@@ -42,8 +42,8 @@ yinit_inter = c(Be = 10000,   #resistant to ery
                 Bet = 0,   #resistant to ery and tet
                 p = 3300000)        #normal phage
 
-yinit_mass = c(Be = 50000,    #resistant to ery
-               Bt = 50000,    #resistant to tet
+yinit_mass = c(Be = 10000,    #resistant to ery
+               Bt = 10000,    #resistant to tet
                Bet = 0)    #resistant to ery and tet
 
 #run models:
@@ -72,4 +72,4 @@ ggplot() +
 
 
 #save image:
-#ggsave("compare_models.png")
+ggsave("Plots/compare_models.png")

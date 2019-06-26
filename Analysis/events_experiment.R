@@ -98,4 +98,4 @@ ggplot(res_full) +
                      labels = c("DRP", "EryR", "TetR", "Total", "Phage"))
 
 #save plot:
-#ggsave("test_model.png")
+ggsave("Plots/test_model.png")
