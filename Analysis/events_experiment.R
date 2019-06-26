@@ -1,4 +1,4 @@
-#A quick script to test the output of the full model
+#A quick script to play around with events in the full model
 
 library(ggplot2)
 library(scales)
@@ -31,8 +31,40 @@ yinit_full = c(Be = 11000,    #resistant to ery
                pe = 0,        #transducing phage (ery)
                pt = 0)        #transducing phage (tet)
 
+#event trigger to add phage at later time point:
+#time = -1: turned off
+event_add_phage = data.frame(var = "p",
+                      time = -1,
+                      value = 1000,
+                      method = "add")
+
+#event trigger to remove transduction at later time point:
+#(analogous to removing all phage in model, sodium citrate effectively blocks all of them)
+#time = -1: turned off
+event_stop_tr = data.frame(var = c("p","pe","pt"),
+                       time = rep(-1,3),
+                       value = rep(0,3),
+                       method = rep("rep",3))
+
+#event trigger to add erythromycin at later time point:
+#(simple method is to remove all susceptible bacteria in model i.e. Bt)
+#time = -1: turned off
+event_add_ery = data.frame(var = "Bt",
+                       time = -1,
+                       value = 0,
+                       method = "rep")
+
+#event trigger to add tetracycline at later time point:
+#(simple method is to remove all susceptible bacteria in model i.e. Be)
+#time = -1: turned off
+event_add_tet = data.frame(var = "Be",
+                       time = -1,
+                       value = 0,
+                       method = "rep")
+
 #run models:
-res_full = as.data.frame(deSolve::ode(func = full_model, times = times, y = yinit_full, parms = parms))
+res_full = as.data.frame(deSolve::ode(func = full_model, times = times, y = yinit_full, parms = parms,
+                                      events = list(data = rbind(event_add_phage, event_stop_tr, event_add_ery, event_add_tet))))
 
 #plot just total bacteria and phage:
 ggplot(res_full) +

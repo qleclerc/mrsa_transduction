@@ -1,4 +1,4 @@
-#A quick script to produce figure 7 from my upgrade report comparing the 3 model outputs
+#A quick script to compare the 3 model outputs with equal parameter values
 
 library(ggplot2)
 library(scales)
