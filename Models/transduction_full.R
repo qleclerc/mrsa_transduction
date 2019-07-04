@@ -7,6 +7,7 @@
 
 library(deSolve)
 
+#redefine as wrapper around the model, so when source creates a function that runs the model
 
 full_model = function(times, y, parms){
   
