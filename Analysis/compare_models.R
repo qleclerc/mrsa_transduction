@@ -15,7 +15,7 @@ source("Models/transduction_mass-action.R")
 
 #define parameters:
 #time (hours):
-times = seq(0,24,0.2)
+times = seq(0,24,1)
 
 #parameter values:
 parms = c(Ge = 1.9,         #growth parameter for ery resistant
@@ -47,9 +47,9 @@ yinit_mass = c(Be = 10000,    #resistant to ery
                Bet = 0)    #resistant to ery and tet
 
 #run models:
-res_full = as.data.frame(deSolve::ode(func = full_model, times = times, y = yinit_full, parms = parms))
-res_inter = as.data.frame(deSolve::ode(func = inter_model, times = times, y = yinit_inter, parms = parms))
-res_mass = as.data.frame(deSolve::ode(func = mass_model, times = times, y = yinit_mass, parms = parms))
+res_full = run_full(times, yinit_full, parms)
+res_inter = run_inter(times, yinit_inter, parms)
+res_mass = run_mass(times, yinit_mass, parms)
 
 
 #plot outputs together:
@@ -72,4 +72,4 @@ ggplot() +
 
 
 #save image:
-ggsave("Plots/compare_models.png")
+#ggsave("Plots/compare_models.png")

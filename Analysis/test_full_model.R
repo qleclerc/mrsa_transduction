@@ -32,7 +32,7 @@ yinit_full = c(Be = 11000,    #resistant to ery
                pt = 0)        #transducing phage (tet)
 
 #run models:
-res_full = as.data.frame(deSolve::ode(func = full_model, times = times, y = yinit_full, parms = parms))
+res_full = run_full(times, yinit_full, parms)
 
 #plot just total bacteria and phage:
 ggplot(res_full) +
