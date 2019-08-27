@@ -12,12 +12,12 @@ source("Models/transduction_full.R")
 times = seq(0,24,0.2)
 
 #parameter values:
-parms = c(Ge = 1.9,         #growth parameter for ery resistant
-          Gt = 1.9,       #growth parameter for tet resistant
-          Get = 1.9,      #growth parameter for ery+tet double resistant
+parms = c(Ge = 1.5,         #growth parameter for ery resistant
+          Gt = 1.6,       #growth parameter for tet resistant
+          Get = 1.3,      #growth parameter for ery+tet double resistant
           lysis = 0.08,    #lysis rate
-          tre = 0,      #ery gene transduction probability
-          trt = 0,      #tet gene transduction probability
+          tre = 0.00001,      #ery gene transduction probability
+          trt = 0.00001,      #tet gene transduction probability
           decay = 0.7,    #phage decay rate
           L = 20,         #burst size
           Nmax = 1e9)     #maximum bacteria population size
@@ -51,7 +51,7 @@ ggplot(res_full) +
 #plot everything:
 ggplot(res_full) +
   geom_line(aes(time, Bet, colour = "1"), size = 1) +
-  geom_line(aes(time, Be, colour = "2"), size = 1) +
+  geom_line(aes(time, Be, colour = "1"), size = 1) +
   geom_line(aes(time, Bt, colour = "3"), size = 1) +
   geom_line(aes(time, (Bet + Be + Bt), colour = "4"), size = 1) +
   geom_line(aes(time, p, colour = "5"), size = 1) +

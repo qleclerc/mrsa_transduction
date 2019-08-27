@@ -18,12 +18,12 @@ source("Models/transduction_mass-action.R")
 times = seq(0,24,1)
 
 #parameter values:
-parms = c(Ge = 1.9,         #growth parameter for ery resistant
-          Gt = 1.9,       #growth parameter for tet resistant
-          Get = 1.9,      #growth parameter for ery+tet double resistant
+parms = c(Ge = 1.5,         #growth parameter for ery resistant
+          Gt = 1.8,       #growth parameter for tet resistant
+          Get = 1.3,      #growth parameter for ery+tet double resistant
           lysis = 0.08,    #lysis rate
-          tre = 1e-7,      #ery gene transduction probability
-          trt = 1e-7,      #tet gene transduction probability
+          tre = 0.00001,      #ery gene transduction probability #1e-7
+          trt = 0.00001,      #tet gene transduction probability
           decay = 0.7,    #phage decay rate
           L = 20,         #burst size
           Nmax = 1e9)     #maximum bacteria population size
@@ -43,8 +43,8 @@ yinit_inter = c(Be = 10000,   #resistant to ery
                 p = 3300000)        #normal phage
 
 yinit_mass = c(Be = 10000,    #resistant to ery
-               Bt = 10000,    #resistant to tet
-               Bet = 0)    #resistant to ery and tet
+               Bt = 9000,    #resistant to tet
+               Bet = 8000)    #resistant to ery and tet
 
 #run models:
 res_full = run_full(times, yinit_full, parms)
