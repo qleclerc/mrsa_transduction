@@ -7,6 +7,8 @@ library(deSolve)
 #get the full model function:
 source("Models/transduction_full.R")
 
+res_full = run_full()
+
 #define parameters:
 #time (hours):
 times = seq(0,24,0.2)

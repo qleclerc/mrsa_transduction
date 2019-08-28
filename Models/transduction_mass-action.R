@@ -1,6 +1,15 @@
 #This is the mass-action model, with no inclusion of phage at all, and the assumption that transduction occurs based on the density of bacteria
 
-run_mass = function(times, yinit, parms){
+run_mass = function(times = seq(0,24,0.2),
+                    yinit = c(Be = 11000, 
+                              Bt = 9000, 
+                              Bet = 0),
+                    parms = c(Ge = 1.5,       
+                              Gt = 1.6,     
+                              Get = 1.3,      
+                              tre = 0.00001,      
+                              trt = 0.00001,     
+                              Nmax = 1e9)){
   
   mass_model = function(times, y, parms){
     

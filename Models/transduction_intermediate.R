@@ -1,6 +1,21 @@
 #This is the intermediate model, with just lytic phage, and the assumption that transduction occurs based on the density of phage and bacteria
 
-run_inter = function(times, yinit, parms){
+run_inter = function(times = seq(0,24,0.2),
+                     yinit = c(Be = 11000, 
+                               Bt = 9000, 
+                               Bet = 0,  
+                               p = 3300000,    
+                               pe = 0,   
+                               pt = 0),
+                     parms = c(Ge = 1.5,       
+                               Gt = 1.6,     
+                               Get = 1.3,      
+                               lysis = 0.08,   
+                               tre = 0.00001,      
+                               trt = 0.00001,     
+                               decay = 0.7,    
+                               L = 20,         
+                               Nmax = 1e9)){
   
   inter_model = function(times, y, parms){
     

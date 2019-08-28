@@ -1,17 +1,27 @@
 
-mcmc_run = function(run_model, data, times, yinit,
+mcmc_run = function(run_model, data, yinit,
                     fixed_theta = NULL, theta, theta_sd,
                     n_iter, likelihood) {
+  
+  #need error if model output length doesn't match data length, or better an autocorrect with notification
+  times = seq(0,max(data$time),1)
+  good_times = unique(data$time)
   
   curr_like = 0
   all_theta = c(fixed_theta, theta)
   obs = run_model(times, yinit, all_theta)
+  obs = obs[obs$time %in% good_times,]
+
+  #figure out which column to take from the model output based on data columns
+  data_cols = colnames(data)[-1]
+  model_cols = which(colnames(obs) %in% data_cols)
+  
+  if (length(model_cols) == 0 ) stop("Data and models do not match, check column names")
   
   # evaluate the function "likelihood" at initial parameter values
-  # exclude first column containing time
-  for (j in 2:ncol(data)) {
+  for (j in model_cols) {
     
-    added_like = likelihood(round(data[,j]), obs[,j])
+    added_like = likelihood(round(data[,colnames(obs)[j]]), round(obs[,j]))
     curr_like = curr_like + added_like
     
   }
@@ -27,8 +37,14 @@ mcmc_run = function(run_model, data, times, yinit,
     
     # - draw a new theta from the (Gaussian) proposal distribution
     #   with standard deviation sd.
-    #new_theta = rnorm(length(curr_theta), curr_theta, proposal_sd)
-    new_theta = rnorm(length(theta), theta , theta_sd)
+    # new_theta = rnorm(length(theta), theta , theta_sd)
+    
+    #trick here is to force a lower band on growth rate variation
+      #otherwise will get stuck going up because correlated
+    
+    #COULD also try fitting LOG instead of base
+    
+    new_theta = runif(length(theta), theta - 2*theta_sd, theta + theta_sd)
     
     names(new_theta) = names(theta)
     
@@ -39,9 +55,9 @@ mcmc_run = function(run_model, data, times, yinit,
     # evaluate the function "likelihood" at initial parameter values
     # exclude first column containing time
     new_like = 0
-    for (j in 2:ncol(data)) {
+    for (j in model_cols) {
       
-      added_like = likelihood(round(data[,j]), obs[,j])
+      added_like = likelihood(round(data[,colnames(obs)[j]]), round(obs[,j]))
       new_like = new_like + added_like
       
     }
@@ -82,26 +98,28 @@ mcmc_run = function(run_model, data, times, yinit,
   
 }
 
-times = seq(0,8,1)
 
 #parameter values:
 fixed_theta = c(tre = 0,      #ery gene transduction probability
-                trt = 0)     #maximum bacteria population size
+                trt = 0,
+                Nmax = 1e9)     #maximum bacteria population size
 
-parms = c(Ge = 2,         #growth parameter for ery resistant
-          Gt = 2,       #growth parameter for tet resistant
-          Get = 2.5,
-          Nmax = 1e9)     #maximum bacteria population size
+parms = c(Ge = 5,         #growth parameter for ery resistant
+          Gt = 2,
+          Get = 1)       #growth parameter for tet resistant
 
 #initial values:
 
-yinit_mass = c(Be = 10000,    #resistant to ery
+yinit_mass = c(Be = 11000,    #resistant to ery
                Bt = 9000,    #resistant to tet
-               Bet = 8000)    #resistant to ery and tet
+               Bet = 10000)    #resistant to ery and tet
 
-trace = mcmc_run(run_mass, res_mass, times, yinit_mass,
-             fixed_theta, parms, c(0.4,0.4,0.4,10000),
-             100000, likelihood_func)
+trace = mcmc_run(run_mass, results, yinit_mass,
+                 fixed_theta, parms, c(0.75,0.75,0.75),
+                 5000, likelihood_func)
+
+# results = run_mass(seq(0,24,1), c(Be = 11000, Bt = 9000, Bet = 10000),
+#                    c(Ge = 1.4, Gt = 1.6, Get = 1.3, tre = 0, trt = 0, Nmax = 1e9))[1:10,]
 
 par(mfrow = c(3,1))
 plot(trace[,"Ge"], type = "l")
@@ -113,15 +131,14 @@ abline(mean(trace[,"Get"]), 0, col = "red")
 par(mfrow = c(1,1))
 
 fitted_parms = c(fixed_theta, Ge = mean(trace[,"Ge"]), 
-                 Gt = mean(trace[,"Gt"]), Get = mean(trace[,"Get"]),
-                 Nmax = mean(trace[,"Nmax"]))
+                 Gt = mean(trace[,"Gt"]), Get = mean(trace[,"Get"]))
 fitted_parms
 
-res_fit = run_mass(times, yinit_mass, fitted_parms)
+res_fit = run_mass(seq(0,24,1), yinit_mass, fitted_parms)
 
-plot(log10(res_mass$Be), type = "l")
-lines(log10(res_mass$Bt))
-lines(log10(res_mass$Bet))
+plot(log10(results$Be), type = "l", ylim = c(1, max(log10(results))))
+lines(log10(results$Bt))
+lines(log10(results$Bet))
 lines(log10(res_fit$Be), col = "red")
 lines(log10(res_fit$Bt), col = "red")
 lines(log10(res_fit$Bet), col = "red")
