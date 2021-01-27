@@ -31,20 +31,20 @@ parms = c(Ge = 1.5,         #growth parameter for ery resistant
 
 #initial values:
 yinit_full = c(Be = 10000,    #resistant to ery
-               Bt = 10000,    #resistant to tet
+               Bt = 9000,    #resistant to tet
                Bet = 0,    #resistant to ery and tet
                p = 3300000,         #normal phage
                pe = 0,        #transducing phage (ery)
                pt = 0)        #transducing phage (tet)
 
 yinit_inter = c(Be = 10000,   #resistant to ery
-                Bt = 10000,   #resistant to tet
+                Bt = 9000,   #resistant to tet
                 Bet = 0,   #resistant to ery and tet
                 p = 3300000)        #normal phage
 
 yinit_mass = c(Be = 10000,    #resistant to ery
                Bt = 9000,    #resistant to tet
-               Bet = 8000)    #resistant to ery and tet
+               Bet = 0)    #resistant to ery and tet
 
 #run models:
 res_full = run_full(times, yinit_full, parms)

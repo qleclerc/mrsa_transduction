@@ -44,13 +44,14 @@ mcmc_run = function(run_model, data, yinit,
     
     #COULD also try fitting LOG instead of base
     
-    new_theta = runif(length(theta), theta - 2*theta_sd, theta + theta_sd)
+    new_theta = runif(length(theta), theta - theta_sd, theta + theta_sd)
     
     names(new_theta) = names(theta)
     
     # - evaluate the function "target" at the proposed theta
     all_theta = c(fixed_theta, new_theta)
     obs = run_model(times, yinit, all_theta)
+    obs = obs[obs$time %in% good_times,]
     
     # evaluate the function "likelihood" at initial parameter values
     # exclude first column containing time
@@ -106,7 +107,7 @@ fixed_theta = c(tre = 0,      #ery gene transduction probability
 
 parms = c(Ge = 5,         #growth parameter for ery resistant
           Gt = 2,
-          Get = 1)       #growth parameter for tet resistant
+          Get = 2)       #growth parameter for tet resistant
 
 #initial values:
 
@@ -115,7 +116,7 @@ yinit_mass = c(Be = 11000,    #resistant to ery
                Bet = 10000)    #resistant to ery and tet
 
 trace = mcmc_run(run_mass, results, yinit_mass,
-                 fixed_theta, parms, c(0.75,0.75,0.75),
+                 fixed_theta, parms, c(0.5,0.5,0.5),
                  5000, likelihood_func)
 
 # results = run_mass(seq(0,24,1), c(Be = 11000, Bt = 9000, Bet = 10000),
