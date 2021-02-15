@@ -1,0 +1,11 @@
+,model_name,beta,L,gamma,alpha,tau,log.density
+1,tr_dde_mass_decay_link_L,1.30E-10,54.96,3.68E-05,2.82E-06,0.3,-453215.3288
+2,tr_dde_fit_mass_decay_link_L,6.71E-11,54.71,3.28E-05,1.18E-05,0.001008382,-426413.5526
+3,tr_dde_mass_decay_link_beta,2.15E-10,65.29,3.32E-05,0.000209561,0.3,-325477.9092
+4,tr_dde_mass_decay_link_both,3.76E-10,63.53,3.24E-05,7.36E-05,0.3,-263901.0328
+5,tr_dde_fit_mass_decay_link_both,4.70E-10,62.87,3.20E-05,6.17E-05,0.384234494,-263455.6313
+6,tr_dde_frequentist_decay_link_beta,8.77E-11,79.98,3.16E-05,3.44E-07,0.3,-2207483.661
+7,tr_dde_frequentist_decay_link_L,8.66E-11,80.72,3.41E-05,3.45E-07,0.3,-524716.2111
+8,tr_dde_frequentist_decay_link_both,8.60E-11,80.60,3.50E-05,3.50E-07,0.3,-3582263.667
+9,tr_dde_fit_frequentist_decay_link_both,1.40E-10,71.39,3.41E-05,8.99E-07,0.371385274,-2955286.338
+10,tr_dde_fit_frequentist_decay_link_L,1.17E-10,33.37,2.82E-05,5.08E-06,0.001093677,-417476.96

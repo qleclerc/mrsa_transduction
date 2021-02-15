@@ -1,4 +1,3 @@
-
 # SETUP ####
 
 library(fitR)
@@ -13,6 +12,8 @@ source(here::here("Model", "transduction_model_functions.R"))
 
 # mass_model = readRDS(here::here("Fitting", "mass_model.rds"))
 model = readRDS(here::here("Model", "transduction_model.rds"))
+
+fitted_params = readRDS(here::here("Fitting", "10_3", "best_params_transduction.rds"))
 
 # lab_dataM = read.csv(here::here("Lab", "Triculture", "summary.csv")) %>%
 #   select(Time, Bacteria, Mean, se) %>%
@@ -49,7 +50,7 @@ lab_data_trans = read.csv(here::here("Lab", "Transduction", "summary_10_4.csv"))
   mutate(Be = round(Be),
          Bt = round(Bt),
          Bet = round(Bet),
-         P = round(P))
+         P = round(P)) 
 
 lab_data_trans5 = read.csv(here::here("Lab", "Transduction", "summary_10_5.csv")) %>%
   select(Time, Bacteria, Mean) %>%
@@ -72,67 +73,58 @@ lab_data_trans3 = read.csv(here::here("Lab", "Transduction", "summary_10_3.csv")
          P = round(P))
 
 
-# FIT PHAGE #####
+## GO #####
 
-models_to_try = data.frame(model_name="tr_dde_mass_decay_link_L", frequentist=FALSE, second_beta = F,
-                           delay=TRUE, 
+
+
+models_to_try = data.frame(model_name="tr_dde_mass_decay_link_L", frequentist=FALSE, delay=TRUE, 
                            fixed_delay=0.3, decay=TRUE,
                            link_beta=FALSE, link_L=TRUE, link_delay=FALSE, transduction=TRUE)
 models_to_try = rbind(models_to_try,
-                      data.frame(model_name="tr_dde_fit_mass_decay_link_L", frequentist=FALSE, second_beta = F,
-                                 delay=TRUE, 
+                      data.frame(model_name="tr_dde_fit_mass_decay_link_L", frequentist=FALSE, delay=TRUE, 
                                  fixed_delay=NA, decay=TRUE,
                                  link_beta=FALSE, link_L=TRUE, link_delay=FALSE, transduction=TRUE))
 models_to_try = rbind(models_to_try,
-                      data.frame(model_name="tr_dde_mass_decay_link_beta", frequentist=FALSE, second_beta = F,
-                                 delay=TRUE, 
+                      data.frame(model_name="tr_dde_mass_decay_link_beta", frequentist=FALSE, delay=TRUE, 
                                  fixed_delay=0.3, decay=TRUE,
                                  link_beta=TRUE, link_L=FALSE, link_delay=FALSE, transduction=TRUE))
 models_to_try = rbind(models_to_try,
-                      data.frame(model_name="tr_dde_mass_decay_link_both", frequentist=FALSE, second_beta = F,
-                                 delay=TRUE, 
+                      data.frame(model_name="tr_dde_mass_decay_link_both", frequentist=FALSE, delay=TRUE, 
                                  fixed_delay=0.3, decay=TRUE,
                                  link_beta=TRUE, link_L=TRUE, link_delay=FALSE, transduction=TRUE))
 models_to_try = rbind(models_to_try,
-                      data.frame(model_name="tr_dde_fit_mass_decay_link_both", frequentist=FALSE, second_beta = F,
-                                 delay=TRUE, 
+                      data.frame(model_name="tr_dde_fit_mass_decay_link_both", frequentist=FALSE, delay=TRUE, 
                                  fixed_delay=NA, decay=TRUE,
                                  link_beta=TRUE, link_L=TRUE, link_delay=FALSE, transduction=TRUE))
 models_to_try = rbind(models_to_try,
-                      data.frame(model_name="tr_dde_frequentist_decay_link_beta", frequentist=TRUE, second_beta = F,
-                                 delay=TRUE, 
+                      data.frame(model_name="tr_dde_frequentist_decay_link_beta", frequentist=TRUE, delay=TRUE, 
                                  fixed_delay=0.3, decay=TRUE,
                                  link_beta=TRUE, link_L=FALSE, link_delay=FALSE, transduction=TRUE))
 models_to_try = rbind(models_to_try,
-                      data.frame(model_name="tr_dde_frequentist_decay_link_L", frequentist=TRUE, second_beta = F,
-                                 delay=TRUE, 
+                      data.frame(model_name="tr_dde_frequentist_decay_link_L", frequentist=TRUE, delay=TRUE, 
                                  fixed_delay=0.3, decay=TRUE,
                                  link_beta=FALSE, link_L=TRUE, link_delay=FALSE, transduction=TRUE))
 models_to_try = rbind(models_to_try,
-                      data.frame(model_name="tr_dde_frequentist_decay_link_both", frequentist=TRUE, second_beta = F,
-                                 delay=TRUE, 
+                      data.frame(model_name="tr_dde_frequentist_decay_link_both", frequentist=TRUE, delay=TRUE, 
                                  fixed_delay=0.3, decay=TRUE,
                                  link_beta=TRUE, link_L=TRUE, link_delay=FALSE, transduction=TRUE))
 models_to_try = rbind(models_to_try,
-                      data.frame(model_name="tr_dde_fit_frequentist_decay_link_both", frequentist=TRUE, second_beta = F,
-                                 delay=TRUE, 
+                      data.frame(model_name="tr_dde_fit_frequentist_decay_link_both", frequentist=TRUE, delay=TRUE, 
                                  fixed_delay=NA, decay=TRUE,
                                  link_beta=TRUE, link_L=TRUE, link_delay=FALSE, transduction=TRUE))
 models_to_try = rbind(models_to_try,
-                      data.frame(model_name="tr_dde_fit_frequentist_decay_link_L", frequentist=TRUE, second_beta = F,
-                                 delay=TRUE, 
+                      data.frame(model_name="tr_dde_fit_frequentist_decay_link_L", frequentist=TRUE, delay=TRUE, 
                                  fixed_delay=NA, decay=TRUE,
                                  link_beta=FALSE, link_L=TRUE, link_delay=FALSE, transduction=TRUE))
 
-all_theta = vector("list", nrow(models_to_try))
+best_params = data.frame()
 
 for(i in 1:nrow(models_to_try)){
   
-  cat("Working on", models_to_try$model_name[i], "\n")
+  cat("\nWorking on", models_to_try$model_name[i])
   
   model = choose_model(model,
                        frequentist = models_to_try$frequentist[i],
-                       second_beta = models_to_try$second_beta[i],
                        delay = models_to_try$delay[i],
                        fixed_delay = models_to_try$fixed_delay[i],
                        decay = models_to_try$decay[i], 
@@ -141,67 +133,37 @@ for(i in 1:nrow(models_to_try)){
                        link_delay = models_to_try$link_delay[i],
                        transduction = models_to_try$transduction[i])
   
-  model = choose_model(model,
-                       frequentist = T,
-                       second_beta = T,
-                       delay = T,
-                       fixed_delay = 0.5,
-                       decay = T,
-                       link_beta = T,
-                       link_L = T,
-                       link_delay = F,
-                       transduction = T)
+  trace_model = fitted_params[[models_to_try$model_name[i]]]
   
-  init.theta = c(beta = 2e9, beta2 = 0.9, L = 50, gamma = 30000, alpha = 5e5, tau = 0.5)
-  mcmc_fit = run_mcmc(model, lab_data_trans,
-                      init.theta = init.theta,
-                      proposal.sd = c(init.theta[1]/3000,
-                                      init.theta[2]/1000,
-                                      init.theta[3]/3000,
-                                      init.theta[4]/3000,
-                                      init.theta[5]/1000,
-                                      init.theta[6]/1000),
-                      n.iterations = 50000,
-                      adapt.size.start = 20000)
+  trace_model = coda::mcmc(trace_model)
+  trace_model = burnAndThin(trace_model, burn = 5000, thin = 10)
   
-  # mcmc_fit2 = run_mcmc(model, lab_data_trans5,
-  #                     init.theta = c(beta = 8e7, L = 100, gamma = 30000, alpha = 1e5, tau = 0.5),
-  #                     n.iterations = 10000,
-  #                     adapt.size.start = 500,
-  #                     adapt.shape.start = 1000)
+  best_params = rbind(best_params, 
+                      c(models_to_try$model_name[i], trace_model[which.max(trace_model[,"log.density"]),]))
   
-  
-  # mcmc.trace = coda::mcmc(mcmc_fit$trace)
-  # plot(mcmc.trace)
-  # effectiveSize(mcmc.trace)
-  # plotESSBurn(mcmc.trace)
-  # autocorr.plot(mcmc.trace)
-  # mcmc.trace = burnAndThin(mcmc.trace, burn = 2500, thin = 10)
-  
-  # mcmc.trace2 = coda::mcmc(mcmc_fit2$trace)
-  # plot(mcmc.trace2)
-  # effectiveSize(mcmc.trace2)
-  # plotESSBurn(mcmc.trace2)
-  # autocorr.plot(mcmc.trace2)
-  # mcmc.trace2 = burnAndThin(mcmc.trace2, burn = 2000, thin = 10)
-  
+  #plot(trace_model)
+  #next
   
   #replicate 4
   init.state = c(Be = lab_data_trans$Be[1], Bt = lab_data_trans$Bt[1], Bet = 0,
                  Pl = lab_data_trans$P[1], Pe = 0, Pt = 0)
-  theta = mcmc_fit$trace[which.max(mcmc_fit$trace[,"log.density"]),]
   
-  #theta = c(beta = 8e9, L = 20, gamma = 30000, alpha = 1e5)
-  # theta["alpha"] = 1e6
-  #theta["beta2"] = 1
-  
-  traj = model$simulate(theta, init.state, times = seq(0, 30, 1))
+  traj = multi_run(model, trace_model, init.state,
+                   times = seq(0, 30, 1), nruns = 5000)
   
   p4 = ggplot() +
     geom_line(data = traj, aes(time, Be, colour = "Model", linetype = "Bacteria")) +
+    geom_ribbon(data = traj, aes(x = time, ymin = pmax(0.1, Be-1.96*Be_sd), ymax = Be+1.96*Be_sd),
+                alpha = 0.3, fill = "darkturquoise") +
     geom_line(data = traj, aes(time, Bt, colour = "Model", linetype = "Bacteria")) +
+    geom_ribbon(data = traj, aes(x = time, ymin = pmax(0.1,Bt-1.96*Bt_sd), ymax = Bt+1.96*Bt_sd),
+                alpha = 0.3, fill = "darkturquoise") +
     geom_line(data = traj, aes(time, Bet, colour = "Model", linetype = "Bacteria")) +
+    geom_ribbon(data = traj, aes(x = time, ymin =pmax(0.1, Bet-1.96*Bet_sd), ymax = Bet+1.96*Bet_sd),
+                alpha = 0.3, fill = "darkturquoise") +
     geom_line(data = traj, aes(time, Pl, colour = "Model", linetype = "Phage")) +
+    geom_ribbon(data = traj, aes(x = time, ymin =pmax(0.1, Pl-1.96*Pl_sd), ymax = Pl+1.96*Pl_sd),
+                alpha = 0.3, fill = "darkturquoise") +
     geom_line(data = lab_data_transM %>% filter(Bacteria != "P"),
               aes(Time, Mean, group = Bacteria, colour = "Data", linetype = "Bacteria")) +
     geom_errorbar(data = lab_data_transM %>% filter(Bacteria != "P"), 
@@ -221,17 +183,27 @@ for(i in 1:nrow(models_to_try)){
     theme_bw()
   
   
+  
   #replicate 5
   init.state = c(Be = lab_data_trans5$Be[1], Bt = lab_data_trans5$Bt[1], Bet = 0,
                  Pl = lab_data_trans5$P[1], Pe = 0, Pt = 0)
   
-  traj = model$simulate(theta, init.state, times = seq(0, 30, 1))
+  traj = multi_run(model, trace_model, init.state,
+                   times = seq(0, 30, 1), nruns = 5000)
   
   p5 = ggplot() +
     geom_line(data = traj, aes(time, Be, colour = "Model", linetype = "Bacteria")) +
+    geom_ribbon(data = traj, aes(x = time, ymin = pmax(0.1, Be-1.96*Be_sd), ymax = Be+1.96*Be_sd),
+                alpha = 0.3, fill = "darkturquoise") +
     geom_line(data = traj, aes(time, Bt, colour = "Model", linetype = "Bacteria")) +
+    geom_ribbon(data = traj, aes(x = time, ymin = pmax(0.1,Bt-1.96*Bt_sd), ymax = Bt+1.96*Bt_sd),
+                alpha = 0.3, fill = "darkturquoise") +
     geom_line(data = traj, aes(time, Bet, colour = "Model", linetype = "Bacteria")) +
+    geom_ribbon(data = traj, aes(x = time, ymin =pmax(0.1, Bet-1.96*Bet_sd), ymax = Bet+1.96*Bet_sd),
+                alpha = 0.3, fill = "darkturquoise") +
     geom_line(data = traj, aes(time, Pl, colour = "Model", linetype = "Phage")) +
+    geom_ribbon(data = traj, aes(x = time, ymin =pmax(0.1, Pl-1.96*Pl_sd), ymax = Pl+1.96*Pl_sd),
+                alpha = 0.3, fill = "darkturquoise") +
     geom_line(data = lab_data_trans5M %>% filter(Bacteria != "P"),
               aes(Time, Mean, group = Bacteria, colour = "Data", linetype = "Bacteria")) +
     geom_errorbar(data = lab_data_trans5M %>% filter(Bacteria != "P"), 
@@ -246,7 +218,7 @@ for(i in 1:nrow(models_to_try)){
                        breaks=trans_breaks("log10", function(x) 10^x),
                        labels=trans_format("log10", math_format(10^.x)),
                        limits = c(0.1, 3e10)) +
-    labs(y = "cfu / pfu per mL", x = "Time (hours)", title = "10^5", 
+    labs(y = "cfu / pfu per mL", x = "Time (hours)", title = "10^4", 
          linetype = "Organism:", colour = "Source:") +
     theme_bw()
   
@@ -255,13 +227,22 @@ for(i in 1:nrow(models_to_try)){
   init.state = c(Be = lab_data_trans3$Be[1], Bt = lab_data_trans3$Bt[1], Bet = 0,
                  Pl = lab_data_trans3$P[1], Pe = 0, Pt = 0)
   
-  traj = model$simulate(theta, init.state, times = seq(0, 30, 1))
+  traj = multi_run(model, trace_model, init.state,
+                   times = seq(0, 30, 1), nruns = 5000)
   
   p3 = ggplot() +
     geom_line(data = traj, aes(time, Be, colour = "Model", linetype = "Bacteria")) +
+    geom_ribbon(data = traj, aes(x = time, ymin = pmax(0.1, Be-1.96*Be_sd), ymax = Be+1.96*Be_sd),
+                alpha = 0.3, fill = "darkturquoise") +
     geom_line(data = traj, aes(time, Bt, colour = "Model", linetype = "Bacteria")) +
+    geom_ribbon(data = traj, aes(x = time, ymin = pmax(0.1,Bt-1.96*Bt_sd), ymax = Bt+1.96*Bt_sd),
+                alpha = 0.3, fill = "darkturquoise") +
     geom_line(data = traj, aes(time, Bet, colour = "Model", linetype = "Bacteria")) +
+    geom_ribbon(data = traj, aes(x = time, ymin =pmax(0.1, Bet-1.96*Bet_sd), ymax = Bet+1.96*Bet_sd),
+                alpha = 0.3, fill = "darkturquoise") +
     geom_line(data = traj, aes(time, Pl, colour = "Model", linetype = "Phage")) +
+    geom_ribbon(data = traj, aes(x = time, ymin =pmax(0.1, Pl-1.96*Pl_sd), ymax = Pl+1.96*Pl_sd),
+                alpha = 0.3, fill = "darkturquoise") +
     geom_line(data = lab_data_trans3M %>% filter(Bacteria != "P"),
               aes(Time, Mean, group = Bacteria, colour = "Data", linetype = "Bacteria")) +
     geom_errorbar(data = lab_data_trans3M %>% filter(Bacteria != "P"), 
@@ -276,7 +257,7 @@ for(i in 1:nrow(models_to_try)){
                        breaks=trans_breaks("log10", function(x) 10^x),
                        labels=trans_format("log10", math_format(10^.x)),
                        limits = c(0.1, 3e10)) +
-    labs(y = "cfu / pfu per mL", x = "Time (hours)", title = "10^3", 
+    labs(y = "cfu / pfu per mL", x = "Time (hours)", title = "10^4", 
          linetype = "Organism:", colour = "Source:") +
     theme_bw()
   
@@ -284,18 +265,21 @@ for(i in 1:nrow(models_to_try)){
   #final plot
   legend = get_legend(p4 + theme(legend.position = "bottom", legend.box = "vertical"))
   
+  
   plot_grid(p3 + theme(legend.position = "none"), 
             p4 + theme(legend.position = "none"), 
             p5 + theme(legend.position = "none"),
             legend)
   
-  filename = paste0(models_to_try$model_name[i], ".png")
-  ggsave(here::here("Fitting", "10_4", "Best_fits", filename))
-  
-  all_theta[[i]] = mcmc_fit$trace
-  names(all_theta)[i] = models_to_try$model_name[i]
+  filename = paste0("multi_", models_to_try$model_name[i], ".png")
+  ggsave(here::here("Fitting", "10_3",  "Multi_runs", filename))
   
 }
 
-saveRDS(all_theta, here::here("Fitting", "10_4", "best_params_transduction.rds"))
+colnames(best_params) = c("model_name", names(trace_model[1,]))
+best_params[,-1] = apply(best_params[,-1], c(1,2), as.numeric)
+best_params$beta = 1/best_params$beta
+best_params$gamma = 1/best_params$gamma
+best_params$alpha = 1/best_params$alpha
 
+write.csv(best_params, here::here("Fitting", "10_3", "best_params.csv"))

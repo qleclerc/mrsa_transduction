@@ -1,87 +1,112 @@
-setwd("../R/Lab/Transduction/200619")
 library(ggplot2)
 library(dplyr)
 library(scales)
+library(reshape2)
 
 
-calculate_cfu_trans = function(data1, data2=NULL, data3=NULL, data4=NULL, data5=NULL, data6=NUL, logged=TRUE){
+calculate_cfu_trans = function(data1, data2=NULL, data3=NULL, logged=TRUE, volume = 30){
   
-  
+  #check how many datasets were inputed
   count = 0
-  for(i in 1:5){
+  for(i in 1:3){
     
     if(!is.null(get(paste0("data",i)))) count = count+1
     
   }
   
+  #extract timepoints
   timepoints = unique(data1$Time)
   
+  #create summary dataframe to populate later
   all_data = data.frame(Time=rep(timepoints, 5))
   all_data$Time = all_data$Time[order(all_data$Time)]
-  all_data$Bacteria = c("Total", "EryR", "P", "TetR", "DRP")
+  all_data$Bacteria = c("Total", "EryR", "TetR", "DRP", "P")
   
-  
+  #loop through all inputed datasets
   for(i in 1:count){
     
+    #recover name of data and access as "d"
     d = get(paste0("data",i))
     
-    d$cfu = d$Count*(10^(d$Dilution))*20
+    #calculate cfu based on plate count and dilution factor
+    d[,2] = d[,2]*(10^(d[,3]))*(1000/volume)
+    d[,4] = d[,4]*(10^(d[,5]))*(1000/volume)
+    d[,6] = d[,6]*(10^(d[,7]))*(1000/volume)
     
-    d$cfu[which(d$Plate == "P")] = d$cfu[which(d$Plate == "P")]/2
+    #correct for T+E plate since 500uL are plated
+    d[,8] = d[,8]*(10^(d[,9]))
+    #correct for P plate since 200uL are plated
+    d[,10] = d[,10]*(10^(d[,11]))*(1000/200)
     
+    #remove dil
     d = d %>%
-      group_by(Time, Plate) %>%
-      summarise(cfu = mean(cfu))
+      select(Time, contains("count")) 
     
-    #loop through each time and deduct number of DRP from Ery and Tet to work out number of 327 and 201kt7
+    colnames(d) = gsub("_count", "", colnames(d))
+    
+    d = melt(d, id.vars = "Time")
+    
+    #merge together the double timepoints (0 and 24)
+    d = d %>%
+      rename(Plate = variable,
+             cfu = value) %>%
+      group_by(Time, Plate) %>%
+      summarise(cfu = mean(cfu)) %>%
+      ungroup
+    
+    #loop through each time and deduct number of DRP from T+E to work out number of 327 and 201kt7
     for(times in unique(d$Time)){
       
-      #order is: BHIA, E, P, T, T+E
+      #order is: BHIA, E, T, T+E, P
       good_rows = which(d$Time == times)
-      d$cfu[good_rows[2]] = d$cfu[good_rows[2]] - d$cfu[good_rows[5]]
-      d$cfu[good_rows[4]] = d$cfu[good_rows[4]] - d$cfu[good_rows[5]]
+      d$cfu[good_rows[2]] = d$cfu[good_rows[2]] - d$cfu[good_rows[4]]
+      d$cfu[good_rows[3]] = d$cfu[good_rows[3]] - d$cfu[good_rows[4]]
       
     }
     
-    d$Bacteria = c("Total", "EryR", "P", "TetR", "DRP")
+    d$Bacteria = rep(c("Total", "EryR", "TetR", "DRP", "P"), nrow(d)/5)
     
     #clean up:
     d = d[,-2]
     
     
-
+    
     #plot:
     if(logged==T){
       
       gg = ggplot(d, aes(Time, cfu, colour=Bacteria))+
         geom_point()+
         geom_line()+
-        scale_x_continuous(limits=c(0,24), breaks=seq(0,24,2))+
+        scale_x_continuous(limits=c(0,max(timepoints)), breaks=seq(0,max(timepoints),2))+
         scale_y_continuous(trans=log10_trans(),
                            breaks=trans_breaks("log10", function(x) 10^x),
                            labels=trans_format("log10", math_format(10^.x)))+
         ylab("cfu/ml")+
-        xlab("Time (hours)")
+        xlab("Time (hours)")+
+        theme_bw()
       
       print(gg)
       ggsave(paste0("data",i,"_log.png"), plot=gg)
       
-    } else {
+    } else {###
       
       gg = ggplot(d, aes(Time, cfu, colour=Bacteria))+
         geom_point()+
         geom_line()+
-        scale_x_continuous(limits=c(0,24), breaks=seq(0,24,2))+
+        scale_x_continuous(limits=c(0,max(timepoints)), breaks=seq(0,max(timepoints),2))+
         ylab("cfu/ml")+
-        xlab("Time (hours)")
+        xlab("Time (hours)")+
+        theme_bw()
       
       print(gg)
       ggsave(paste0("data",i,".png"), plot=gg)
       
     }
     
+    #save dataset
     write.csv(d, paste0("data",i,".csv"), row.names = F)
     
+    #bind together (then used below if inputed more than one dataset)
     all_data = cbind(all_data, d$cfu)
     colnames(all_data)[2+i] = paste0("data",i)
     
@@ -90,13 +115,14 @@ calculate_cfu_trans = function(data1, data2=NULL, data3=NULL, data4=NULL, data5=
   #summary if more than 1 dataset
   if(count>1){
     
+    #calculate mean and standard error at 95% confidence
     all_data$Mean = rowMeans(all_data[,3:dim(all_data)[2]])
     all_data$se = apply(all_data[,3:(dim(all_data)[2]-1)], 1,
-                        FUN = function(x){1.96*(sd(x)/sqrt(dim(all_data)[2]-2))})
+                        FUN = function(x){sd(x)/sqrt(count)})
     
     all_data$se_min = all_data$Mean-all_data$se
     #correction to avoid error when logging:
-    all_data$se_min[which(all_data$se_min < 1)] = 1
+    all_data$se_min[which(all_data$se_min < 0)] = 0
     
     all_data$se_max = all_data$Mean+all_data$se
     
@@ -106,12 +132,13 @@ calculate_cfu_trans = function(data1, data2=NULL, data3=NULL, data4=NULL, data5=
         geom_point()+
         geom_line()+
         geom_errorbar(aes(x=Time, ymin=se_min, ymax=se_max))+
-        scale_x_continuous(limits=c(0,24), breaks=seq(0,24,2))+
+        scale_x_continuous(limits=c(0,max(timepoints)), breaks=seq(0,max(timepoints),2))+
         scale_y_continuous(trans=log10_trans(),
                            breaks=trans_breaks("log10", function(x) 10^x),
                            labels=trans_format("log10", math_format(10^.x)))+
         ylab("cfu/ml")+
-        xlab("Time (hours)")
+        xlab("Time (hours)")+
+        theme_bw()
       
       print(gg)
       ggsave("summary_log.png", plot=gg)
@@ -122,23 +149,27 @@ calculate_cfu_trans = function(data1, data2=NULL, data3=NULL, data4=NULL, data5=
         geom_point()+
         geom_line()+
         geom_errorbar(aes(x=Time, ymin=se_min, ymax=se_max))+
-        scale_x_continuous(limits=c(0,24), breaks=seq(0,24,2))+
+        scale_x_continuous(limits=c(0,max(timepoints)), breaks=seq(0,max(timepoints),2))+
         ylab("cfu/ml")+
-        xlab("Time (hours)")
+        xlab("Time (hours)")+
+        theme_bw()
       
       print(gg)
       ggsave("summary.png", plot=gg)
       
     }
     
-    
+    #save summary dataset
     write.csv(all_data, "summary.csv", row.names = F)
     
   }
 }
 
-data1 = read.csv('200619.csv')[-101,-(5:8)]
-data2 = read.csv('050619_2.csv')[-101,]
-data3 = read.csv('050619_3.csv')[-101,]
 
-calculate_cfu_trans(data1, logged=T)
+#load datasets to analyse
+data1 = rio::import(here::here("Lab", "Transduction", "07_10_20", "071020.xlsx"))
+data2 = rio::import(here::here("Lab", "Transduction", "14_10_20", "141020_1.xlsx"))
+data3 = rio::import(here::here("Lab", "Transduction", "14_10_20", "141020_2.xlsx"))
+
+#run function
+calculate_cfu_trans(data1, data2, data3, logged=T)
