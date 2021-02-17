@@ -74,55 +74,77 @@ lab_data_trans3 = read.csv(here::here("Lab", "Transduction", "summary_10_3.csv")
 
 # FIT PHAGE #####
 
-models_to_try = data.frame(model_name="tr_dde_mass_decay_link_L", frequentist=FALSE, second_beta = F,
+models_to_try = data.frame(model_name="tr_dde_mass_decay_link_L", frequentist=FALSE,
+                           second_beta = F,
                            delay=TRUE, 
                            fixed_delay=0.3, decay=TRUE,
                            link_beta=FALSE, link_L=TRUE, link_delay=FALSE, transduction=TRUE)
 models_to_try = rbind(models_to_try,
-                      data.frame(model_name="tr_dde_fit_mass_decay_link_L", frequentist=FALSE, second_beta = F,
+                      data.frame(model_name="tr_dde_fit_mass_decay_link_L", frequentist=FALSE,
+                                 second_beta = F,
                                  delay=TRUE, 
                                  fixed_delay=NA, decay=TRUE,
                                  link_beta=FALSE, link_L=TRUE, link_delay=FALSE, transduction=TRUE))
 models_to_try = rbind(models_to_try,
-                      data.frame(model_name="tr_dde_mass_decay_link_beta", frequentist=FALSE, second_beta = F,
+                      data.frame(model_name="tr_dde_mass_decay_link_beta", frequentist=FALSE,
+                                 second_beta = F,
                                  delay=TRUE, 
                                  fixed_delay=0.3, decay=TRUE,
                                  link_beta=TRUE, link_L=FALSE, link_delay=FALSE, transduction=TRUE))
 models_to_try = rbind(models_to_try,
-                      data.frame(model_name="tr_dde_mass_decay_link_both", frequentist=FALSE, second_beta = F,
+                      data.frame(model_name="tr_dde_mass_decay_link_both", frequentist=FALSE,
+                                 second_beta = F,
                                  delay=TRUE, 
                                  fixed_delay=0.3, decay=TRUE,
                                  link_beta=TRUE, link_L=TRUE, link_delay=FALSE, transduction=TRUE))
 models_to_try = rbind(models_to_try,
-                      data.frame(model_name="tr_dde_fit_mass_decay_link_both", frequentist=FALSE, second_beta = F,
+                      data.frame(model_name="tr_dde_fit_mass_decay_link_both", frequentist=FALSE,
+                                 second_beta = F,
                                  delay=TRUE, 
                                  fixed_delay=NA, decay=TRUE,
                                  link_beta=TRUE, link_L=TRUE, link_delay=FALSE, transduction=TRUE))
 models_to_try = rbind(models_to_try,
-                      data.frame(model_name="tr_dde_frequentist_decay_link_beta", frequentist=TRUE, second_beta = F,
+                      data.frame(model_name="tr_dde_frequentist_decay_link_beta", frequentist=TRUE,
+                                 second_beta = F,
                                  delay=TRUE, 
                                  fixed_delay=0.3, decay=TRUE,
                                  link_beta=TRUE, link_L=FALSE, link_delay=FALSE, transduction=TRUE))
 models_to_try = rbind(models_to_try,
-                      data.frame(model_name="tr_dde_frequentist_decay_link_L", frequentist=TRUE, second_beta = F,
+                      data.frame(model_name="tr_dde_frequentist_decay_link_L", frequentist=TRUE,
+                                 second_beta = F,
                                  delay=TRUE, 
                                  fixed_delay=0.3, decay=TRUE,
                                  link_beta=FALSE, link_L=TRUE, link_delay=FALSE, transduction=TRUE))
 models_to_try = rbind(models_to_try,
-                      data.frame(model_name="tr_dde_frequentist_decay_link_both", frequentist=TRUE, second_beta = F,
+                      data.frame(model_name="tr_dde_frequentist_decay_link_both", frequentist=TRUE,
+                                 second_beta = F,
                                  delay=TRUE, 
                                  fixed_delay=0.3, decay=TRUE,
                                  link_beta=TRUE, link_L=TRUE, link_delay=FALSE, transduction=TRUE))
 models_to_try = rbind(models_to_try,
-                      data.frame(model_name="tr_dde_fit_frequentist_decay_link_both", frequentist=TRUE, second_beta = F,
+                      data.frame(model_name="tr_dde_fit_frequentist_decay_link_both", frequentist=TRUE,
+                                 second_beta = F,
                                  delay=TRUE, 
                                  fixed_delay=NA, decay=TRUE,
                                  link_beta=TRUE, link_L=TRUE, link_delay=FALSE, transduction=TRUE))
 models_to_try = rbind(models_to_try,
-                      data.frame(model_name="tr_dde_fit_frequentist_decay_link_L", frequentist=TRUE, second_beta = F,
+                      data.frame(model_name="tr_dde_fit_frequentist_decay_link_L", frequentist=TRUE,
+                                 second_beta = F,
                                  delay=TRUE, 
                                  fixed_delay=NA, decay=TRUE,
                                  link_beta=FALSE, link_L=TRUE, link_delay=FALSE, transduction=TRUE))
+models_to_try = rbind(models_to_try,
+                      data.frame(model_name="tr_2beta_dde_fit_frequentist_decay_link_L", frequentist=TRUE,
+                                 second_beta = T,
+                                 delay=TRUE, 
+                                 fixed_delay=NA, decay=TRUE,
+                                 link_beta=FALSE, link_L=TRUE, link_delay=FALSE, transduction=TRUE))
+models_to_try = rbind(models_to_try,
+                      data.frame(model_name="tr_2beta_dde_fit_frequentist_decay_link_both", frequentist=TRUE,
+                                 second_beta = T,
+                                 delay=TRUE, 
+                                 fixed_delay=NA, decay=TRUE,
+                                 link_beta=T, link_L=TRUE, link_delay=FALSE, transduction=TRUE))
 
 all_theta = vector("list", nrow(models_to_try))
 
@@ -141,18 +163,18 @@ for(i in 1:nrow(models_to_try)){
                        link_delay = models_to_try$link_delay[i],
                        transduction = models_to_try$transduction[i])
   
-  model = choose_model(model,
-                       frequentist = T,
-                       second_beta = T,
-                       delay = T,
-                       fixed_delay = 0.5,
-                       decay = T,
-                       link_beta = T,
-                       link_L = T,
-                       link_delay = F,
-                       transduction = T)
+  # model = choose_model(model,
+  #                      frequentist = T,
+  #                      second_beta = T,
+  #                      delay = T,
+  #                      fixed_delay = 0.5,
+  #                      decay = T,
+  #                      link_beta = T,
+  #                      link_L = T,
+  #                      link_delay = F,
+  #                      transduction = T)
   
-  init.theta = c(beta = 2e9, beta2 = 0.9, L = 50, gamma = 30000, alpha = 5e5, tau = 0.5)
+  init.theta = c(beta = 2e10, beta2 = 0.9, L = 50, gamma = 30000, alpha = 5e5, tau = 0.5)
   mcmc_fit = run_mcmc(model, lab_data_trans,
                       init.theta = init.theta,
                       proposal.sd = c(init.theta[1]/3000,
@@ -163,6 +185,7 @@ for(i in 1:nrow(models_to_try)){
                                       init.theta[6]/1000),
                       n.iterations = 50000,
                       adapt.size.start = 20000)
+  trace = mcmc_fit$trace#[-c(1:10000),]
   
   # mcmc_fit2 = run_mcmc(model, lab_data_trans5,
   #                     init.theta = c(beta = 8e7, L = 100, gamma = 30000, alpha = 1e5, tau = 0.5),
@@ -222,8 +245,21 @@ for(i in 1:nrow(models_to_try)){
   
   
   #replicate 5
+  mcmc_fit = run_mcmc(model, lab_data_trans5,
+                      init.theta = init.theta,
+                      proposal.sd = c(init.theta[1]/3000,
+                                      init.theta[2]/1000,
+                                      init.theta[3]/3000,
+                                      init.theta[4]/3000,
+                                      init.theta[5]/1000,
+                                      init.theta[6]/1000),
+                      n.iterations = 50000,
+                      adapt.size.start = 20000)
+  #trace = rbind(trace, mcmc_fit$trace[-c(1:10000),])
+  
   init.state = c(Be = lab_data_trans5$Be[1], Bt = lab_data_trans5$Bt[1], Bet = 0,
                  Pl = lab_data_trans5$P[1], Pe = 0, Pt = 0)
+  theta = mcmc_fit$trace[which.max(mcmc_fit$trace[,"log.density"]),]
   
   traj = model$simulate(theta, init.state, times = seq(0, 30, 1))
   
@@ -252,8 +288,21 @@ for(i in 1:nrow(models_to_try)){
   
   
   #replicate 3
+  mcmc_fit = run_mcmc(model, lab_data_trans3,
+                      init.theta = init.theta,
+                      proposal.sd = c(init.theta[1]/3000,
+                                      init.theta[2]/1000,
+                                      init.theta[3]/3000,
+                                      init.theta[4]/3000,
+                                      init.theta[5]/1000,
+                                      init.theta[6]/1000),
+                      n.iterations = 50000,
+                      adapt.size.start = 20000)
+  #trace = rbind(trace, mcmc_fit$trace[-c(1:10000),])
+  
   init.state = c(Be = lab_data_trans3$Be[1], Bt = lab_data_trans3$Bt[1], Bet = 0,
                  Pl = lab_data_trans3$P[1], Pe = 0, Pt = 0)
+  theta = mcmc_fit$trace[which.max(mcmc_fit$trace[,"log.density"]),]
   
   traj = model$simulate(theta, init.state, times = seq(0, 30, 1))
   
@@ -290,12 +339,12 @@ for(i in 1:nrow(models_to_try)){
             legend)
   
   filename = paste0(models_to_try$model_name[i], ".png")
-  ggsave(here::here("Fitting", "10_4", "Best_fits", filename))
+  ggsave(here::here("Fitting", "All", "Best_fits", filename))
   
-  all_theta[[i]] = mcmc_fit$trace
+  all_theta[[i]] = trace
   names(all_theta)[i] = models_to_try$model_name[i]
   
 }
 
-saveRDS(all_theta, here::here("Fitting", "10_4", "best_params_transduction.rds"))
+saveRDS(all_theta, here::here("Fitting", "All", "best_params_transduction.rds"))
 
