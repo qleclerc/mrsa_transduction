@@ -183,7 +183,7 @@ for(i in 1:nrow(models_to_try)){
                                       init.theta[4]/3000,
                                       init.theta[5]/1000,
                                       init.theta[6]/1000),
-                      n.iterations = 1000,
+                      n.iterations = 100,
                       adapt.size.start = 20000)
   trace = mcmc_fit$trace#[-c(1:10000),]
   
@@ -253,7 +253,7 @@ for(i in 1:nrow(models_to_try)){
                                       init.theta[4]/3000,
                                       init.theta[5]/1000,
                                       init.theta[6]/1000),
-                      n.iterations = 1000,
+                      n.iterations = 100,
                       adapt.size.start = 20000)
   #trace = rbind(trace, mcmc_fit$trace[-c(1:10000),])
   
@@ -296,7 +296,7 @@ for(i in 1:nrow(models_to_try)){
                                       init.theta[4]/3000,
                                       init.theta[5]/1000,
                                       init.theta[6]/1000),
-                      n.iterations = 1000,
+                      n.iterations = 100,
                       adapt.size.start = 20000)
   #trace = rbind(trace, mcmc_fit$trace[-c(1:10000),])
   
