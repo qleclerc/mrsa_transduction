@@ -15,7 +15,7 @@ on:
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 # Important: ubuntu-latest is not set up properly for R, so use macOS
 jobs:
-  update-nhs-pathways:
+  mcmc-run:
     runs-on: macos-latest
     steps:
       - name: Checkout repos
