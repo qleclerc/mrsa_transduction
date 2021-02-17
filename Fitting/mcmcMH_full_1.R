@@ -293,12 +293,12 @@ for(i in 1:nrow(models_to_try)){
             legend)
   
   filename = paste0(models_to_try$model_name[i], ".png")
-  ggsave(here::here("Fitting", "10_4", "Best_fits", filename))
+  ggsave(here::here("Fitting", "All", "Best_fits", filename))
   
   all_theta[[i]] = trace
   names(all_theta)[i] = models_to_try$model_name[i]
   
 }
 
-saveRDS(all_theta, here::here("Fitting", "10_4", "best_params_transduction.rds"))
+saveRDS(all_theta, here::here("Fitting", "All", "best_params_transduction.rds"))
 
