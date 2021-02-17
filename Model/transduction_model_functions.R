@@ -98,9 +98,9 @@ choose_model = function(model,
         }
         
         #no link
-        dBe = mu_e * link * Be - (phi_Pl + phi_Pt) * Be/N
-        dBt = mu_t * link * Bt - (phi_Pl + phi_Pe) * Bt/N
-        dBet = mu_et * link * Bet - phi_Pl * Bet/N +
+        dBe = mu_e * link * (Be-(phi_Pl + phi_Pt) * Be/N) - (phi_Pl + phi_Pt) * Be/N
+        dBt = mu_t * link * (Bt-(phi_Pl + phi_Pe) * Bt/N) - (phi_Pl + phi_Pe) * Bt/N
+        dBet = mu_et * link * (Bet-phi_Pl*Bet/N) - phi_Pl * Bet/N +
           phi_Pe * Bt/N + phi_Pt * Be/N
         
         dPl = phi_Pl_past * L * (1 - alpha*(Be_past+Bt_past+2*Bet_past)/N_past) -
