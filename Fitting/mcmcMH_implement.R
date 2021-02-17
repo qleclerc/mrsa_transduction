@@ -183,7 +183,7 @@ for(i in 1:nrow(models_to_try)){
                                       init.theta[4]/3000,
                                       init.theta[5]/1000,
                                       init.theta[6]/1000),
-                      n.iterations = 50000,
+                      n.iterations = 1000,
                       adapt.size.start = 20000)
   trace = mcmc_fit$trace#[-c(1:10000),]
   
@@ -253,7 +253,7 @@ for(i in 1:nrow(models_to_try)){
                                       init.theta[4]/3000,
                                       init.theta[5]/1000,
                                       init.theta[6]/1000),
-                      n.iterations = 50000,
+                      n.iterations = 1000,
                       adapt.size.start = 20000)
   #trace = rbind(trace, mcmc_fit$trace[-c(1:10000),])
   
@@ -296,7 +296,7 @@ for(i in 1:nrow(models_to_try)){
                                       init.theta[4]/3000,
                                       init.theta[5]/1000,
                                       init.theta[6]/1000),
-                      n.iterations = 50000,
+                      n.iterations = 1000,
                       adapt.size.start = 20000)
   #trace = rbind(trace, mcmc_fit$trace[-c(1:10000),])
   
@@ -339,12 +339,12 @@ for(i in 1:nrow(models_to_try)){
             legend)
   
   filename = paste0(models_to_try$model_name[i], ".png")
-  ggsave(here::here("Fitting", "All", "Best_fits", filename))
+  ggsave(here::here("Fitting", "Test", "Best_fits", filename))
   
   all_theta[[i]] = trace
   names(all_theta)[i] = models_to_try$model_name[i]
   
 }
 
-saveRDS(all_theta, here::here("Fitting", "All", "best_params_transduction.rds"))
+saveRDS(all_theta, here::here("Fitting", "Test", "best_params_transduction.rds"))
 
