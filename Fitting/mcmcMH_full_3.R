@@ -135,12 +135,12 @@ for(i in 1:nrow(models_to_try)){
   init.theta = c(beta = 2e10, beta2 = 0.9, L = 50, gamma = 30000, alpha = 5e5, tau = 0.5)
   mcmc_fit = run_mcmc(model, lab_data_trans,
                       init.theta = init.theta,
-                      proposal.sd = c(init.theta[1]/3000,
-                                      init.theta[2]/1000,
-                                      init.theta[3]/3000,
-                                      init.theta[4]/3000,
-                                      init.theta[5]/3000,
-                                      init.theta[6]/1000),
+                      proposal.sd = c(init.theta[1]/5000,
+                                      init.theta[2]/5000,
+                                      init.theta[3]/5000,
+                                      init.theta[4]/5000,
+                                      init.theta[5]/5000,
+                                      init.theta[6]/5000),
                       n.iterations = 100000,
                       adapt.size.start = 20000)
   trace = mcmc_fit$trace[-c(1:20000),]
@@ -204,18 +204,18 @@ for(i in 1:nrow(models_to_try)){
   
   
   #replicate 5
-  
-  mcmc_fit = run_mcmc(model, lab_data_trans5,
-                      init.theta = init.theta,
-                      proposal.sd = c(init.theta[1]/3000,
-                                      init.theta[2]/1000,
-                                      init.theta[3]/3000,
-                                      init.theta[4]/3000,
-                                      init.theta[5]/3000,
-                                      init.theta[6]/1000),
-                      n.iterations = 100000,
-                      adapt.size.start = 20000)
-  trace = rbind(trace, mcmc_fit$trace[-c(1:20000),])
+  # 
+  #   mcmc_fit = run_mcmc(model, lab_data_trans5,
+  #                       init.theta = init.theta,
+  #                       proposal.sd = c(init.theta[1]/5000,
+  #                                       init.theta[2]/5000,
+  #                                       init.theta[3]/5000,
+  #                                       init.theta[4]/5000,
+  #                                       init.theta[5]/5000,
+  #                                       init.theta[6]/5000),
+  #                       n.iterations = 100000,
+  #                       adapt.size.start = 20000)
+  #   trace = rbind(trace, mcmc_fit$trace[-c(1:20000),])
   
   init.state = c(Be = lab_data_trans5$Be[1], Bt = lab_data_trans5$Bt[1], Bet = 0,
                  Pl = lab_data_trans5$P[1], Pe = 0, Pt = 0)
@@ -248,17 +248,17 @@ for(i in 1:nrow(models_to_try)){
   
   
   #replicate 3
-  mcmc_fit = run_mcmc(model, lab_data_trans3,
-                      init.theta = init.theta,
-                      proposal.sd = c(init.theta[1]/3000,
-                                      init.theta[2]/1000,
-                                      init.theta[3]/3000,
-                                      init.theta[4]/3000,
-                                      init.theta[5]/3000,
-                                      init.theta[6]/1000),
-                      n.iterations = 100000,
-                      adapt.size.start = 20000)
-  trace = rbind(trace, mcmc_fit$trace[-c(1:20000),])
+  # mcmc_fit = run_mcmc(model, lab_data_trans3,
+  #                     init.theta = init.theta,
+  #                     proposal.sd = c(init.theta[1]/5000,
+  #                                     init.theta[2]/5000,
+  #                                     init.theta[3]/5000,
+  #                                     init.theta[4]/5000,
+  #                                     init.theta[5]/5000,
+  #                                     init.theta[6]/5000),
+  #                     n.iterations = 100000,
+  #                     adapt.size.start = 20000)
+  # trace = rbind(trace, mcmc_fit$trace[-c(1:20000),])
   
   init.state = c(Be = lab_data_trans3$Be[1], Bt = lab_data_trans3$Bt[1], Bet = 0,
                  Pl = lab_data_trans3$P[1], Pe = 0, Pt = 0)
