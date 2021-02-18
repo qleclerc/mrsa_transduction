@@ -35,9 +35,19 @@ jobs:
           devtools::install_github("sbfnk/fitR")
         shell: Rscript {0}
  
-      - name: Run MCMC
+      - name: Run MCMC first
         run: |
-          source(here::here("Fitting", "mcmcMH_implement.R"))
+          source(here::here("Fitting", "mcmcMH_full_1.R"))
+        shell: Rscript {0}
+        
+      - name: Run MCMC first
+        run: |
+          source(here::here("Fitting", "mcmcMH_full_2.R"))
+        shell: Rscript {0}
+        
+      - name: Run MCMC first
+        run: |
+          source(here::here("Fitting", "mcmcMH_full_3.R"))
         shell: Rscript {0}
         
       - name: Commit and push files
