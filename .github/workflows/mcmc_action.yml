@@ -35,17 +35,17 @@ jobs:
           devtools::install_github("sbfnk/fitR")
         shell: Rscript {0}
  
-      - name: Run MCMC first
+      - name: Run MCMC first set
         run: |
           source(here::here("Fitting", "mcmcMH_full_1.R"))
         shell: Rscript {0}
         
-      - name: Run MCMC first
+      - name: Run MCMC second set
         run: |
           source(here::here("Fitting", "mcmcMH_full_2.R"))
         shell: Rscript {0}
         
-      - name: Run MCMC first
+      - name: Run MCMC third set
         run: |
           source(here::here("Fitting", "mcmcMH_full_3.R"))
         shell: Rscript {0}
