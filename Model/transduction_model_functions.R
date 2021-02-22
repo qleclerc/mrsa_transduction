@@ -65,13 +65,14 @@ choose_model = function(model,
           beta_past = beta * link_past
         } else beta_past = beta
         
-        beta2_past = beta2
-        
+
         if(link_L) L = L * link + 1
         
         if(link_delay) tau = tau * (N/Nmax)
         
         if(frequentist){
+          
+          growth_correction = 1
           
           lambda = (1 - exp(-beta * N))
           phi_Pl = (1 - exp(-lambda * Pl*beta2/N)) * N
@@ -79,11 +80,13 @@ choose_model = function(model,
           phi_Pt = (1 - exp(-lambda * Pt*beta2/N)) * N
           
           lambda_past = (1 - exp(-beta_past * N_past))
-          phi_Pl_past = (1 - exp(-lambda_past * Pl_past*beta2_past/N_past)) * N_past
-          phi_Pe_past = (1 - exp(-lambda_past * Pe_past*beta2_past/N_past)) * N_past
-          phi_Pt_past = (1 - exp(-lambda_past * Pt_past*beta2_past/N_past)) * N_past
+          phi_Pl_past = (1 - exp(-lambda_past * Pl_past*beta2/N_past)) * N_past
+          phi_Pe_past = (1 - exp(-lambda_past * Pe_past*beta2/N_past)) * N_past
+          phi_Pt_past = (1 - exp(-lambda_past * Pt_past*beta2/N_past)) * N_past
           
         } else {
+          
+          growth_correction = 0
           
           lambda = beta * N
           phi_Pl = lambda * Pl
@@ -98,9 +101,9 @@ choose_model = function(model,
         }
         
         #no link
-        dBe = mu_e * link * (Be-(phi_Pl + phi_Pt) * Be/N) - (phi_Pl + phi_Pt) * Be/N
-        dBt = mu_t * link * (Bt-(phi_Pl + phi_Pe) * Bt/N) - (phi_Pl + phi_Pe) * Bt/N
-        dBet = mu_et * link * (Bet-phi_Pl*Bet/N) - phi_Pl * Bet/N +
+        dBe = mu_e * link * (Be- growth_correction*((phi_Pl + phi_Pt) * Be/N) ) - (phi_Pl + phi_Pt) * Be/N
+        dBt = mu_t * link * (Bt- growth_correction*((phi_Pl + phi_Pe) * Bt/N) ) - (phi_Pl + phi_Pe) * Bt/N
+        dBet = mu_et * link * (Bet- growth_correction*(phi_Pl*Bet/N) ) - phi_Pl * Bet/N +
           phi_Pe * Bt/N + phi_Pt * Be/N
         
         dPl = phi_Pl_past * L * (1 - alpha*(Be_past+Bt_past+2*Bet_past)/N_past) -
