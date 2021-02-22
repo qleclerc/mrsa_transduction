@@ -163,8 +163,8 @@ for(i in 1:nrow(models_to_try)){
   
   
   #replicate 4
-  init.state = c(Be = lab_data_trans$Be[1], Bt = lab_data_trans$Bt[1], Bet = 0,
-                 Pl = lab_data_trans$P[1], Pe = 0, Pt = 0)
+  init.state = c(Be = lab_data_trans4$Be[1], Bt = lab_data_trans4$Bt[1], Bet = 0,
+                 Pl = lab_data_trans4$P[1], Pe = 0, Pt = 0)
   theta = mcmc_fit$trace[which.max(mcmc_fit$trace[,"log.density"]),]
   
   #theta = c(beta = 8e9, L = 20, gamma = 30000, alpha = 1e5)
