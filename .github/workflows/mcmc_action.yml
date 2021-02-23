@@ -16,7 +16,7 @@ on:
 # Important: ubuntu-latest is not set up properly for R, so use macOS
 jobs:
   mcmc-run1:
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout repos
         uses: actions/checkout@v2
@@ -50,7 +50,7 @@ jobs:
           git push
 
   mcmc-run2:
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout repos
         uses: actions/checkout@v2
@@ -84,7 +84,7 @@ jobs:
           git push
           
   mcmc-run3:
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout repos
         uses: actions/checkout@v2
