@@ -16,7 +16,7 @@ on:
 # Important: ubuntu-latest is not set up properly for R, so use macOS
 jobs:
   mcmc-run1:
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     steps:
       - name: Checkout repos
         uses: actions/checkout@v2
@@ -50,7 +50,7 @@ jobs:
           git push
 
   mcmc-run2:
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     steps:
       - name: Checkout repos
         uses: actions/checkout@v2
@@ -84,7 +84,7 @@ jobs:
           git push
           
   mcmc-run3:
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     steps:
       - name: Checkout repos
         uses: actions/checkout@v2
@@ -115,4 +115,72 @@ jobs:
           git pull
           git add Fitting
           git commit -m "New MCMC run 3"
+          git push
+
+  mcmc-run4:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout repos
+        uses: actions/checkout@v2
+        with:
+          ref: master
+
+      - name: Setup R
+        uses: r-lib/actions/setup-r@v1
+
+      - name: Install dependencies
+        run: |
+          Sys.setenv(R_REMOTES_NO_ERRORS_FROM_WARNINGS = "true")
+          options(install.packages.check.source = "no")
+          pkgs <- c("devtools", "coda", "dplyr", "reshape2", "ggplot2", "cowplot", "scales", "here")
+          install.packages(pkgs, repos = "https://cloud.r-project.org/")
+          devtools::install_github("sbfnk/fitR")
+        shell: Rscript {0}
+ 
+      - name: Run MCMC third set
+        run: |
+          source(here::here("Fitting", "mcmcMH_full_4.R"))
+        shell: Rscript {0}
+
+      - name: Commit and push files
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git pull
+          git add Fitting
+          git commit -m "New MCMC run 4"
+          git push
+          
+  mcmc-run5:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout repos
+        uses: actions/checkout@v2
+        with:
+          ref: master
+
+      - name: Setup R
+        uses: r-lib/actions/setup-r@v1
+
+      - name: Install dependencies
+        run: |
+          Sys.setenv(R_REMOTES_NO_ERRORS_FROM_WARNINGS = "true")
+          options(install.packages.check.source = "no")
+          pkgs <- c("devtools", "coda", "dplyr", "reshape2", "ggplot2", "cowplot", "scales", "here")
+          install.packages(pkgs, repos = "https://cloud.r-project.org/")
+          devtools::install_github("sbfnk/fitR")
+        shell: Rscript {0}
+ 
+      - name: Run MCMC third set
+        run: |
+          source(here::here("Fitting", "mcmcMH_full_5.R"))
+        shell: Rscript {0}
+
+      - name: Commit and push files
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git pull
+          git add Fitting
+          git commit -m "New MCMC run 5"
           git push
