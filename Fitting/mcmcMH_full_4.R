@@ -284,5 +284,5 @@ for(i in 1:nrow(models_to_try)){
   
 }
 
-saveRDS(all_theta, here::here("Fitting", "10_4", "best_params_transduction.rds"))
+saveRDS(all_theta, here::here("Fitting", "10_4", "best_params_transduction4.rds"))
 
