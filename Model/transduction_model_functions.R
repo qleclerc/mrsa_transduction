@@ -1,7 +1,6 @@
 
 choose_model = function(model,
                         frequentist = FALSE,
-                        second_beta = FALSE,
                         delay = FALSE, fixed_delay = NA,
                         decay = FALSE,
                         link_beta = FALSE, link_L = FALSE, link_delay = FALSE,
@@ -21,7 +20,6 @@ choose_model = function(model,
         #ll for this set is -4.026931e+08 
         
         beta = 1/parameters[["beta"]]
-        beta2 = ifelse(second_beta, parameters[["beta2"]], 1)
         L = parameters[["L"]]
         gamma = ifelse(decay, 1/parameters[["gamma"]], 0)
         alpha = ifelse(transduction, 1/parameters[["alpha"]], 0)
@@ -75,14 +73,14 @@ choose_model = function(model,
           growth_correction = 1
           
           lambda = (1 - exp(-beta * N))
-          phi_Pl = (1 - exp(-lambda * Pl*beta2/N)) * N
-          phi_Pe = (1 - exp(-lambda * Pe*beta2/N)) * N
-          phi_Pt = (1 - exp(-lambda * Pt*beta2/N)) * N
+          phi_Pl = (1 - exp(-lambda * Pl/N)) * N
+          phi_Pe = (1 - exp(-lambda * Pe/N)) * N
+          phi_Pt = (1 - exp(-lambda * Pt/N)) * N
           
           lambda_past = (1 - exp(-beta_past * N_past))
-          phi_Pl_past = (1 - exp(-lambda_past * Pl_past*beta2/N_past)) * N_past
-          phi_Pe_past = (1 - exp(-lambda_past * Pe_past*beta2/N_past)) * N_past
-          phi_Pt_past = (1 - exp(-lambda_past * Pt_past*beta2/N_past)) * N_past
+          phi_Pl_past = (1 - exp(-lambda_past * Pl_past/N_past)) * N_past
+          phi_Pe_past = (1 - exp(-lambda_past * Pe_past/N_past)) * N_past
+          phi_Pt_past = (1 - exp(-lambda_past * Pt_past/N_past)) * N_past
           
         } else {
           

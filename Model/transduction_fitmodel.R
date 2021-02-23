@@ -1,6 +1,6 @@
 model_name <- "transduction model"
 model_state.names <- c("Be","Bt","Bet","Pl", "Pe", "Pt")
-model_theta.names <- c("beta", "beta2", "L", "gamma", "alpha", "tau")
+model_theta.names <- c("beta", "L", "gamma", "alpha", "tau")
 
 model_simulateDeterministic <- function(theta,init.state,times) {
   
@@ -12,13 +12,12 @@ model_prior <- function(theta, log = FALSE) {
   
   log.prior.L <- dunif(theta[["L"]], min = 1, max = 1000, log = TRUE)
   log.prior.beta <- dunif(theta[["beta"]], min = 1, max = 1e20, log = TRUE)
-  log.prior.beta2 <- dunif(theta[["beta2"]], min = 0.001, max = 1, log = TRUE)
   log.prior.gamma <- dunif(theta[["gamma"]], min = 1, max = 1e20, log = TRUE)
   log.prior.alpha <- dunif(theta[["alpha"]], min = 1, max = 1e20, log = TRUE)
   
   log.prior.tau <- dunif(theta[["tau"]], min = 0.001, max = 1, log = TRUE)
   
-  log.sum <- log.prior.L + log.prior.beta + log.prior.beta2 + log.prior.gamma + log.prior.alpha + log.prior.tau
+  log.sum <- log.prior.L + log.prior.beta + log.prior.gamma + log.prior.alpha + log.prior.tau
   
   return(ifelse(log, log.sum, exp(log.sum)))
 }
@@ -46,7 +45,7 @@ model_pointLike <- function(data.point, model.point, theta, log = FALSE){
                  log = log)
   
   ## the prevalence is observed through a Poisson process
-  return(sum(dpoisBe, dpoisBt, 10000*dpoisBet, dpoisPl, dpoisPe, dpoisPt))
+  return(sum(dpoisBe, dpoisBt, 1000*dpoisBet, dpoisPl, dpoisPe, dpoisPt))
 }
 
 ## function to generate observation from a model simulation

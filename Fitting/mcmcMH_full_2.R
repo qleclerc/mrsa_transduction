@@ -75,28 +75,14 @@ lab_data_trans3 = read.csv(here::here("Lab", "Transduction", "summary_10_3.csv")
 # FIT PHAGE #####
 
 models_to_try = data.frame(model_name="tr_dde_fit_mass_decay_link_both", frequentist=FALSE,
-                           second_beta = F,
                            delay=TRUE, 
                            fixed_delay=NA, decay=TRUE,
                            link_beta=TRUE, link_L=TRUE, link_delay=FALSE, transduction=TRUE)
 models_to_try = rbind(models_to_try,
                       data.frame(model_name="tr_dde_frequentist_decay_link_beta", frequentist=TRUE,
-                                 second_beta = F,
                                  delay=TRUE, 
                                  fixed_delay=0.3, decay=TRUE,
                                  link_beta=TRUE, link_L=FALSE, link_delay=FALSE, transduction=TRUE))
-models_to_try = rbind(models_to_try,
-                      data.frame(model_name="tr_dde_frequentist_decay_link_L", frequentist=TRUE,
-                                 second_beta = F,
-                                 delay=TRUE, 
-                                 fixed_delay=0.3, decay=TRUE,
-                                 link_beta=FALSE, link_L=TRUE, link_delay=FALSE, transduction=TRUE))
-models_to_try = rbind(models_to_try,
-                      data.frame(model_name="tr_dde_frequentist_decay_link_both", frequentist=TRUE,
-                                 second_beta = F,
-                                 delay=TRUE, 
-                                 fixed_delay=0.3, decay=TRUE,
-                                 link_beta=TRUE, link_L=TRUE, link_delay=FALSE, transduction=TRUE))
 
 all_theta = vector("list", nrow(models_to_try))
 
@@ -106,7 +92,6 @@ for(i in 1:nrow(models_to_try)){
   
   model = choose_model(model,
                        frequentist = models_to_try$frequentist[i],
-                       second_beta = models_to_try$second_beta[i],
                        delay = models_to_try$delay[i],
                        fixed_delay = models_to_try$fixed_delay[i],
                        decay = models_to_try$decay[i], 
@@ -126,18 +111,16 @@ for(i in 1:nrow(models_to_try)){
   #                      link_delay = F,
   #                      transduction = T)
   
-  init.theta = c(beta = 5e10, beta2 = 0.9, L = 70, gamma = 300000, alpha = 1e6, tau = 0.3)
-  mcmc_fit = run_mcmc(model, lab_data_trans3,
+  init.theta = c(beta = 1e10, L = 90, gamma = 300000, alpha = 1e6, tau = 0.3)
+  mcmc_fit = run_mcmc(model, lab_data_trans4,
                       init.theta = init.theta,
                       proposal.sd = c(init.theta[1]/10000,
-                                      init.theta[2]/1000,
+                                      init.theta[2]/10000,
                                       init.theta[3]/10000,
                                       init.theta[4]/10000,
-                                      init.theta[5]/10000,
-                                      init.theta[6]/1000),
+                                      init.theta[5]/10000),
                       n.iterations = 100000,
-                      adapt.size.start = 10000,
-                      adapt.shape.start = 15000)
+                      adapt.size.start = 10000)
   trace = mcmc_fit$trace[-c(1:20000),]
   
   # mcmc_fit2 = run_mcmc(model, lab_data_trans5,
@@ -167,7 +150,7 @@ for(i in 1:nrow(models_to_try)){
                  Pl = lab_data_trans4$P[1], Pe = 0, Pt = 0)
   theta = mcmc_fit$trace[which.max(mcmc_fit$trace[,"log.density"]),]
   
-  #theta = c(beta = 8e9, L = 20, gamma = 30000, alpha = 1e5)
+  #theta = c(beta = 1e10, beta2=1 , L = 100, gamma = 300000, alpha = 1e6)
   # theta["alpha"] = 1e6
   #theta["beta2"] = 1
   
@@ -214,7 +197,7 @@ for(i in 1:nrow(models_to_try)){
   
   init.state = c(Be = lab_data_trans5$Be[1], Bt = lab_data_trans5$Bt[1], Bet = 0,
                  Pl = lab_data_trans5$P[1], Pe = 0, Pt = 0)
-  theta = mcmc_fit$trace[which.max(mcmc_fit$trace[,"log.density"]),]
+  #theta = mcmc_fit$trace[which.max(mcmc_fit$trace[,"log.density"]),]
   
   traj = model$simulate(theta, init.state, times = seq(0, 30, 1))
   
@@ -257,7 +240,7 @@ for(i in 1:nrow(models_to_try)){
   
   init.state = c(Be = lab_data_trans3$Be[1], Bt = lab_data_trans3$Bt[1], Bet = 0,
                  Pl = lab_data_trans3$P[1], Pe = 0, Pt = 0)
-  theta = mcmc_fit$trace[which.max(mcmc_fit$trace[,"log.density"]),]
+  #theta = mcmc_fit$trace[which.max(mcmc_fit$trace[,"log.density"]),]
   
   traj = model$simulate(theta, init.state, times = seq(0, 30, 1))
   
@@ -294,12 +277,12 @@ for(i in 1:nrow(models_to_try)){
             legend)
   
   filename = paste0(models_to_try$model_name[i], ".png")
-  ggsave(here::here("Fitting", "10_3", "Best_fits", filename))
+  ggsave(here::here("Fitting", "10_4", "Best_fits", filename))
   
   all_theta[[i]] = trace
   names(all_theta)[i] = models_to_try$model_name[i]
   
 }
 
-saveRDS(all_theta, here::here("Fitting", "10_3", "best_params_transduction2.rds"))
+saveRDS(all_theta, here::here("Fitting", "10_4", "best_params_transduction2.rds"))
 
