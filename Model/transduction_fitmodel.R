@@ -10,12 +10,12 @@ model_simulateDeterministic <- function(theta,init.state,times) {
 ## function to compute log-prior
 model_prior <- function(theta, log = FALSE) {
   
-  log.prior.L <- dunif(theta[["L"]], min = 1, max = 1000, log = TRUE)
+  log.prior.L <- dunif(theta[["L"]], min = 1, max = 500, log = TRUE)
   log.prior.beta <- dunif(theta[["beta"]], min = 1, max = 1e20, log = TRUE)
-  log.prior.gamma <- dunif(theta[["gamma"]], min = 1, max = 1e20, log = TRUE)
-  log.prior.alpha <- dunif(theta[["alpha"]], min = 1, max = 1e20, log = TRUE)
+  log.prior.gamma <- dunif(theta[["gamma"]], min = 1, max = 1e10, log = TRUE)
+  log.prior.alpha <- dunif(theta[["alpha"]], min = 1, max = 1e10, log = TRUE)
   
-  log.prior.tau <- dunif(theta[["tau"]], min = 0.001, max = 1, log = TRUE)
+  log.prior.tau <- dunif(theta[["tau"]], min = 0.001, max = 0.75, log = TRUE)
   
   log.sum <- log.prior.L + log.prior.beta + log.prior.gamma + log.prior.alpha + log.prior.tau
   
