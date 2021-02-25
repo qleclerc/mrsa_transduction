@@ -204,12 +204,13 @@ choose_model = function(model,
 
 
 run_mcmc = function(model, lab_data,
-                    init.theta = c(beta = 8e9, L = 20, gamma = 30000, alpha = 1e5),
+                    init.theta = c(beta = 1e10, L = 80, gamma = 30000, alpha = 1e6, tau = 0.3),
                     proposal.sd = init.theta/50000,
                     n.iterations = 10000,
                     adapt.size.start = 200000,
-                    adapt.size.cooling = 0.999,
-                    adapt.shape.start = 200000){
+                    adapt.size.cooling = 0.99,
+                    adapt.shape.start = 200000,
+                    verbose = FALSE){
   
   
   
@@ -231,7 +232,10 @@ run_mcmc = function(model, lab_data,
                     n.iterations = n.iterations,
                     adapt.size.start = adapt.size.start,
                     adapt.size.cooling = adapt.size.cooling,
-                    adapt.shape.start = adapt.shape.start)
+                    adapt.shape.start = adapt.shape.start,
+                    verbose = verbose,
+                    limits = list(lower = c(beta = 1, L = 1, gamma = 1, alpha = 1, tau = 0.01),
+                                  upper = c(beta = 1e20, L = 500, gamma = 1e10, alpha = 1e10, tau = 0.75)))
   
   mcmc_fit
   
