@@ -279,7 +279,7 @@ for(i in 1:nrow(models_to_try)){
   filename = paste0(models_to_try$model_name[i], ".png")
   ggsave(here::here("Fitting", "10_5", "Best_fits", filename))
   
-  all_theta[[i]] = trace
+  all_theta[[i]] = mcmc_fit$trace
   names(all_theta)[i] = models_to_try$model_name[i]
   
 }
