@@ -81,7 +81,7 @@ models_to_try = data.frame(model_name="tr_dde_fit_mass_decay_link_both", frequen
 models_to_try = rbind(models_to_try,
                       data.frame(model_name="tr_dde_frequentist_decay_link_beta", frequentist=TRUE,
                                  delay=TRUE, 
-                                 fixed_delay=0.3, decay=TRUE,
+                                 fixed_delay=0.67, decay=TRUE,
                                  link_beta=TRUE, link_L=FALSE, link_delay=FALSE, transduction=TRUE))
 
 all_theta = vector("list", nrow(models_to_try))
@@ -112,7 +112,7 @@ for(i in 1:nrow(models_to_try)){
   #                      transduction = T)
   
   init.theta = c(beta = 1e10, L = 80, gamma = 30000, alpha = 1e6, tau = 0.3)
-  mcmc_fit = run_mcmc(model, lab_data_trans3,
+  mcmc_fit = run_mcmc(model, lab_data_trans4,
                       init.theta = init.theta,
                       proposal.sd = c(init.theta[1]/1000,
                                       init.theta[2]/1000,
@@ -278,12 +278,12 @@ for(i in 1:nrow(models_to_try)){
             legend)
   
   filename = paste0(models_to_try$model_name[i], ".png")
-  ggsave(here::here("Fitting", "10_3", "Best_fits", filename))
+  ggsave(here::here("Fitting", "10_4", "Best_fits", filename))
   
   all_theta[[i]] = mcmc_fit$trace
   names(all_theta)[i] = models_to_try$model_name[i]
   
 }
 
-saveRDS(all_theta, here::here("Fitting", "10_3", "best_params_transduction2.rds"))
+saveRDS(all_theta, here::here("Fitting", "10_4", "best_params_transduction2.rds"))
 

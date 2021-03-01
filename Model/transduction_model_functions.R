@@ -290,3 +290,49 @@ multi_run = function(model, theta_trace, init.state, times = seq(0, 24, 1), nrun
   summary_results
   
 }
+
+multi_run2 = function(model, theta, init.state, times = seq(0, 24, 1), nruns = 5000){
+  
+  summary_runs = list()
+  index = 1
+  for (i in names(init.state)) {
+    summary_runs[[index]] = matrix(0, length(times), nruns)
+    index = index + 1
+  }
+  names(summary_runs) = names(init.state)
+  
+  
+  for(i in 1:nruns){
+    
+    traj = model$simulate(theta, init.state, times)
+    
+    traj[,-1] = apply(traj[,-1], c(1,2), function(x) rpois(1,x))
+    
+    for (name in names(init.state)) {
+      summary_runs[[name]][,i] = traj[,name]
+    }
+    
+  }
+  
+  
+  #combine all results into a single dataframe with mean and sd
+  summary_results = data.frame(time = times)
+  
+  for (name in names(init.state)) {
+    summary_results = cbind(summary_results, 
+                            rowMeans(summary_runs[[name]]), 
+                            apply(summary_runs[[name]], 1, sd))
+  }
+  
+  summary_colnames = c()
+  for (name in names(init.state)) {
+    summary_colnames = c(summary_colnames,
+                         name,
+                         paste0(name, "_sd"))
+  }
+  
+  colnames(summary_results) = c("time", summary_colnames)
+  
+  summary_results
+  
+}
