@@ -111,7 +111,7 @@ for(i in 1:nrow(models_to_try)){
   #                      link_delay = F,
   #                      transduction = T)
   
-  init.theta = c(beta = 5e9, L = 40, gamma = 30000, alpha = 1e6, tau = 0.6)
+  init.theta = c(beta = 2e9, L = 60, gamma = 30000, alpha = 1e6, tau = 0.6)
   mcmc_fit = run_mcmc(model, lab_data_trans3,
                       init.theta = init.theta,
                       proposal.sd = c(init.theta[1]/10000,
@@ -120,7 +120,7 @@ for(i in 1:nrow(models_to_try)){
                                       init.theta[4]/1000,
                                       init.theta[5]/1000),
                       n.iterations = 100000,
-                      adapt.size.start = 50000,
+                      adapt.size.start = 20000,
                       adapt.shape.start = NULL,
                       adapt.size.cooling = 0.999)
   
