@@ -111,7 +111,7 @@ for(i in 1:nrow(models_to_try)){
   #                      link_delay = F,
   #                      transduction = T)
   init.theta = c(beta = 2e9, L = 60, gamma = 30000, alpha = 1e6, tau = 0.6)
-  mcmc_fit = run_mcmc(model, lab_data_trans3,
+  mcmc_fit = run_mcmc(model, lab_data_trans4,
                       init.theta = init.theta,
                       proposal.sd = c(init.theta[1]/10000,
                                       init.theta[2]/1000,
@@ -130,12 +130,12 @@ for(i in 1:nrow(models_to_try)){
   #                     adapt.shape.start = 1000)
   
   
-  mcmc.trace = coda::mcmc(mcmc_fit$trace)
-  plot(mcmc.trace)
+  # mcmc.trace = coda::mcmc(mcmc_fit$trace)
+  # plot(mcmc.trace)
   # effectiveSize(mcmc.trace)
   # plotESSBurn(mcmc.trace)
   # autocorr.plot(mcmc.trace)
-  mcmc.trace = burnAndThin(mcmc.trace, burn = 5000, thin = 10)
+  # mcmc.trace = burnAndThin(mcmc.trace, burn = 20000, thin = 10)
   
   # mcmc.trace2 = coda::mcmc(mcmc_fit2$trace)
   # plot(mcmc.trace2)
@@ -277,12 +277,12 @@ for(i in 1:nrow(models_to_try)){
             legend)
   
   filename = paste0(models_to_try$model_name[i], ".png")
-  ggsave(here::here("Fitting", "10_3", "Best_fits", filename))
+  ggsave(here::here("Fitting", "10_4", "Best_fits", filename))
   
   all_theta[[i]] = mcmc_fit$trace
   names(all_theta)[i] = models_to_try$model_name[i]
   
 }
 
-saveRDS(all_theta, here::here("Fitting", "10_3", "best_params_transduction.rds"))
+saveRDS(all_theta, here::here("Fitting", "10_4", "best_params_transduction.rds"))
 

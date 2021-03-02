@@ -36,13 +36,13 @@ model_pointLike <- function(data.point, model.point, theta, log = FALSE){
   #                 log = log)
   dpoisBe = dpoisBt = dpoisPe = dpoisPt = 0
   
-  dpoisBet = dpois(x = round(data.point[["Bet"]]/(10^(max(nchar(as.character(round(data.point[["Bet"]]))),2)-2))),
+  dpoisBet = dpois(x = round(data.point[["Bet"]]/(10^(max(nchar(as.character(round(model.point[["Bet"]]))),2)-2))),
                    lambda = model.point[["Bet"]]/(10^(max(nchar(as.character(round(model.point[["Bet"]]))),2)-2)),
                    log = log)
   if(is.infinite(dpoisBet)) dpoisBet = -1e5
   
   
-  dpoisPl = dpois(x = round(data.point[["P"]]/(10^(max(nchar(as.character(round(data.point[["P"]]))),2)-2))),
+  dpoisPl = dpois(x = round(data.point[["P"]]/(10^(max(nchar(as.character(round(model.point[["Pl"]]))),2)-2))),
                   lambda = model.point[["Pl"]]/(10^(max(nchar(as.character(round(model.point[["Pl"]]))),2)-2)),
                   log = log)
   
