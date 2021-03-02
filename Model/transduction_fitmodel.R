@@ -36,18 +36,18 @@ model_pointLike <- function(data.point, model.point, theta, log = FALSE){
   #                 log = log)
   dpoisBe = dpoisBt = dpoisPe = dpoisPt = 0
   
-  dpoisBet = dpois(x = data.point[["Bet"]],
-                   lambda = model.point[["Bet"]],
+  dpoisBet = dpois(x = round(data.point[["Bet"]]/(10^(max(nchar(as.character(round(data.point[["Bet"]]))),2)-2))),
+                   lambda = model.point[["Bet"]]/(10^(max(nchar(as.character(round(model.point[["Bet"]]))),2)-2)),
                    log = log)
-  if(is.infinite(dpoisBet)) dpoisBet = -1e7
+  if(is.infinite(dpoisBet)) dpoisBet = -1e5
   
   
-  dpoisPl = dpois(x = data.point[["P"]],
-                 lambda = model.point[["Pl"]],
-                 log = log)
+  dpoisPl = dpois(x = round(data.point[["P"]]/(10^(max(nchar(as.character(round(data.point[["P"]]))),2)-2))),
+                  lambda = model.point[["Pl"]]/(10^(max(nchar(as.character(round(model.point[["Pl"]]))),2)-2)),
+                  log = log)
   
   ## the prevalence is observed through a Poisson process
-  return(sum(dpoisBe, dpoisBt, 1000*dpoisBet, dpoisPl, dpoisPe, dpoisPt))
+  return(sum(dpoisBe, dpoisBt, dpoisBet, dpoisPl, dpoisPe, dpoisPt))
 }
 
 ## function to generate observation from a model simulation
