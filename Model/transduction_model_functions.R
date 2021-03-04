@@ -235,7 +235,7 @@ run_mcmc = function(model, lab_data,
                     adapt.shape.start = adapt.shape.start,
                     verbose = verbose,
                     limits = list(lower = c(beta = 1, L = 1, gamma = 1, alpha = 1, tau = 0.01),
-                                  upper = c(beta = 1e20, L = 500, gamma = 1e10, alpha = 1e10, tau = 0.75)))
+                                  upper = c(beta = 1e20, L = 500, gamma = 1e10, alpha = 1e10, tau = 0.8)))
   
   mcmc_fit
   

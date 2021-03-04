@@ -10,14 +10,14 @@ model_simulateDeterministic <- function(theta,init.state,times) {
 ## function to compute log-prior
 model_prior <- function(theta, log = TRUE) {
   
-  #log.prior.L <- dunif(theta[["L"]], min = 1, max = 500, log = TRUE)
-  log.prior.L <- dnorm(theta[["L"]], mean = 40, sd = 7, log = TRUE)
+  log.prior.L <- dunif(theta[["L"]], min = 1, max = 500, log = TRUE)
+  #log.prior.L <- dnorm(theta[["L"]], mean = 40, sd = 7, log = TRUE)
   log.prior.beta <- dunif(theta[["beta"]], min = 1, max = 1e20, log = TRUE)
   log.prior.gamma <- dunif(theta[["gamma"]], min = 1, max = 1e10, log = TRUE)
   log.prior.alpha <- dunif(theta[["alpha"]], min = 1, max = 1e10, log = TRUE)
   
-  #log.prior.tau <- dunif(theta[["tau"]], min = 0.001, max = 0.75, log = TRUE)
-  log.prior.tau <- dnorm(theta[["tau"]], mean = 0.67, sd = 0.07, log = TRUE)
+  log.prior.tau <- dunif(theta[["tau"]], min = 0.01, max = 0.8, log = TRUE)
+  #log.prior.tau <- dnorm(theta[["tau"]], mean = 0.67, sd = 0.07, log = TRUE)
   
   log.sum <- log.prior.L + log.prior.beta + log.prior.gamma + log.prior.alpha + log.prior.tau
   
@@ -39,7 +39,7 @@ model_pointLike <- function(data.point, model.point, theta, log = FALSE){
   dpoisBet = dpois(x = data.point[["Bet"]],
                    lambda = model.point[["Bet"]],
                    log = log)
-  if(is.infinite(dpoisBet)) dpoisBet = -1e5
+  if(is.infinite(dpoisBet)) dpoisBet = -1e7
   
   
   dpoisPl = dpois(x = round(data.point[["P"]]/(10^(max(nchar(as.character(round(model.point[["Pl"]]))),2)-2))),
