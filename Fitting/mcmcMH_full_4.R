@@ -74,15 +74,15 @@ lab_data_trans3 = read.csv(here::here("Lab", "Transduction", "summary_10_3.csv")
 
 # FIT PHAGE #####
 
-models_to_try = data.frame(model_name="tr_dde_mass_decay_link_beta", frequentist=FALSE,
-                           delay=TRUE, 
-                           fixed_delay=0.67, decay=TRUE,
-                           link_beta=TRUE, link_L=FALSE, link_delay=FALSE, transduction=TRUE)
-models_to_try = rbind(models_to_try,
-                      data.frame(model_name="tr_dde_mass_decay_link_both", frequentist=FALSE,
-                                 delay=TRUE, 
-                                 fixed_delay=0.67, decay=TRUE,
-                                 link_beta=TRUE, link_L=TRUE, link_delay=FALSE, transduction=TRUE))
+# models_to_try = data.frame(model_name="tr_dde_mass_decay_link_beta", frequentist=FALSE,
+#                            delay=TRUE, 
+#                            fixed_delay=0.67, decay=TRUE,
+#                            link_beta=TRUE, link_L=FALSE, link_delay=FALSE, transduction=TRUE)
+# models_to_try = rbind(models_to_try,
+#                       data.frame(model_name="tr_dde_mass_decay_link_both", frequentist=FALSE,
+#                                  delay=TRUE, 
+#                                  fixed_delay=0.67, decay=TRUE,
+#                                  link_beta=TRUE, link_L=TRUE, link_delay=FALSE, transduction=TRUE))
 
 all_theta = vector("list", nrow(models_to_try))
 
