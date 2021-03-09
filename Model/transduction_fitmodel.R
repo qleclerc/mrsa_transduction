@@ -47,7 +47,7 @@ model_pointLike <- function(data.point, model.point, theta, log = FALSE){
                   log = log)
   
   ## the prevalence is observed through a Poisson process
-  return(sum(dpoisBe, dpoisBt, 10*dpoisBet, dpoisPl, dpoisPe, dpoisPt))
+  return(sum(dpoisBe, dpoisBt, dpoisBet, dpoisPl, dpoisPe, dpoisPt))
 }
 
 ## function to generate observation from a model simulation
