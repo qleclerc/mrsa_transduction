@@ -125,8 +125,21 @@ for(i in 1:nrow(models_to_try)){
   #                     adapt.shape.start = NULL,
   #                     adapt.size.cooling = 0.999)
   
+  # init.theta = c(beta = 1e10, L = 60, gamma = 30000, alpha = 9e5, tau = 0.6)
+  # mcmc_fit = run_mcmc(model, lab_data_trans4,
+  #                     init.theta = init.theta,
+  #                     proposal.sd = c(init.theta[1]/300,
+  #                                     init.theta[2]/30,
+  #                                     init.theta[3]/1000,
+  #                                     init.theta[4]/5,
+  #                                     init.theta[5]/100),
+  #                     n.iterations = 100000,
+  #                     adapt.size.start = NULL,
+  #                     adapt.shape.start = NULL,
+  #                     adapt.size.cooling = 0.999)
+  
   init.theta = c(beta = 1e10, L = 60, gamma = 30000, alpha = 9e5, tau = 0.6)
-  mcmc_fit = run_mcmc(model, lab_data_trans4,
+  mcmc_fit = run_mcmc(model, lab_data_trans5,
                       init.theta = init.theta,
                       proposal.sd = c(init.theta[1]/300,
                                       init.theta[2]/30,
@@ -137,19 +150,6 @@ for(i in 1:nrow(models_to_try)){
                       adapt.size.start = NULL,
                       adapt.shape.start = NULL,
                       adapt.size.cooling = 0.999)
-  
-  # init.theta = c(beta = 1e10, L = 60, gamma = 30000, alpha = 9e5, tau = 0.6)
-  # mcmc_fit = run_mcmc(model, lab_data_trans5,
-  #                     init.theta = init.theta,
-  #                     proposal.sd = c(init.theta[1]/300,
-  #                                     init.theta[2]/30,
-  #                                     init.theta[3]/3000,
-  #                                     init.theta[4]/10,
-  #                                     init.theta[5]/100),
-  #                     n.iterations = 100000,
-  #                     adapt.size.start = NULL,
-  #                     adapt.shape.start = NULL,
-  #                     adapt.size.cooling = 0.999)
   
 
   # mcmc_fit2 = run_mcmc(model, lab_data_trans5,
@@ -306,12 +306,12 @@ for(i in 1:nrow(models_to_try)){
             legend)
   
   filename = paste0(models_to_try$model_name[i], ".png")
-  ggsave(here::here("Fitting", "10_4", "Best_fits", filename))
+  ggsave(here::here("Fitting", "10_5", "Best_fits", filename))
   
   all_theta[[i]] = mcmc_fit$trace
   names(all_theta)[i] = models_to_try$model_name[i]
   
 }
 
-saveRDS(all_theta, here::here("Fitting", "10_4", "best_params_transduction3.rds"))
+saveRDS(all_theta, here::here("Fitting", "10_5", "best_params_transduction3.rds"))
 
