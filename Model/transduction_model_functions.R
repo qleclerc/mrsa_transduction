@@ -258,7 +258,8 @@ multi_run = function(model, theta_trace, init.state, times = seq(0, 24, 1), nrun
   
   for(i in 1:nruns){
     
-    theta = apply(theta_trace, 2, FUN = function(x) sample(x, 1))
+    #theta = apply(theta_trace, 2, FUN = function(x) sample(x, 1))
+    theta = theta_trace[sample(1:nrow(theta_trace), 1),]
     
     traj = model$simulate(theta, init.state, times)
     
