@@ -1,0 +1,56 @@
+
+library(ggplot2)
+library(scales)
+library(dplyr)
+
+"#8d57bf"
+"#aca549"
+"#944d61"
+"#79a097"
+
+data = read.csv(here::here("Lab", "Triculture", "summary.csv"))
+data3 = read.csv(here::here("Lab", "Transduction", "summary_10_3.csv"))
+data4 = read.csv(here::here("Lab", "Transduction", "summary_10_4.csv"))
+data5 = read.csv(here::here("Lab", "Transduction", "summary_10_5.csv"))
+
+data$Type = "No phage"
+data3$Type = "10^3"
+data4$Type = "10^4"
+data5$Type = "10^5"
+
+data_all = rbind(data, data3, data4, data5) %>%
+  filter(Bacteria != "Total") %>%
+  mutate(Bacteria=replace(Bacteria, Bacteria=="EryR", "Be")) %>%
+  mutate(Bacteria=replace(Bacteria, Bacteria=="TetR", "Bt")) %>%
+  mutate(Bacteria=replace(Bacteria, Bacteria=="DRP", "Bet")) %>%
+  mutate(Bacteria=replace(Bacteria, Bacteria=="P", "Pl"))
+  
+data_all$Type = as.factor(data_all$Type)
+data_all$Type = factor(data_all$Type, levels(data_all$Type)[c(4,1,2,3)])
+data_all$Bacteria = as.factor(data_all$Bacteria)
+data_all$Bacteria = factor(data_all$Bacteria, levels(data_all$Bacteria)[c(1,3,2,4)])
+
+
+ggplot(data_all, aes(x=Time, y=Mean, colour=Bacteria))+
+  geom_point(size = 1.5)+
+  geom_line(alpha=0.3)+
+  geom_line(data = data_all %>% filter(Time < 9), size = 0.8) +
+  geom_line(data = data_all %>% filter(Time > 15), size = 0.8) +
+  geom_errorbar(aes(x=Time, ymin=se_min, ymax=se_max), size = 0.7) +
+  scale_x_continuous(limits=c(0,max(data$Time)), breaks=seq(0,max(data$Time),2))+
+  scale_y_continuous(trans=log10_trans(),
+                     breaks=trans_breaks("log10", function(x) 10^x),
+                     labels=trans_format("log10", math_format(10^.x)))+
+  labs(y = "cfu or pfu per mL", x = "Time (hours)", colour = "")+
+  theme_bw() +
+  facet_wrap(~Type) +
+  scale_colour_manual(values=c("#685cc4","#6db356","#c2484d","#c88a33")) +
+  theme(axis.text.x = element_text(size=12),
+        axis.title.x = element_text(size=12),
+        axis.text.y = element_text(size=12),
+        axis.title.y = element_text(size=12),
+        legend.text = element_text(size=12),
+        strip.text.x = element_text(size=12))
+
+
+ggsave("all_lab_data_wrap.png")

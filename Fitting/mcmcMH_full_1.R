@@ -137,7 +137,7 @@ for(i in 1:nrow(models_to_try)){
                                       init.theta[3]/900,
                                       init.theta[4]/10,
                                       init.theta[5]/100),
-                      n.iterations = 100000,
+                      n.iterations = 150000,
                       adapt.size.start = NULL,
                       adapt.shape.start = NULL,
                       adapt.size.cooling = 0.999)
@@ -190,27 +190,36 @@ for(i in 1:nrow(models_to_try)){
   traj = model$simulate(theta, init.state, times = seq(0, 30, 1))
   
   p4 = ggplot() +
-    geom_line(data = traj, aes(time, Be, colour = "Model", linetype = "Bacteria")) +
-    geom_line(data = traj, aes(time, Bt, colour = "Model", linetype = "Bacteria")) +
-    geom_line(data = traj, aes(time, Bet, colour = "Model", linetype = "Bacteria")) +
-    geom_line(data = traj, aes(time, Pl, colour = "Model", linetype = "Phage")) +
+    geom_line(data = traj, aes(time, Be, colour = "Model", linetype = "Bacteria"), size = 0.8) +
+    geom_line(data = traj, aes(time, Bt, colour = "Model", linetype = "Bacteria"), size = 0.8) +
+    geom_line(data = traj, aes(time, Bet, colour = "Model", linetype = "Bacteria"), size = 0.8) +
+    geom_line(data = traj, aes(time, Pl, colour = "Model", linetype = "Phage"), size = 0.8) +
     geom_line(data = lab_data_transM %>% filter(Bacteria != "P"),
-              aes(Time, Mean, group = Bacteria, colour = "Data", linetype = "Bacteria")) +
+              aes(Time, Mean, group = Bacteria, colour = "Data", linetype = "Bacteria"), size = 0.8) +
     geom_errorbar(data = lab_data_transM %>% filter(Bacteria != "P"), 
                   aes(x = Time, ymin = pmax(Mean - se, 0), ymax = Mean + se, group = Bacteria,
-                      colour= "Data", linetype = "Bacteria")) +
+                      colour= "Data", linetype = "Bacteria"), size = 0.7) +
     geom_line(data = lab_data_transM %>% filter(Bacteria == "P"), 
-              aes(Time, Mean, group = Bacteria, colour = "Data", linetype = "Phage")) +
+              aes(Time, Mean, group = Bacteria, colour = "Data", linetype = "Phage"), size = 0.8) +
     geom_errorbar(data = lab_data_transM %>% filter(Bacteria == "P"), 
                   aes(x = Time, ymin = pmax(Mean - se, 0), ymax = Mean + se, group = Bacteria,
-                      colour= "Data", linetype = "Phage")) +
+                      colour= "Data", linetype = "Phage"), size = 0.7) +
     scale_y_continuous(trans=log10_trans(),
                        breaks=trans_breaks("log10", function(x) 10^x),
                        labels=trans_format("log10", math_format(10^.x)),
                        limits = c(0.1, 3e10)) +
-    labs(y = "cfu / pfu per mL", x = "Time (hours)", title = "10^4", 
+    scale_x_continuous(breaks = seq(0,30,5)) +
+    labs(y = "cfu or pfu per mL", x = "Time (hours)", title = "10^4", 
          linetype = "Organism:", colour = "Source:") +
-    theme_bw()
+    theme_bw() +
+    theme(axis.text.x = element_text(size=12),
+          axis.title.x = element_text(size=12),
+          axis.text.y = element_text(size=12),
+          axis.title.y = element_text(size=12),
+          legend.text = element_text(size=12),
+          legend.title = element_text(size=12),
+          strip.text.x = element_text(size=12)) +
+    scale_colour_manual(values=c("#685cc4","#6db356"))
   
   
   
@@ -235,27 +244,36 @@ for(i in 1:nrow(models_to_try)){
   traj = model$simulate(theta, init.state, times = seq(0, 30, 1))
   
   p5 = ggplot() +
-    geom_line(data = traj, aes(time, Be, colour = "Model", linetype = "Bacteria")) +
-    geom_line(data = traj, aes(time, Bt, colour = "Model", linetype = "Bacteria")) +
-    geom_line(data = traj, aes(time, Bet, colour = "Model", linetype = "Bacteria")) +
-    geom_line(data = traj, aes(time, Pl, colour = "Model", linetype = "Phage")) +
+    geom_line(data = traj, aes(time, Be, colour = "Model", linetype = "Bacteria"), size = 0.8) +
+    geom_line(data = traj, aes(time, Bt, colour = "Model", linetype = "Bacteria"), size = 0.8) +
+    geom_line(data = traj, aes(time, Bet, colour = "Model", linetype = "Bacteria"), size = 0.8) +
+    geom_line(data = traj, aes(time, Pl, colour = "Model", linetype = "Phage"), size = 0.8) +
     geom_line(data = lab_data_trans5M %>% filter(Bacteria != "P"),
-              aes(Time, Mean, group = Bacteria, colour = "Data", linetype = "Bacteria")) +
+              aes(Time, Mean, group = Bacteria, colour = "Data", linetype = "Bacteria"), size = 0.8) +
     geom_errorbar(data = lab_data_trans5M %>% filter(Bacteria != "P"), 
                   aes(x = Time, ymin = pmax(Mean - se, 0), ymax = Mean + se, group = Bacteria,
-                      colour= "Data", linetype = "Bacteria")) +
+                      colour= "Data", linetype = "Bacteria"), size = 0.7) +
     geom_line(data = lab_data_trans5M %>% filter(Bacteria == "P"), 
-              aes(Time, Mean, group = Bacteria, colour = "Data", linetype = "Phage")) +
+              aes(Time, Mean, group = Bacteria, colour = "Data", linetype = "Phage"), size = 0.8) +
     geom_errorbar(data = lab_data_trans5M %>% filter(Bacteria == "P"), 
                   aes(x = Time, ymin = pmax(Mean - se, 0), ymax = Mean + se, group = Bacteria,
-                      colour= "Data", linetype = "Phage")) +
+                      colour= "Data", linetype = "Phage"), size = 0.7) +
     scale_y_continuous(trans=log10_trans(),
                        breaks=trans_breaks("log10", function(x) 10^x),
                        labels=trans_format("log10", math_format(10^.x)),
                        limits = c(0.1, 3e10)) +
-    labs(y = "cfu / pfu per mL", x = "Time (hours)", title = "10^5", 
+    scale_x_continuous(breaks = seq(0,30,5)) +
+    labs(y = "cfu or pfu per mL", x = "Time (hours)", title = "10^5", 
          linetype = "Organism:", colour = "Source:") +
-    theme_bw()
+    theme_bw() +
+    theme(axis.text.x = element_text(size=12),
+          axis.title.x = element_text(size=12),
+          axis.text.y = element_text(size=12),
+          axis.title.y = element_text(size=12),
+          legend.text = element_text(size=12),
+          legend.title = element_text(size=12),
+          strip.text.x = element_text(size=12)) +
+    scale_colour_manual(values=c("#685cc4","#6db356"))
   
   
   #replicate 3
@@ -278,27 +296,36 @@ for(i in 1:nrow(models_to_try)){
   traj = model$simulate(theta, init.state, times = seq(0, 30, 1))
   
   p3 = ggplot() +
-    geom_line(data = traj, aes(time, Be, colour = "Model", linetype = "Bacteria")) +
-    geom_line(data = traj, aes(time, Bt, colour = "Model", linetype = "Bacteria")) +
-    geom_line(data = traj, aes(time, Bet, colour = "Model", linetype = "Bacteria")) +
-    geom_line(data = traj, aes(time, Pl, colour = "Model", linetype = "Phage")) +
+    geom_line(data = traj, aes(time, Be, colour = "Model", linetype = "Bacteria"), size = 0.8) +
+    geom_line(data = traj, aes(time, Bt, colour = "Model", linetype = "Bacteria"), size = 0.8) +
+    geom_line(data = traj, aes(time, Bet, colour = "Model", linetype = "Bacteria"), size = 0.8) +
+    geom_line(data = traj, aes(time, Pl, colour = "Model", linetype = "Phage"), size = 0.8) +
     geom_line(data = lab_data_trans3M %>% filter(Bacteria != "P"),
-              aes(Time, Mean, group = Bacteria, colour = "Data", linetype = "Bacteria")) +
+              aes(Time, Mean, group = Bacteria, colour = "Data", linetype = "Bacteria"), size = 0.8) +
     geom_errorbar(data = lab_data_trans3M %>% filter(Bacteria != "P"), 
                   aes(x = Time, ymin = pmax(Mean - se, 0), ymax = Mean + se, group = Bacteria,
-                      colour= "Data", linetype = "Bacteria")) +
+                      colour= "Data", linetype = "Bacteria"), size = 0.7) +
     geom_line(data = lab_data_trans3M %>% filter(Bacteria == "P"), 
-              aes(Time, Mean, group = Bacteria, colour = "Data", linetype = "Phage")) +
+              aes(Time, Mean, group = Bacteria, colour = "Data", linetype = "Phage"), size = 0.8) +
     geom_errorbar(data = lab_data_trans3M %>% filter(Bacteria == "P"), 
                   aes(x = Time, ymin = pmax(Mean - se, 0), ymax = Mean + se, group = Bacteria,
-                      colour= "Data", linetype = "Phage")) +
+                      colour= "Data", linetype = "Phage"), size = 0.7) +
     scale_y_continuous(trans=log10_trans(),
                        breaks=trans_breaks("log10", function(x) 10^x),
                        labels=trans_format("log10", math_format(10^.x)),
                        limits = c(0.1, 3e10)) +
-    labs(y = "cfu / pfu per mL", x = "Time (hours)", title = "10^3", 
+    scale_x_continuous(breaks = seq(0,30,5)) +
+    labs(y = "cfu or pfu per mL", x = "Time (hours)", title = "10^3", 
          linetype = "Organism:", colour = "Source:") +
-    theme_bw()
+    theme_bw() +
+    theme(axis.text.x = element_text(size=12),
+          axis.title.x = element_text(size=12),
+          axis.text.y = element_text(size=12),
+          axis.title.y = element_text(size=12),
+          legend.text = element_text(size=12),
+          legend.title = element_text(size=12),
+          strip.text.x = element_text(size=12)) +
+    scale_colour_manual(values=c("#685cc4","#6db356"))
   
   
   #final plot

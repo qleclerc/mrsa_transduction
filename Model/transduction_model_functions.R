@@ -63,7 +63,7 @@ choose_model = function(model,
           beta_past = beta * link_past
         } else beta_past = beta
         
-
+        
         if(link_L) L = L * link + 1
         
         if(link_delay) tau = tau * (N/Nmax)
@@ -105,7 +105,7 @@ choose_model = function(model,
           phi_Pe * Bt/N + phi_Pt * Be/N
         
         dPl = phi_Pl_past * L * (1 - alpha*(Be_past+Bt_past+2*Bet_past)/N_past) -
-              lambda * Pl - gamma * Pl
+          lambda * Pl - gamma * Pl
         dPe = phi_Pl_past * L * alpha * (Be_past + Bet_past)/N_past - lambda * Pe - gamma * Pe
         dPt = phi_Pl_past * L * alpha * (Bt_past + Bet_past)/N_past - lambda * Pt - gamma * Pt
         
@@ -114,9 +114,9 @@ choose_model = function(model,
       }
       
       trajectory <- data.frame(dede(y = init.state,
-                                   times = times,
-                                   func = model_dde,
-                                   parms = theta))
+                                    times = times,
+                                    func = model_dde,
+                                    parms = theta))
       
       return(trajectory)
       
@@ -139,7 +139,7 @@ choose_model = function(model,
         L = parameters[["L"]]
         gamma = ifelse(decay, 1/parameters[["gamma"]], 0)
         alpha = ifelse(transduction, 1/parameters[["alpha"]], 0)
-
+        
         ## states
         Be = state[["Be"]]
         Bt = state[["Bt"]]
@@ -234,8 +234,8 @@ run_mcmc = function(model, lab_data,
                     adapt.size.cooling = adapt.size.cooling,
                     adapt.shape.start = adapt.shape.start,
                     verbose = verbose,
-                    limits = list(lower = c(beta = 1, L = 1, gamma = 1, alpha = 1, tau = 0.01),
-                                  upper = c(beta = 1e20, L = 500, gamma = 1e10, alpha = 1e10, tau = 0.8)))
+                    limits = list(lower = c(beta = 1, L = 1, gamma = 1, alpha = 1, tau = 0.02),
+                                  upper = c(beta = 1e20, L = 500, gamma = 1e10, alpha = 1e10, tau = 1)))
   
   mcmc_fit
   
@@ -292,7 +292,9 @@ multi_run = function(model, theta_trace, init.state, times = seq(0, 24, 1), nrun
   
 }
 
-multi_run2 = function(model, theta, init.state, times = seq(0, 24, 1), nruns = 5000){
+multi_run2 = function(model, theta_trace, init.state, times = seq(0, 24, 1), nruns = 5000){
+  
+  #theta = theta_trace[which.max(theta_trace[,"log.density"]),]
   
   summary_runs = list()
   index = 1
@@ -305,9 +307,17 @@ multi_run2 = function(model, theta, init.state, times = seq(0, 24, 1), nruns = 5
   
   for(i in 1:nruns){
     
+    #theta = apply(theta_trace, 2, FUN = function(x) sample(x, 1))
+    theta = theta_trace[sample(1:nrow(theta_trace), 1),]
+    
     traj = model$simulate(theta, init.state, times)
     
-    traj[,-1] = apply(traj[,-1], c(1,2), function(x) rpois(1,x))
+    traj[,-1] = apply(traj[,-1], c(1,2),
+                      function(x){
+                        dec = max(nchar(as.character(round(x))),2)
+                        val = rpois(1,x/(10^(dec-2)))
+                        val*(10^(dec-2))
+                      })
     
     for (name in names(init.state)) {
       summary_runs[[name]][,i] = traj[,name]
@@ -337,3 +347,4 @@ multi_run2 = function(model, theta, init.state, times = seq(0, 24, 1), nruns = 5
   summary_results
   
 }
+
