@@ -212,7 +212,7 @@ run_mcmc = function(model, lab_data,
                     adapt.shape.start = 200000,
                     verbose = FALSE){
   
-  
+  lab_data = lab_data %>% filter(time < 18)
   
   target_function = function(theta){
     
