@@ -294,7 +294,7 @@ multi_run = function(model, theta_trace, init.state, times = seq(0, 24, 1), nrun
 
 multi_run2 = function(model, theta_trace, init.state, times = seq(0, 24, 1), nruns = 5000){
   
-  #theta = theta_trace[which.max(theta_trace[,"log.density"]),]
+  theta = theta_trace[which.max(theta_trace[,"log.density"]),]
   
   summary_runs = list()
   index = 1
@@ -308,7 +308,7 @@ multi_run2 = function(model, theta_trace, init.state, times = seq(0, 24, 1), nru
   for(i in 1:nruns){
     
     #theta = apply(theta_trace, 2, FUN = function(x) sample(x, 1))
-    theta = theta_trace[sample(1:nrow(theta_trace), 1),]
+    #theta = theta_trace[sample(1:nrow(theta_trace), 1),]
     
     traj = model$simulate(theta, init.state, times)
     
