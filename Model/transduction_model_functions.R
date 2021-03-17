@@ -212,8 +212,6 @@ run_mcmc = function(model, lab_data,
                     adapt.shape.start = 200000,
                     verbose = FALSE){
   
-  lab_data = lab_data %>% filter(time < 18)
-  
   target_function = function(theta){
     
     my_init.state <- c(Be = lab_data$Be[1], Bt = lab_data$Bt[1], Bet = 0,
