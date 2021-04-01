@@ -27,9 +27,13 @@ data_all = rbind(data, data3, data4, data5) %>%
   
 data_all$Type = as.factor(data_all$Type)
 data_all$Type = factor(data_all$Type, levels(data_all$Type)[c(4,1,2,3)])
+levels(data_all$Type) = c(expression(paste("No phage, with ", B[ET])),
+                          expression(paste(10^3, " phage, no ", B[ET])),
+                          expression(paste(10^4, " phage, no ", B[ET])),
+                          expression(paste(10^5, " phage, no ", B[ET])))
+
 data_all$Bacteria = as.factor(data_all$Bacteria)
 data_all$Bacteria = factor(data_all$Bacteria, levels(data_all$Bacteria)[c(1,3,2,4)])
-
 
 ggplot(data_all, aes(x=Time, y=Mean, colour=Bacteria))+
   geom_point(size = 1.5)+
@@ -43,8 +47,12 @@ ggplot(data_all, aes(x=Time, y=Mean, colour=Bacteria))+
                      labels=trans_format("log10", math_format(10^.x)))+
   labs(y = "cfu or pfu per mL", x = "Time (hours)", colour = "")+
   theme_bw() +
-  facet_wrap(~Type) +
-  scale_colour_manual(values=c("#685cc4","#6db356","#c2484d","#c88a33")) +
+  facet_wrap(~Type, labeller = label_parsed) +
+  scale_colour_manual(values=c("#685cc4","#6db356","#c2484d","#c88a33"),
+                      labels = c(expression(B[E]),
+                                 expression(B[T]),
+                                 expression(B[ET]),
+                                 expression(P[L]))) +
   theme(axis.text.x = element_text(size=12),
         axis.title.x = element_text(size=12),
         axis.text.y = element_text(size=12),
@@ -54,3 +62,40 @@ ggplot(data_all, aes(x=Time, y=Mean, colour=Bacteria))+
 
 
 ggsave("all_lab_data_wrap.png")
+
+
+fitness = function(data, str1, str2){
+  
+  str1_0 = data %>%
+    filter(Time == 0 & Bacteria == str1) %>%
+    select(c("data1", "data2", "data3"))
+  
+  str1_24 = data %>%
+    filter(Time == 24 & Bacteria == str1) %>%
+    select(c("data1", "data2", "data3"))
+  
+  str2_0 = data %>%
+    filter(Time == 0 & Bacteria == str2) %>%
+    select(c("data1", "data2", "data3"))
+  
+  str2_24 = data %>%
+    filter(Time == 24 & Bacteria == str2) %>%
+    select(c("data1", "data2", "data3"))
+  
+  str1_w = log(str1_24/str1_0)
+  str2_w = log(str2_24/str2_0)
+  
+  tt = str1_w/str2_w
+  tt$Mean = rowMeans(tt)
+  tt$sd = sd(tt[1,1:3])
+  tt$sd_min = tt$Mean - tt$sd
+  tt$sd_max = tt$Mean + tt$sd
+  
+  tt
+  
+}
+
+fitness(data, "EryR", "TetR")
+fitness(data, "DRP", "EryR")
+fitness(data, "DRP", "TetR")
+
