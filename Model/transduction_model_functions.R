@@ -292,7 +292,7 @@ multi_run = function(model, theta_trace, init.state, times = seq(0, 24, 1), nrun
 
 multi_run2 = function(model, theta_trace, init.state, times = seq(0, 24, 1), nruns = 5000){
 
-  if(!is.null(nrow(theta_trace))) theta = theta_trace[which.max(theta_trace[,"log.density"]),]
+  if(!is.null(nrow(theta_trace))) theta = apply(theta_trace, 2, median)#theta_trace[which.max(theta_trace[,"log.density"]),]
   else theta = theta_trace
   
   summary_runs = list()
