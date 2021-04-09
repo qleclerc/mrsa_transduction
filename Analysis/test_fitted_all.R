@@ -131,25 +131,30 @@ for(i in 1:nrow(models_to_try)){
                        link_delay = models_to_try$link_delay[i],
                        transduction = models_to_try$transduction[i])
   
-  trace_model3 = fitted_params3[[models_to_try$model_name[i]]]
-  #trace_model3 = trace_model3[which.max(trace_model3[,"log.density"]),]
-  trace_model3 = coda::mcmc(trace_model3)
-  trace_model3 = burnAndThin(trace_model3, burn = 20000, thin = 10)
+  # trace_model3 = fitted_params3[[models_to_try$model_name[i]]]
+  # trace_model3 = trace_model3[which.max(trace_model3[,"log.density"]),]
+  # trace_model3 = coda::mcmc(trace_model3)
+  # trace_model3 = burnAndThin(trace_model3, burn = 20000, thin = 10)
   
   trace_model4 = fitted_params4[[models_to_try$model_name[i]]]
   #trace_model4 = trace_model4[which.max(trace_model4[,"log.density"]),]
   trace_model4 = coda::mcmc(trace_model4)
   trace_model4 = burnAndThin(trace_model4, burn = 20000, thin = 10)
+
+  # trace_model5 = fitted_params5[[models_to_try$model_name[i]]]
+  # trace_model5 = trace_model5[which.max(trace_model5[,"log.density"]),]
+  # trace_model5 = coda::mcmc(trace_model5)
+  # trace_model5 = burnAndThin(trace_model5, burn = 20000, thin = 10)
   
-  trace_model5 = fitted_params5[[models_to_try$model_name[i]]]
-  #trace_model5 = trace_model5[which.max(trace_model5[,"log.density"]),]
-  trace_model5 = coda::mcmc(trace_model5)
-  trace_model5 = burnAndThin(trace_model5, burn = 20000, thin = 10)
+  # best_params = rbind(best_params, 
+  #                     c(models_to_try$model_name[i], "10_3", trace_model3[which.max(trace_model3[,"log.density"]),]),
+  #                     c(models_to_try$model_name[i], "10_4", trace_model4[which.max(trace_model4[,"log.density"]),]),
+  #                     c(models_to_try$model_name[i], "10_5", trace_model5[which.max(trace_model5[,"log.density"]),]))
   
-  best_params = rbind(best_params, 
-                      c(models_to_try$model_name[i], "10_3", trace_model3[which.max(trace_model3[,"log.density"]),]),
-                      c(models_to_try$model_name[i], "10_4", trace_model4[which.max(trace_model4[,"log.density"]),]),
-                      c(models_to_try$model_name[i], "10_5", trace_model5[which.max(trace_model5[,"log.density"]),]))
+  best_params = rbind(best_params,
+                      cbind(rep(models_to_try$model_name[i], 3),
+                            c(0.025, 0.5, 0.975),
+                            apply(trace_model4, 2, function(x) quantile(x, probs = c(0.025, 0.5, 0.975)))))
   
   #plot(trace_model)
   #next
@@ -159,7 +164,7 @@ for(i in 1:nrow(models_to_try)){
                  Pl = lab_data_trans$P[1], Pe = 0, Pt = 0)
   
   traj = multi_run2(model, trace_model4, init.state,
-                    times = seq(0, 24, 1), nruns = 1000)
+                    times = seq(0, 24, 1), nruns = 100)
   
   p4 = ggplot() +
     geom_line(data = traj, aes(time, Be, colour = "Model", linetype = "Bacteria"), size = 0.8) +
@@ -219,7 +224,7 @@ for(i in 1:nrow(models_to_try)){
                  Pl = lab_data_trans5$P[1], Pe = 0, Pt = 0)
   
   traj = multi_run2(model, trace_model4, init.state,
-                    times = seq(0, 24, 1), nruns = 1000)
+                    times = seq(0, 24, 1), nruns = 100)
   
   p5 = ggplot() +
     geom_line(data = traj, aes(time, Be, colour = "Model", linetype = "Bacteria"), size = 0.8) +
@@ -277,7 +282,7 @@ for(i in 1:nrow(models_to_try)){
                  Pl = lab_data_trans3$P[1], Pe = 0, Pt = 0)
   
   traj = multi_run2(model, trace_model4, init.state,
-                    times = seq(0, 24, 1), nruns = 1000)
+                    times = seq(0, 24, 1), nruns = 100)
   
   p3 = ggplot() +
     geom_line(data = traj, aes(time, Be, colour = "Model", linetype = "Bacteria"), size = 0.8) +
@@ -343,8 +348,8 @@ for(i in 1:nrow(models_to_try)){
   
 }
 
-colnames(best_params) = c("model_name", "init_pha", colnames(trace_model4)[-6])
-best_params[,-c(1,2)] = apply(best_params[,-c(1,2)], c(1,2), as.numeric)
+colnames(best_params) = c("model_name", "value", colnames(trace_model4))
+best_params[,-1] = apply(best_params[,-1], c(1,2), as.numeric)
 best_params$beta = 1/best_params$beta
 best_params$gamma = 1/best_params$gamma
 best_params$alpha = 1/best_params$alpha
