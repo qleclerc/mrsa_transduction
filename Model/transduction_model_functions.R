@@ -13,11 +13,11 @@ choose_model = function(model,
       model_dde <- function(time, state, parameters) {
         
         ## parameters
-        mu_e = 1.678177 
-        mu_t = 1.605017 
-        mu_et = 1.562914
-        Nmax = 2.140317e+09 
-        #ll for this set is -4.026931e+08 
+        mu_e = 1.609412 
+        mu_t = 1.512903 
+        mu_et = 1.444933
+        Nmax = 2.762957e+09 
+        #median values from growth fitting
         
         beta = 1/parameters[["beta"]]
         L = parameters[["L"]]
@@ -210,16 +210,34 @@ run_mcmc = function(model, lab_data,
                     adapt.size.start = 200000,
                     adapt.size.cooling = 0.99,
                     adapt.shape.start = 200000,
-                    verbose = FALSE){
+                    verbose = FALSE,
+                    growth = FALSE){
   
-  target_function = function(theta){
+  if(growth){
+    target_function = function(theta){
+      
+      my_init.state <- c(Be = lab_data$Be[1], Bt = lab_data$Bt[1], Bet = lab_data$Bet[1])
+      
+      return(dLogPosterior(fitmodel = model, theta = theta, init.state = my_init.state, 
+                           data = lab_data, margLogLike = dTrajObs, log = TRUE))
+      
+    }
     
-    my_init.state <- c(Be = lab_data$Be[1], Bt = lab_data$Bt[1], Bet = 0,
-                       Pl = lab_data$P[1], Pt = 0, Pe = 0)
+    limits = NULL
     
-    return(dLogPosterior(fitmodel = model, theta = theta, init.state = my_init.state, 
-                         data = lab_data, margLogLike = dTrajObs, log = TRUE))
+  } else {
+    target_function = function(theta){
+      
+      my_init.state <- c(Be = lab_data$Be[1], Bt = lab_data$Bt[1], Bet = 0,
+                         Pl = lab_data$P[1], Pt = 0, Pe = 0)
+      
+      return(dLogPosterior(fitmodel = model, theta = theta, init.state = my_init.state, 
+                           data = lab_data, margLogLike = dTrajObs, log = TRUE))
+      
+    }
     
+    limits = list(lower = c(beta = 1, L = 1, gamma = 1, alpha = 1, tau = 0.02),
+                  upper = c(beta = 1e20, L = 500, gamma = 1e10, alpha = 1e10, tau = 1))
     
   }
   
@@ -232,8 +250,7 @@ run_mcmc = function(model, lab_data,
                     adapt.size.cooling = adapt.size.cooling,
                     adapt.shape.start = adapt.shape.start,
                     verbose = verbose,
-                    limits = list(lower = c(beta = 1, L = 1, gamma = 1, alpha = 1, tau = 0.02),
-                                  upper = c(beta = 1e20, L = 500, gamma = 1e10, alpha = 1e10, tau = 1)))
+                    limits = limits)
   
   mcmc_fit
   
@@ -256,8 +273,8 @@ multi_run = function(model, theta_trace, init.state, times = seq(0, 24, 1), nrun
   
   for(i in 1:nruns){
     
-    #theta = apply(theta_trace, 2, FUN = function(x) sample(x, 1))
-    theta = theta_trace[sample(1:nrow(theta_trace), 1),]
+    theta = apply(theta_trace, 2, FUN = function(x) sample(x, 1))
+    #theta = theta_trace[sample(1:nrow(theta_trace), 1),]
     
     traj = model$simulate(theta, init.state, times)
     
@@ -291,7 +308,7 @@ multi_run = function(model, theta_trace, init.state, times = seq(0, 24, 1), nrun
 }
 
 multi_run2 = function(model, theta_trace, init.state, times = seq(0, 24, 1), nruns = 5000){
-
+  
   if(!is.null(nrow(theta_trace))) theta = apply(theta_trace, 2, median)#theta_trace[which.max(theta_trace[,"log.density"]),]
   else theta = theta_trace
   

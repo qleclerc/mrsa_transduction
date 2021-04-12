@@ -171,6 +171,10 @@ for(i in 1:nrow(models_to_try)){
 
 }
 
+all_traj_4[all_traj_4<0.01] = 0.01
+all_traj_5[all_traj_5<0.01] = 0.01
+all_traj_3[all_traj_3<0.01] = 0.01
+
 all_traj_4$group = all_traj_4$model
 all_traj_4 = all_traj_4 %>% 
   mutate(model = replace(model, group %in% c("mass_decay_link_beta",
@@ -192,10 +196,12 @@ all_traj_3 = all_traj_3 %>%
                                              "frequentist_decay_link_both"), "other"))
 
 p4 = ggplot() +
-  geom_line(data = all_traj_4, aes(time, Pl, group = group, colour = model, linetype = "Model")) +
+  geom_line(data = all_traj_4, aes(time, Pl, group = group, colour = model,
+                                   linetype = "Model", size = model)) +
   geom_ribbon(data = all_traj_4, aes(x = time, ymin = pmax(Pl - 1.96*Pl_sd, 0), ymax = Pl + 1.96*Pl_sd,
                                      group= group, fill=model), alpha = 0.1) +
-  geom_line(data = all_traj_4, aes(time, Bet, group = group, colour = model,linetype = "Model")) +
+  geom_line(data = all_traj_4, aes(time, Bet, group = group, colour = model,
+                                   linetype = "Model", size = model)) +
   geom_ribbon(data = all_traj_4, aes(x = time, ymin = pmax(Bet - 1.96*Bet_sd, 0), ymax = Bet + 1.96*Bet_sd,
                                      group = group, fill = model), alpha = 0.1) +
   geom_line(data = lab_data_transM %>% filter(Bacteria == "P"), 
@@ -212,20 +218,25 @@ p4 = ggplot() +
                      breaks=trans_breaks("log10", function(x) 10^x),
                      labels=trans_format("log10", math_format(10^.x))) +
   scale_x_continuous(breaks = seq(0,24,4)) +
-  coord_cartesian(ylim = c(0.1, 1e11), xlim = c(-0.1, 24.1)) +
-  scale_linetype_manual(breaks = c("Model", "Data"),
-                        labels = c("Model", "Data"),
-                        values = c("dashed", "solid")) +
+  coord_cartesian(ylim = c(0.1, 1e11)) +
+  scale_linetype_manual(breaks = c("Data", "Model"),
+                        labels = c("Data", "Model"),
+                        values = c(1, 2)) +
   scale_colour_manual(breaks = c("PL", "BET"),
                       labels = c(bquote(P[L]), bquote(B[ET])),
-                      values = c("#c2484d", "grey", "grey", "grey", "#c88a33")) +
+                      values = c("#c2484d", "#29709e", "#5ad3ec", "grey", "#c88a33")) +
   scale_fill_manual(breaks = c("mass_decay_link_L", "frequentist_decay_link_L", "other"),
                     labels = c("Density, link burst size", "Frequency, link burst size", "Other"),
-                    values = c("red", "blue", "grey"),
-                    guide = guide_legend(override.aes = list(linetype = c(1,1,1)))) +
+                    values = c("#5ad3ec", "#29709e", "grey"),
+                    guide = guide_legend(override.aes = list(size = c(0.8,0.8,0.5),
+                                                             linetype = c(2,2,2)))) +
+  scale_size_manual(breaks = c("mass_decay_link_L", "frequentist_decay_link_L", "other"),
+                    labels = c("Density, link burst size", "Frequency, link burst size", "Other"),
+                    values = c(0.8,0.8,0.5)) +
   labs(x = "Time (hours)", y = "cfu or pfu per mL", linetype = "Source:",
-       colour = "Organism:", fill = "Model type:",
+       colour = "Organism:", fill = "Model type:", size = "Model type:",
        title = bquote(paste("B) ", 10^4, " phage"))) +
+  guides(linetype = guide_legend(order = 1)) +
   theme_bw() +
   theme(axis.text.x = element_text(size=12),
         axis.title.x = element_text(size=12),
@@ -238,10 +249,12 @@ p4 = ggplot() +
 
 
 p5 = ggplot() +
-  geom_line(data = all_traj_5, aes(time, Pl, group = group, colour = model, linetype = "Model")) +
+  geom_line(data = all_traj_5, aes(time, Pl, group = group, colour = model,
+                                   linetype = "Model", size = model)) +
   geom_ribbon(data = all_traj_5, aes(x = time, ymin = pmax(Pl - 1.96*Pl_sd, 0), ymax = Pl + 1.96*Pl_sd,
                                      group= group, fill=model), alpha = 0.1) +
-  geom_line(data = all_traj_5, aes(time, Bet, group = group, colour = model,linetype = "Model")) +
+  geom_line(data = all_traj_5, aes(time, Bet, group = group, colour = model,
+                                   linetype = "Model", size = model)) +
   geom_ribbon(data = all_traj_5, aes(x = time, ymin = pmax(Bet - 1.96*Bet_sd, 0), ymax = Bet + 1.96*Bet_sd,
                                      group = group, fill = model), alpha = 0.1) +
   geom_line(data = lab_data_trans5M %>% filter(Bacteria == "P"), 
@@ -258,20 +271,25 @@ p5 = ggplot() +
                      breaks=trans_breaks("log10", function(x) 10^x),
                      labels=trans_format("log10", math_format(10^.x))) +
   scale_x_continuous(breaks = seq(0,24,4)) +
-  coord_cartesian(ylim = c(0.1, 1e11), xlim = c(-0.1, 24.1)) +
-  scale_linetype_manual(breaks = c("Model", "Data"),
-                        labels = c("Model", "Data"),
-                        values = c("dashed", "solid")) +
+  coord_cartesian(ylim = c(0.1, 1e11)) +
+  scale_linetype_manual(breaks = c("Data", "Model"),
+                        labels = c("Data", "Model"),
+                        values = c(1, 2)) +
   scale_colour_manual(breaks = c("PL", "BET"),
                       labels = c(bquote(P[L]), bquote(B[ET])),
-                      values = c("#c2484d", "grey", "grey", "grey", "#c88a33")) +
+                      values = c("#c2484d", "#29709e", "#5ad3ec", "grey", "#c88a33")) +
   scale_fill_manual(breaks = c("mass_decay_link_L", "frequentist_decay_link_L", "other"),
                     labels = c("Density, link burst size", "Frequency, link burst size", "Other"),
-                    values = c("red", "blue", "grey"),
-                    guide = guide_legend(override.aes = list(linetype = c(1,1,1)))) +
+                    values = c("#5ad3ec", "#29709e", "grey"),
+                    guide = guide_legend(override.aes = list(size = c(0.8,0.8,0.5),
+                                                             linetype = c(2,2,2)))) +
+  scale_size_manual(breaks = c("mass_decay_link_L", "frequentist_decay_link_L", "other"),
+                    labels = c("Density, link burst size", "Frequency, link burst size", "Other"),
+                    values = c(0.8,0.8,0.5)) +
   labs(x = "Time (hours)", y = "cfu or pfu per mL", linetype = "Source:",
-       colour = "Organism:", fill = "Model type:",
+       colour = "Organism:", fill = "Model type:", size = "Model type:",
        title = bquote(paste("C) ", 10^5, " phage"))) +
+  guides(linetype = guide_legend(order = 1)) +
   theme_bw() +
   theme(axis.text.x = element_text(size=12),
         axis.title.x = element_text(size=12),
@@ -283,10 +301,12 @@ p5 = ggplot() +
 
 
 p3 = ggplot() +
-  geom_line(data = all_traj_3, aes(time, Pl, group = group, colour = model, linetype = "Model")) +
+  geom_line(data = all_traj_3, aes(time, Pl, group = group, colour = model,
+                                   linetype = "Model", size = model)) +
   geom_ribbon(data = all_traj_3, aes(x = time, ymin = pmax(Pl - 1.96*Pl_sd, 0), ymax = Pl + 1.96*Pl_sd,
                                      group= group, fill=model), alpha = 0.1) +
-  geom_line(data = all_traj_3, aes(time, Bet, group = group, colour = model,linetype = "Model")) +
+  geom_line(data = all_traj_3, aes(time, Bet, group = group, colour = model,
+                                   linetype = "Model", size = model)) +
   geom_ribbon(data = all_traj_3, aes(x = time, ymin = pmax(Bet - 1.96*Bet_sd, 0), ymax = Bet + 1.96*Bet_sd,
                                      group = group, fill = model), alpha = 0.1) +
   geom_line(data = lab_data_trans3M %>% filter(Bacteria == "P"), 
@@ -303,20 +323,25 @@ p3 = ggplot() +
                      breaks=trans_breaks("log10", function(x) 10^x),
                      labels=trans_format("log10", math_format(10^.x))) +
   scale_x_continuous(breaks = seq(0,24,4)) +
-  coord_cartesian(ylim = c(0.1, 1e11), xlim = c(-0.1, 24.1)) +
-  scale_linetype_manual(breaks = c("Model", "Data"),
-                        labels = c("Model", "Data"),
-                        values = c("dashed", "solid")) +
+  coord_cartesian(ylim = c(0.1, 1e11)) +
+  scale_linetype_manual(breaks = c("Data", "Model"),
+                        labels = c("Data", "Model"),
+                        values = c(1, 2)) +
   scale_colour_manual(breaks = c("PL", "BET"),
                       labels = c(bquote(P[L]), bquote(B[ET])),
-                      values = c("#c2484d", "grey", "grey", "grey", "#c88a33")) +
+                      values = c("#c2484d", "#29709e", "#5ad3ec", "grey", "#c88a33")) +
   scale_fill_manual(breaks = c("mass_decay_link_L", "frequentist_decay_link_L", "other"),
                     labels = c("Density, link burst size", "Frequency, link burst size", "Other"),
-                    values = c("red", "blue", "grey"),
-                    guide = guide_legend(override.aes = list(linetype = c(1,1,1)))) +
+                    values = c("#5ad3ec", "#29709e", "grey"),
+                    guide = guide_legend(override.aes = list(size = c(0.8,0.8,0.5),
+                                                             linetype = c(2,2,2)))) +
+  scale_size_manual(breaks = c("mass_decay_link_L", "frequentist_decay_link_L", "other"),
+                    labels = c("Density, link burst size", "Frequency, link burst size", "Other"),
+                    values = c(0.8,0.8,0.5)) +
   labs(x = "Time (hours)", y = "cfu or pfu per mL", linetype = "Source:",
-       colour = "Organism:", fill = "Model type:",
+       colour = "Organism:", fill = "Model type:", size = "Model type:",
        title = bquote(paste("A) ", 10^3, " phage"))) +
+  guides(linetype = guide_legend(order = 1)) +
   theme_bw() +
   theme(axis.text.x = element_text(size=12),
         axis.title.x = element_text(size=12),
