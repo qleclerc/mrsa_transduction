@@ -18,6 +18,10 @@ jobs:
   mcmc-run1:
     runs-on: macos-latest
     steps:
+      - name: Set up Homebrew
+        id: set-up-homebrew
+        uses: Homebrew/actions/setup-homebrew@master
+        
       - name: Checkout repos
         uses: actions/checkout@v2
         with:
@@ -51,7 +55,11 @@ jobs:
 
   mcmc-run2:
     runs-on: macos-latest
-    steps:
+    steps:    
+      - name: Set up Homebrew
+        id: set-up-homebrew
+        uses: Homebrew/actions/setup-homebrew@master
+        
       - name: Checkout repos
         uses: actions/checkout@v2
         with:
@@ -85,7 +93,11 @@ jobs:
           
   mcmc-run3:
     runs-on: macos-latest
-    steps:
+    steps:    
+      - name: Set up Homebrew
+        id: set-up-homebrew
+        uses: Homebrew/actions/setup-homebrew@master
+        
       - name: Checkout repos
         uses: actions/checkout@v2
         with:
