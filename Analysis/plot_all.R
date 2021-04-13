@@ -78,15 +78,15 @@ lab_data_trans3 = read.csv(here::here("Lab", "Transduction", "summary_10_3.csv")
 ## GO #####
 
 
-models_to_try = data.frame(model_name="mass_decay_link_L", frequentist=FALSE,
+models_to_try = data.frame(model_name="mass_decay_link_beta", frequentist=FALSE,
                            delay=TRUE, 
                            fixed_delay=NA, decay=TRUE,
-                           link_beta=FALSE, link_L=TRUE, link_delay=FALSE, transduction=TRUE)
+                           link_beta=TRUE, link_L=FALSE, link_delay=FALSE, transduction=TRUE)
 models_to_try = rbind(models_to_try,
-                      data.frame(model_name="mass_decay_link_beta", frequentist=FALSE,
+                      data.frame(model_name="mass_decay_link_L", frequentist=FALSE,
                                  delay=TRUE,
                                  fixed_delay=NA, decay=TRUE,
-                                 link_beta=TRUE, link_L=FALSE, link_delay=FALSE, transduction=TRUE))
+                                 link_beta=FALSE, link_L=TRUE, link_delay=FALSE, transduction=TRUE))
 models_to_try = rbind(models_to_try,
                       data.frame(model_name="mass_decay_link_both", frequentist=FALSE,
                                  delay=TRUE, 
@@ -98,15 +98,15 @@ models_to_try = rbind(models_to_try,
                                  fixed_delay=NA, decay=TRUE,
                                  link_beta=TRUE, link_L=FALSE, link_delay=FALSE, transduction=TRUE))
 models_to_try = rbind(models_to_try,
-                      data.frame(model_name="frequentist_decay_link_both", frequentist=TRUE,
-                                 delay=TRUE, 
-                                 fixed_delay=NA, decay=TRUE,
-                                 link_beta=TRUE, link_L=TRUE, link_delay=FALSE, transduction=TRUE))
-models_to_try = rbind(models_to_try,
                       data.frame(model_name="frequentist_decay_link_L", frequentist=TRUE,
                                  delay=TRUE, 
                                  fixed_delay=NA, decay=TRUE,
                                  link_beta=FALSE, link_L=TRUE, link_delay=FALSE, transduction=TRUE))
+models_to_try = rbind(models_to_try,
+                      data.frame(model_name="frequentist_decay_link_both", frequentist=TRUE,
+                                 delay=TRUE, 
+                                 fixed_delay=NA, decay=TRUE,
+                                 link_beta=TRUE, link_L=TRUE, link_delay=FALSE, transduction=TRUE))
 
 
 best_params = data.frame()

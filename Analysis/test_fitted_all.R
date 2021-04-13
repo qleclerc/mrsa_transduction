@@ -84,15 +84,15 @@ lab_data_trans3 = read.csv(here::here("Lab", "Transduction", "summary_10_3.csv")
 ## GO #####
 
 
-models_to_try = data.frame(model_name="mass_decay_link_L", frequentist=FALSE,
+models_to_try = data.frame(model_name="mass_decay_link_beta", frequentist=FALSE,
                            delay=TRUE, 
                            fixed_delay=NA, decay=TRUE,
-                           link_beta=FALSE, link_L=TRUE, link_delay=FALSE, transduction=TRUE)
+                           link_beta=TRUE, link_L=FALSE, link_delay=FALSE, transduction=TRUE)
 models_to_try = rbind(models_to_try,
-                      data.frame(model_name="mass_decay_link_beta", frequentist=FALSE,
+                      data.frame(model_name="mass_decay_link_L", frequentist=FALSE,
                                  delay=TRUE,
                                  fixed_delay=NA, decay=TRUE,
-                                 link_beta=TRUE, link_L=FALSE, link_delay=FALSE, transduction=TRUE))
+                                 link_beta=FALSE, link_L=TRUE, link_delay=FALSE, transduction=TRUE))
 models_to_try = rbind(models_to_try,
                       data.frame(model_name="mass_decay_link_both", frequentist=FALSE,
                                  delay=TRUE, 
@@ -104,15 +104,15 @@ models_to_try = rbind(models_to_try,
                                  fixed_delay=NA, decay=TRUE,
                                  link_beta=TRUE, link_L=FALSE, link_delay=FALSE, transduction=TRUE))
 models_to_try = rbind(models_to_try,
-                      data.frame(model_name="frequentist_decay_link_both", frequentist=TRUE,
-                                 delay=TRUE, 
-                                 fixed_delay=NA, decay=TRUE,
-                                 link_beta=TRUE, link_L=TRUE, link_delay=FALSE, transduction=TRUE))
-models_to_try = rbind(models_to_try,
                       data.frame(model_name="frequentist_decay_link_L", frequentist=TRUE,
                                  delay=TRUE, 
                                  fixed_delay=NA, decay=TRUE,
                                  link_beta=FALSE, link_L=TRUE, link_delay=FALSE, transduction=TRUE))
+models_to_try = rbind(models_to_try,
+                      data.frame(model_name="frequentist_decay_link_both", frequentist=TRUE,
+                                 delay=TRUE, 
+                                 fixed_delay=NA, decay=TRUE,
+                                 link_beta=TRUE, link_L=TRUE, link_delay=FALSE, transduction=TRUE))
 
 
 best_params = data.frame()
@@ -140,7 +140,7 @@ for(i in 1:nrow(models_to_try)){
   #trace_model4 = trace_model4[which.max(trace_model4[,"log.density"]),]
   trace_model4 = coda::mcmc(trace_model4)
   trace_model4 = burnAndThin(trace_model4, burn = 20000, thin = 10)
-
+  
   # trace_model5 = fitted_params5[[models_to_try$model_name[i]]]
   # trace_model5 = trace_model5[which.max(trace_model5[,"log.density"]),]
   # trace_model5 = coda::mcmc(trace_model5)
@@ -151,10 +151,15 @@ for(i in 1:nrow(models_to_try)){
   #                     c(models_to_try$model_name[i], "10_4", trace_model4[which.max(trace_model4[,"log.density"]),]),
   #                     c(models_to_try$model_name[i], "10_5", trace_model5[which.max(trace_model5[,"log.density"]),]))
   
+
+  quants = apply(trace_model4, 2, function(x) quantile(x, probs = c(0.025, 0.5, 0.975)))
+  quants_s = c(models_to_try$model_name[i])
+  for(j in 1:(ncol(quants)-1)){
+    quants_s = c(quants_s, quants[2,j], quants[1,j], quants[3,j])
+  }
+  
   best_params = rbind(best_params,
-                      cbind(rep(models_to_try$model_name[i], 3),
-                            c(0.025, 0.5, 0.975),
-                            apply(trace_model4, 2, function(x) quantile(x, probs = c(0.025, 0.5, 0.975)))))
+                      quants_s)
   
   #plot(trace_model)
   #next
@@ -348,10 +353,16 @@ for(i in 1:nrow(models_to_try)){
   
 }
 
-colnames(best_params) = c("model_name", "value", colnames(trace_model4))
+quants_names = c("model_name")
+for(j in 1:(ncol(quants)-1)){
+  quants_names = c(quants_names, colnames(quants)[j],
+                   paste0(colnames(quants)[j], "_0.025"),
+                   paste0(colnames(quants)[j], "_0.975"))
+}
+
+colnames(best_params) = quants_names
+
 best_params[,-1] = apply(best_params[,-1], c(1,2), as.numeric)
-best_params$beta = 1/best_params$beta
-best_params$gamma = 1/best_params$gamma
-best_params$alpha = 1/best_params$alpha
+best_params[,c(2,3,4,8:13)] = apply(best_params[,c(2,3,4,8:13)], c(1,2), function(x) 1/x)
 
 write.csv(best_params, here::here("Fitting", "best_params.csv"), row.names = F)

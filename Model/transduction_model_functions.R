@@ -257,6 +257,25 @@ run_mcmc = function(model, lab_data,
 }
 
 
+evaluate_fit = function(model, lab_data, theta){
+  
+  my_init.state <- c(Be = lab_data$Be[1], Bt = lab_data$Bt[1], Bet = 0,
+                     Pl = lab_data$P[1], Pt = 0, Pe = 0)
+  
+  trigger = round(nrow(theta)/10)
+  
+  for(i in 1:nrow(theta)){
+
+    if(i %% trigger == 0) cat((i/trigger*10), "% done\n")
+    
+    theta_test = theta[i,]
+    theta[i,"log.density"] = dLogPosterior(fitmodel = model, theta = theta_test, init.state = my_init.state, 
+                  data = lab_data, margLogLike = dTrajObs, log = TRUE)
+    
+  }
+  
+  theta
+}
 
 multi_run = function(model, theta_trace, init.state, times = seq(0, 24, 1), nruns = 5000){
   
