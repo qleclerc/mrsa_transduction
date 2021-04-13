@@ -76,7 +76,7 @@ lab_data_trans3 = read.csv(here::here("Lab", "Transduction", "summary_10_3.csv")
 
 models_to_try = data.frame(model_name="mass_decay_link_L", frequentist=FALSE,
                            delay=TRUE, 
-                           fixed_delay=0.67, decay=TRUE,
+                           fixed_delay=NA, decay=TRUE,
                            link_beta=FALSE, link_L=TRUE, link_delay=FALSE, transduction=TRUE)
 models_to_try = rbind(models_to_try,
                       data.frame(model_name="frequentist_decay_link_L", frequentist=TRUE,
