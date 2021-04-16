@@ -25,7 +25,7 @@ model_prior <- function(theta, log = TRUE) {
 }
 
 ## function to compute the likelihood of one data point
-model_pointLike <- function(data.point, model.point, theta, log = TRUE){
+model_pointLike <- function(data.point, model.point, theta, log = FALSE){
   
   # dpoisBe = dpois(x = data.point[["Be"]],
   #                 lambda = model.point[["Be"]],
@@ -45,8 +45,8 @@ model_pointLike <- function(data.point, model.point, theta, log = TRUE){
   if(is.infinite(dpoisBet)) dpoisBet = -1e7
   
   
-  dpoisPl = dpois(x = round(data.point[["P"]]/(10^(max(nchar(as.character(round(model.point[["Pl"]]))),2)-2))),
-                  lambda = model.point[["Pl"]]/(10^(max(nchar(as.character(round(model.point[["Pl"]]))),2)-2)),
+  dpoisPl = dpois(x = round(data.point[["P"]]/(10^(max(floor(log10(model.point[["Pl"]])),1)-1))),
+                  lambda = model.point[["Pl"]]/(10^(max(floor(log10(model.point[["Pl"]])),1)-1)),
                   log = log)
   #if(is.infinite(dpoisPl)) dpoisPl = -1e7
   

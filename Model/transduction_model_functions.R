@@ -13,10 +13,10 @@ choose_model = function(model,
       model_dde <- function(time, state, parameters) {
         
         ## parameters
-        mu_e = 1.609412 
-        mu_t = 1.512903 
-        mu_et = 1.444933
-        Nmax = 2.762957e+09 
+        mu_e = 1.609 
+        mu_t = 1.513 
+        mu_et = 1.445
+        Nmax = 2.763e+09 
         #median values from growth fitting
         
         beta = 1/parameters[["beta"]]
