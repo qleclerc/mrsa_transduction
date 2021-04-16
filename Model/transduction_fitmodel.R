@@ -48,7 +48,7 @@ model_pointLike <- function(data.point, model.point, theta, log = TRUE){
   dpoisPl = dpois(x = round(data.point[["P"]]/(10^(max(nchar(as.character(round(model.point[["Pl"]]))),2)-2))),
                   lambda = model.point[["Pl"]]/(10^(max(nchar(as.character(round(model.point[["Pl"]]))),2)-2)),
                   log = log)
-  if(is.infinite(dpoisPl)) dpoisPl = -1e7
+  #if(is.infinite(dpoisPl)) dpoisPl = -1e7
   
   ## the prevalence is observed through a Poisson process
   return(sum(dpoisBe, dpoisBt, dpoisBet, dpoisPl, dpoisPe, dpoisPt))
