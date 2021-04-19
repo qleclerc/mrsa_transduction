@@ -16,6 +16,9 @@ fitted_params3 = c(readRDS(here::here("Fitting", "10_3", "best_params_transducti
 fitted_params4 = c(readRDS(here::here("Fitting", "10_4", "best_params_transduction.rds")),
                    readRDS(here::here("Fitting", "10_4", "best_params_transduction2.rds")),
                    readRDS(here::here("Fitting", "10_4", "best_params_transduction3.rds")))
+fitted_params4b = c(readRDS(here::here("Fitting", "10_4", "best_params_transduction_b.rds")),
+                   readRDS(here::here("Fitting", "10_4", "best_params_transduction2_b.rds")),
+                   readRDS(here::here("Fitting", "10_4", "best_params_transduction3_b.rds")))
 fitted_params5 = c(readRDS(here::here("Fitting", "10_5", "best_params_transduction.rds")),
                    readRDS(here::here("Fitting", "10_5", "best_params_transduction2.rds")),
                    readRDS(here::here("Fitting", "10_5", "best_params_transduction3.rds")))
@@ -118,10 +121,12 @@ for(i in 1:nrow(models_to_try)){
   
   trace_model4 = fitted_params4[[models_to_try$model_name[i]]]
   trace_model4 = coda::mcmc(trace_model4)
-  #trace_model4 = mcmc.list(trace_model4, trace_model4)
+  trace_model4b = fitted_params4b[[models_to_try$model_name[i]]]
+  trace_model4b = coda::mcmc(trace_model4b)
+  trace_model4 = mcmc.list(trace_model4, trace_model4b)
   trace_model4 = burnAndThin(trace_model4, burn = 20000, thin = 10)
   plot(trace_model4)
-  #gelman.diag(trace_model4)
+  gelman.diag(trace_model4)
   
   trace_model5 = fitted_params5[[models_to_try$model_name[i]]]
   trace_model5 = coda::mcmc(trace_model5)
