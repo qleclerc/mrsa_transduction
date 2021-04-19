@@ -16,8 +16,10 @@ fitted_params = c(readRDS(here::here("Fitting", "10_4", "best_params_transductio
                   readRDS(here::here("Fitting", "10_4", "best_params_transduction3.rds")))
 
 
-data = read.xlsx(here::here("Lab", "Varying_MOI", "jake_data2.xlsx"))
-data = data[c(2:25),]
+data = read.xlsx(here::here("Lab", "Varying_MOI", "jake_data3.xlsx"))
+#data = read.xlsx(here::here("Lab", "Varying_MOI", "jake_data2.xlsx"))
+
+data = data[c(2:25),c(1:29)]
 data$se_bac = apply(data[,c(18,19,20)], 1, sd)
 
 drp = data[,c(26:29)] %>%
@@ -25,7 +27,7 @@ drp = data[,c(26:29)] %>%
   mutate(drp_se = apply(.[,c(1,2,3)], 1, sd))
 
 
-data = data[,c(7,8,11,21,29,31)]
+data = data[,c(7,8,11,21,29,30)]
 
 colnames(data) = c("init_bac", "init_pha", "plate", "bac_24h", "drp_24h", "bac_se")
 
@@ -53,8 +55,9 @@ data = cbind(data, data_se)
 data = as.data.frame(apply(data, c(1,2), as.numeric))[,-3]
 colnames(data)[c(3,4)] = c("Be", "Bt")
 
+data_pha = read.xlsx(here::here("Lab", "Varying_MOI", "jake_data3.xlsx"),sheet = 2)[c(2:9),]
+#data_pha = read.xlsx(here::here("Lab", "Varying_MOI", "jake_data2.xlsx"),sheet = 2)[c(2:9),]
 
-data_pha = read.xlsx(here::here("Lab", "Varying_MOI", "jake_data2.xlsx"),sheet = 2)[c(2:9),]
 data_pha$se_pha = apply(data_pha[,c(8,9,10)], 1, sd)
 
 data$Pl = rev(data_pha$`Mean.PFU/mL`)
@@ -145,7 +148,8 @@ all_results[all_results<0.01] = 0.01
 all_results[is.na(all_results)] = 0.01
 
 all_results$init_pha = as.factor(format(unique(all_results$init_pha), scientific = T, digits = 2))
-all_results$init_pha = factor(all_results$init_pha, levels(all_results$init_pha)[c(1,3,5,7,2,4,6,8)])
+#all_results$init_pha = factor(all_results$init_pha, levels(all_results$init_pha)[c(1,3,5,7,2,4,6,8)])
+all_results$init_pha = factor(all_results$init_pha, levels(all_results$init_pha)[c(6,1,3,5,7,2,4,8)])
 
 all_results_L = all_results %>%
   filter(model %in% c("frequentist_decay_link_L", "data", "mass_decay_link_L"))

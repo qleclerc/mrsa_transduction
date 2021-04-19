@@ -236,7 +236,7 @@ run_mcmc = function(model, lab_data,
       
     }
     
-    limits = list(lower = c(beta = 1, L = 1, gamma = 1, alpha = 1, tau = 0.02),
+    limits = list(lower = c(beta = 1, L = 1, gamma = 1, alpha = 1, tau = 0.167),
                   upper = c(beta = 1e20, L = 500, gamma = 1e10, alpha = 1e10, tau = 1))
     
   }
