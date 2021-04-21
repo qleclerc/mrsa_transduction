@@ -130,16 +130,16 @@ for(i in 1:nrow(models_to_try)){
   #                     adapt.size.cooling = 0.999)
   
   init.theta = c(beta = 1e10, L = 60, gamma = 300, alpha = 9e6, tau = 0.6)
-  mcmc_fit = run_mcmc(model, lab_data_trans4,
+  mcmc_fit = run_mcmc(model, lab_data_trans5,
                       init.theta = init.theta,
                       proposal.sd = c(init.theta[1]/50,
                                       init.theta[2]/50,
                                       init.theta[3]/50,
                                       init.theta[4]/50,
                                       init.theta[5]/50),
-                      n.iterations = 200000,
+                      n.iterations = 150000,
                       adapt.size.start = 1000,
-                      adapt.shape.start = 2000,
+                      adapt.shape.start = NULL,
                       adapt.size.cooling = 0.999)
   
   # init.theta = c(beta = 1e10, L = 60, gamma = 30000, alpha = 9e5, tau = 0.6)
@@ -337,12 +337,12 @@ for(i in 1:nrow(models_to_try)){
             legend)
   
   filename = paste0(models_to_try$model_name[i], ".png")
-  ggsave(here::here("Fitting", "10_4", "Best_fits", filename))
+  ggsave(here::here("Fitting", "10_5", "Best_fits", filename))
   
   all_theta[[i]] = mcmc_fit$trace
   names(all_theta)[i] = models_to_try$model_name[i]
   
 }
 
-saveRDS(all_theta, here::here("Fitting", "10_4", "best_params_transduction.rds"))
+saveRDS(all_theta, here::here("Fitting", "10_5", "best_params_transduction.rds"))
 
