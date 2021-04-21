@@ -16,6 +16,9 @@ model = readRDS(here::here("Model", "transduction_model.rds"))
 fitted_params4 = c(readRDS(here::here("Fitting", "10_4", "best_params_transduction.rds")),
                    readRDS(here::here("Fitting", "10_4", "best_params_transduction2.rds")),
                    readRDS(here::here("Fitting", "10_4", "best_params_transduction3.rds")))
+fitted_params4b = c(readRDS(here::here("Fitting", "10_4", "best_params_transduction_b.rds")),
+                   readRDS(here::here("Fitting", "10_4", "best_params_transduction2_b.rds")),
+                   readRDS(here::here("Fitting", "10_4", "best_params_transduction3_b.rds")))
 
 # lab_dataM = read.csv(here::here("Lab", "Triculture", "summary.csv")) %>%
 #   select(Time, Bacteria, Mean, se) %>%
@@ -133,6 +136,11 @@ for(i in 1:nrow(models_to_try)){
   #trace_model4 = trace_model4[which.max(trace_model4[,"log.density"]),]
   trace_model4 = coda::mcmc(trace_model4)
   trace_model4 = burnAndThin(trace_model4, burn = 20000, thin = 10)
+  trace_model4b = fitted_params4b[[models_to_try$model_name[i]]]
+  trace_model4b = coda::mcmc(trace_model4b)
+  trace_model4b = burnAndThin(trace_model4b, burn = 20000, thin = 10)
+  
+  trace_model4 = rbind(trace_model4,trace_model4b)
   
   #plot(trace_model)
   #next
