@@ -11,35 +11,25 @@ library(scales)
 
 source(here::here("Model", "transduction_model_functions.R"))
 
-# mass_model = readRDS(here::here("Fitting", "mass_model.rds"))
 model = readRDS(here::here("Model", "transduction_model.rds"))
 
-# lab_dataM = read.csv(here::here("Lab", "Triculture", "summary.csv")) %>%
-#   select(Time, Bacteria, Mean, se) %>%
-#   #mutate(se = se*sqrt(3)) %>%
-#   filter(Bacteria != "Total")
+fitted_params4 = c(readRDS(here::here("Fitting", "10_4", "best_params_transduction.rds")),
+                   readRDS(here::here("Fitting", "10_4", "best_params_transduction2.rds")),
+                   readRDS(here::here("Fitting", "10_4", "best_params_transduction3.rds")))
+fitted_params4b = c(readRDS(here::here("Fitting", "10_4", "best_params_transduction_b.rds")),
+                    readRDS(here::here("Fitting", "10_4", "best_params_transduction2_b.rds")),
+                    readRDS(here::here("Fitting", "10_4", "best_params_transduction3_b.rds")))
+
 lab_data_transM = read.csv(here::here("Lab", "Transduction", "summary_10_4.csv")) %>%
   select(Time, Bacteria, Mean, se) %>%
-  #mutate(se = se*sqrt(3)) %>%
   filter(Bacteria != "Total")
 lab_data_trans5M = read.csv(here::here("Lab", "Transduction", "summary_10_5.csv")) %>%
   select(Time, Bacteria, Mean, se)%>%
-  #mutate(se = se*sqrt(3)) %>%
   filter(Bacteria != "Total")
 lab_data_trans3M = read.csv(here::here("Lab", "Transduction", "summary_10_3.csv")) %>%
   select(Time, Bacteria, Mean, se) %>%
-  #mutate(se = se*sqrt(3)) %>%
   filter(Bacteria != "Total")
 
-
-# lab_data = read.csv(here::here("Lab", "Triculture", "summary.csv")) %>%
-#   select(Time, Bacteria, Mean) %>%
-#   dcast(Time~Bacteria) %>%
-#   select(-Total) %>%
-#   rename(time = Time, Bet = DRP, Be = EryR, Bt = TetR) %>%
-#   mutate(Be = round(Be),
-#          Bt = round(Bt),
-#          Bet = round(Bet))
 
 lab_data_trans4 = read.csv(here::here("Lab", "Transduction", "summary_10_4.csv")) %>%
   select(Time, Bacteria, Mean) %>%
@@ -74,21 +64,16 @@ lab_data_trans3 = read.csv(here::here("Lab", "Transduction", "summary_10_3.csv")
 
 # FIT PHAGE #####
 
-models_to_try = data.frame(model_name="mass_decay_link_L", frequentist=FALSE,
+models_to_try = data.frame(model_name="mass_decay_link_beta", frequentist=FALSE,
                            delay=TRUE, 
                            fixed_delay=NA, decay=TRUE,
-                           link_beta=FALSE, link_L=TRUE, link_delay=FALSE, transduction=TRUE)
+                           link_beta=TRUE, link_L=FALSE, link_delay=FALSE, transduction=TRUE)
 models_to_try = rbind(models_to_try,
-                      data.frame(model_name="frequentist_decay_link_L", frequentist=TRUE,
+                      data.frame(model_name="frequentist_decay_link_beta", frequentist=TRUE,
                                  delay=TRUE,
                                  fixed_delay=NA, decay=TRUE,
-                                 link_beta=FALSE, link_L=TRUE, link_delay=FALSE, transduction=TRUE))
+                                 link_beta=TRUE, link_L=FALSE, link_delay=FALSE, transduction=TRUE))
 
-# models_to_try = rbind(models_to_try,
-#                       data.frame(model_name="tr_dde_fit_mass_decay_link_L", frequentist=FALSE,
-#                                  delay=TRUE, 
-#                                  fixed_delay=NA, decay=TRUE,
-#                                  link_beta=FALSE, link_L=TRUE, link_delay=FALSE, transduction=TRUE))
 
 all_theta = vector("list", nrow(models_to_try))
 
@@ -106,86 +91,35 @@ for(i in 1:nrow(models_to_try)){
                        link_delay = models_to_try$link_delay[i],
                        transduction = models_to_try$transduction[i])
   
-  # model = choose_model(model,
-  #                      frequentist = T,
-  #                      second_beta = T,
-  #                      delay = T,
-  #                      fixed_delay = 0.5,
-  #                      decay = T,
-  #                      link_beta = T,
-  #                      link_L = T,
-  #                      link_delay = F,
-  #                      transduction = T)
-  # init.theta = c(beta = 1e10, L = 60, gamma = 30000, alpha = 9e5, tau = 0.6)
-  # mcmc_fit = run_mcmc(model, lab_data_trans3,
-  #                     init.theta = init.theta,
-  #                     proposal.sd = c(init.theta[1]/300,
-  #                                     init.theta[2]/30,
-  #                                     init.theta[3]/3000,
-  #                                     init.theta[4]/5,
-  #                                     init.theta[5]/100),
-  #                     n.iterations = 100000,
-  #                     adapt.size.start = NULL,
-  #                     adapt.shape.start = NULL,
-  #                     adapt.size.cooling = 0.999)
+  trace_model4 = fitted_params4[[models_to_try$model_name[i]]]
+  trace_model4 = coda::mcmc(trace_model4)
+  trace_model4 = burnAndThin(trace_model4, burn = 20000, thin = 10)
+  trace_model4b = fitted_params4b[[models_to_try$model_name[i]]]
+  trace_model4b = coda::mcmc(trace_model4b)
+  trace_model4b = burnAndThin(trace_model4b, burn = 20000, thin = 10)
   
-  init.theta = c(beta = 5e10, L = 20, gamma = 600, alpha = 1e6, tau = 0.2)
+  trace_model4 = rbind(trace_model4,trace_model4b)
+  
+  
+  init.theta = apply(trace_model4, 2, median)[-6]
   mcmc_fit = run_mcmc(model, lab_data_trans5,
                       init.theta = init.theta,
-                      proposal.sd = c(1e8,
-                                      0.6,
-                                      3,
-                                      9e4,
-                                      6e-3),
+                      proposal.sd = c(init.theta[1]/100,
+                                      init.theta[2]/100,
+                                      init.theta[3]/100,
+                                      init.theta[4]/100,
+                                      init.theta[5]/100),
                       n.iterations = 150000,
                       adapt.size.start = 1000,
                       adapt.shape.start = NULL,
                       adapt.size.cooling = 0.999)
   
-  # init.theta = c(beta = 1e10, L = 60, gamma = 30000, alpha = 9e5, tau = 0.6)
-  # mcmc_fit = run_mcmc(model, lab_data_trans5,
-  #                     init.theta = init.theta,
-  #                     proposal.sd = c(init.theta[1]/1000,
-  #                                     init.theta[2]/1000,
-  #                                     init.theta[3]/5000,
-  #                                     init.theta[4]/100,
-  #                                     init.theta[5]/500),
-  #                     n.iterations = 10000,
-  #                     adapt.size.start = NULL,
-  #                     adapt.shape.start = NULL,
-  #                     adapt.size.cooling = 0.999)
-  
-  
-  # mcmc_fit2 = run_mcmc(model, lab_data_trans5,
-  #                     init.theta = c(beta = 8e7, L = 100, gamma = 30000, alpha = 1e5, tau = 0.5),
-  #                     n.iterations = 10000,
-  #                     adapt.size.start = 500,
-  #                     adapt.shape.start = 1000)
-  
-  
-  # mcmc.trace = coda::mcmc(mcmc_fit$trace)
-  # mcmc.trace = burnAndThin(mcmc.trace, burn = 6000)#, thin = 10)
-  # plot(mcmc.trace)
-  # effectiveSize(mcmc.trace)
-  # plotESSBurn(mcmc.trace)
-  # autocorr.plot(mcmc.trace)
-  
-  # mcmc.trace2 = coda::mcmc(mcmc_fit2$trace)
-  # plot(mcmc.trace2)
-  # effectiveSize(mcmc.trace2)
-  # plotESSBurn(mcmc.trace2)
-  # autocorr.plot(mcmc.trace2)
-  # mcmc.trace2 = burnAndThin(mcmc.trace2, burn = 2000, thin = 10)
   
   
   #replicate 4
   init.state = c(Be = lab_data_trans4$Be[1], Bt = lab_data_trans4$Bt[1], Bet = 0,
                  Pl = lab_data_trans4$P[1], Pe = 0, Pt = 0)
   theta = mcmc_fit$trace[which.max(mcmc_fit$trace[,"log.density"]),]
-  
-  #theta = c(beta = 8e9, L = 20, gamma = 30000, alpha = 1e5)
-  # theta["alpha"] = 1e6
-  #theta["beta2"] = 1
   
   traj = model$simulate(theta, init.state, times = seq(0, 30, 1))
   
@@ -224,19 +158,6 @@ for(i in 1:nrow(models_to_try)){
   
   
   #replicate 5
-# 
-#   mcmc_fit = run_mcmc(model, lab_data_trans5,
-#                       init.theta = init.theta,
-#                       proposal.sd = c(init.theta[1]/5000,
-#                                       init.theta[2]/5000,
-#                                       init.theta[3]/5000,
-#                                       init.theta[4]/5000,
-#                                       init.theta[5]/5000,
-#                                       init.theta[6]/5000),
-#                       n.iterations = 100000,
-#                       adapt.size.start = 20000)
-#   trace = rbind(trace, mcmc_fit$trace[-c(1:20000),])
-  
   init.state = c(Be = lab_data_trans5$Be[1], Bt = lab_data_trans5$Bt[1], Bet = 0,
                  Pl = lab_data_trans5$P[1], Pe = 0, Pt = 0)
   theta = mcmc_fit$trace[which.max(mcmc_fit$trace[,"log.density"]),]
@@ -277,18 +198,6 @@ for(i in 1:nrow(models_to_try)){
   
   
   #replicate 3
-  # mcmc_fit = run_mcmc(model, lab_data_trans3,
-  #                     init.theta = init.theta,
-  #                     proposal.sd = c(init.theta[1]/5000,
-  #                                     init.theta[2]/5000,
-  #                                     init.theta[3]/5000,
-  #                                     init.theta[4]/5000,
-  #                                     init.theta[5]/5000,
-  #                                     init.theta[6]/5000),
-  #                     n.iterations = 100000,
-  #                     adapt.size.start = 20000)
-  # trace = rbind(trace, mcmc_fit$trace[-c(1:20000),])
-  
   init.state = c(Be = lab_data_trans3$Be[1], Bt = lab_data_trans3$Bt[1], Bet = 0,
                  Pl = lab_data_trans3$P[1], Pe = 0, Pt = 0)
   theta = mcmc_fit$trace[which.max(mcmc_fit$trace[,"log.density"]),]
@@ -336,7 +245,7 @@ for(i in 1:nrow(models_to_try)){
             p5 + theme(legend.position = "none"),
             legend)
   
-  filename = paste0(models_to_try$model_name[i], "_b.png")
+  filename = paste0(models_to_try$model_name[i], ".png")
   ggsave(here::here("Fitting", "10_5", "Best_fits", filename))
   
   all_theta[[i]] = mcmc_fit$trace
@@ -344,5 +253,5 @@ for(i in 1:nrow(models_to_try)){
   
 }
 
-saveRDS(all_theta, here::here("Fitting", "10_5", "best_params_transduction_b.rds"))
+saveRDS(all_theta, here::here("Fitting", "10_5", "best_params_transduction2.rds"))
 
