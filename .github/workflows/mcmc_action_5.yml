@@ -41,7 +41,7 @@ jobs:
  
       - name: Run MCMC first set
         run: |
-          source(here::here("Fitting", "mcmcMH_full_1.R"))
+          source(here::here("Fitting", "mcmcMH_105_1.R"))
         shell: Rscript {0}
 
       - name: Commit and push files
@@ -79,7 +79,7 @@ jobs:
  
       - name: Run MCMC second set
         run: |
-          source(here::here("Fitting", "mcmcMH_full_2.R"))
+          source(here::here("Fitting", "mcmcMH_105_2.R"))
         shell: Rscript {0}
 
       - name: Commit and push files
@@ -117,7 +117,7 @@ jobs:
  
       - name: Run MCMC third set
         run: |
-          source(here::here("Fitting", "mcmcMH_full_3.R"))
+          source(here::here("Fitting", "mcmcMH_105_3.R"))
         shell: Rscript {0}
 
       - name: Commit and push files
