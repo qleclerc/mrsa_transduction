@@ -75,9 +75,9 @@ lab_data_trans3 = read.csv(here::here("Lab", "Transduction", "summary_10_3.csv")
 # FIT PHAGE #####
 
 models_to_try = data.frame(model_name="mass_decay_link_both", frequentist=FALSE,
-                                 delay=TRUE, 
-                                 fixed_delay=NA, decay=TRUE,
-                                 link_beta=TRUE, link_L=TRUE, link_delay=FALSE, transduction=TRUE)
+                           delay=TRUE, 
+                           fixed_delay=NA, decay=TRUE,
+                           link_beta=TRUE, link_L=TRUE, link_delay=FALSE, transduction=TRUE)
 models_to_try = rbind(models_to_try,
                       data.frame(model_name="frequentist_decay_link_both", frequentist=TRUE,
                                  delay=TRUE, 
@@ -128,10 +128,10 @@ for(i in 1:nrow(models_to_try)){
   init.theta = c(beta = 5e10, L = 20, gamma = 600, alpha = 1e6, tau = 0.2)
   mcmc_fit = run_mcmc(model, lab_data_trans4,
                       init.theta = init.theta,
-                      proposal.sd = c(2e7,
+                      proposal.sd = c(1e8,
                                       0.6,
                                       3,
-                                      1.8e4,
+                                      9e4,
                                       6e-3),
                       n.iterations = 150000,
                       adapt.size.start = 1000,
