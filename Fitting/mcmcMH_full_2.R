@@ -140,7 +140,7 @@ for(i in 1:nrow(models_to_try)){
                                       init.theta[5]/100),
                       n.iterations = 150000,
                       adapt.size.start = 1000,
-                      adapt.shape.start = 4000,
+                      adapt.shape.start = NULL,
                       adapt.size.cooling = 0.999)
   
   # init.theta = c(beta = 1e10, L = 60, gamma = 30000, alpha = 9e5, tau = 0.6)
