@@ -131,7 +131,7 @@ for(i in 1:nrow(models_to_try)){
                       proposal.sd = c(init.theta[1]/20,
                                       init.theta[2]/20,
                                       init.theta[3]/10,
-                                      init.theta[4]/10,
+                                      init.theta[4]/20,
                                       init.theta[5]/20),
                       n.iterations = 150000,
                       adapt.size.start = 1000,
