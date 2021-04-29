@@ -133,8 +133,8 @@ for(i in 1:nrow(models_to_try)){
   init.theta = c(beta = 1e10, L = 60, gamma = 300, alpha = 9e6, tau = 0.6)
   mcmc_fit = run_mcmc(model, lab_data_trans4,
                       init.theta = init.theta,
-                      proposal.sd = c(init.theta[1]/20,
-                                      init.theta[2]/20,
+                      proposal.sd = c(init.theta[1]/10,
+                                      init.theta[2]/10,
                                       init.theta[3]/10,
                                       init.theta[4]/10,
                                       init.theta[5]/10),
