@@ -136,9 +136,9 @@ for(i in 1:nrow(models_to_try)){
                       proposal.sd = c(1e9,
                                       6,
                                       30,
-                                      9e5,
-                                      6e-2),
-                      n.iterations = 150000,
+                                      4.5e5,
+                                      3e-2),
+                      n.iterations = 200000,
                       adapt.size.start = 1000,
                       adapt.shape.start = NULL,
                       adapt.size.cooling = 0.999)
