@@ -19,6 +19,9 @@ fitted_params4 = c(readRDS(here::here("Fitting", "10_4", "best_params_transducti
 fitted_params4b = c(readRDS(here::here("Fitting", "10_4", "best_params_transduction_b.rds")),
                    readRDS(here::here("Fitting", "10_4", "best_params_transduction2_b.rds")),
                    readRDS(here::here("Fitting", "10_4", "best_params_transduction3_b.rds")))
+fitted_params5 = c(readRDS(here::here("Fitting", "10_5", "best_params_transduction.rds")),
+                   readRDS(here::here("Fitting", "10_5", "best_params_transduction2.rds")),
+                   readRDS(here::here("Fitting", "10_5", "best_params_transduction3.rds")))
 
 # lab_dataM = read.csv(here::here("Lab", "Triculture", "summary.csv")) %>%
 #   select(Time, Bacteria, Mean, se) %>%
@@ -133,17 +136,30 @@ for(i in 1:nrow(models_to_try)){
                        transduction = models_to_try$transduction[i])
   
   trace_model4 = fitted_params4[[models_to_try$model_name[i]]]
-  #trace_model4 = trace_model4[which.max(trace_model4[,"log.density"]),]
   trace_model4 = coda::mcmc(trace_model4)
   trace_model4 = burnAndThin(trace_model4, burn = 20000, thin = 10)
   trace_model4b = fitted_params4b[[models_to_try$model_name[i]]]
   trace_model4b = coda::mcmc(trace_model4b)
   trace_model4b = burnAndThin(trace_model4b, burn = 20000, thin = 10)
   
-  trace_model4 = rbind(trace_model4,trace_model4b)
+  trace_model5 = fitted_params5[[models_to_try$model_name[i]]]
+  trace_model5 = coda::mcmc(trace_model5)
+  trace_model5 = burnAndThin(trace_model5, burn = 20000, thin = 10)
+  
+  trace_model4 = rbind(trace_model4,trace_model4b,trace_model5)
   
   #plot(trace_model)
   #next
+  
+  quants = apply(trace_model4, 2, function(x) quantile(x, probs = c(0.025, 0.5, 0.975)))
+  quants_s = c(models_to_try$model_name[i])
+  for(j in 1:(ncol(quants)-1)){
+    quants_s = c(quants_s, quants[2,j], quants[1,j], quants[3,j])
+  }
+  
+  best_params = rbind(best_params,
+                      quants_s)
+  
   
   #replicate 4
   init.state = c(Be = lab_data_trans$Be[1], Bt = lab_data_trans$Bt[1], Bet = 0,
@@ -178,6 +194,23 @@ for(i in 1:nrow(models_to_try)){
   
 
 }
+
+quants_names = c("model_name")
+for(j in 1:(ncol(quants)-1)){
+  quants_names = c(quants_names, colnames(quants)[j],
+                   paste0(colnames(quants)[j], "_0.025"),
+                   paste0(colnames(quants)[j], "_0.975"))
+}
+
+colnames(best_params) = quants_names
+
+best_params[,-1] = apply(best_params[,-1], c(1,2), as.numeric)
+best_params[,c(2,3,4,8:13)] = apply(best_params[,c(2,3,4,8:13)], c(1,2), function(x) 1/x)
+
+write.csv(best_params, here::here("Fitting", "best_params5.csv"), row.names = F)
+
+
+
 
 all_traj_4[all_traj_4<0.01] = 0.01
 all_traj_5[all_traj_5<0.01] = 0.01
@@ -368,4 +401,4 @@ plot_grid(p3 + theme(legend.position = "none"),
           p5 + theme(legend.position = "none"),
           legend)
 
-ggsave("plot_compare_all.png")
+ggsave("plot_compare_all5.png")
