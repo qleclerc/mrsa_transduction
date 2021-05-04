@@ -146,7 +146,7 @@ for(i in 1:nrow(models_to_try)){
   trace_model5 = coda::mcmc(trace_model5)
   trace_model5 = burnAndThin(trace_model5, burn = 20000, thin = 10)
   
-  trace_model4 = rbind(trace_model4,trace_model4b,trace_model5)
+  trace_model4 = rbind(trace_model4,trace_model4b)
   
   #plot(trace_model)
   #next
@@ -207,7 +207,7 @@ colnames(best_params) = quants_names
 best_params[,-1] = apply(best_params[,-1], c(1,2), as.numeric)
 best_params[,c(2,3,4,8:13)] = apply(best_params[,c(2,3,4,8:13)], c(1,2), function(x) 1/x)
 
-write.csv(best_params, here::here("Fitting", "best_params5.csv"), row.names = F)
+write.csv(best_params, here::here("Fitting", "best_params4.csv"), row.names = F)
 
 
 
@@ -401,4 +401,4 @@ plot_grid(p3 + theme(legend.position = "none"),
           p5 + theme(legend.position = "none"),
           legend)
 
-ggsave("plot_compare_all5.png")
+ggsave("plot_compare_all4.png")

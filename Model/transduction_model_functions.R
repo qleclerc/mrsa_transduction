@@ -203,7 +203,7 @@ choose_model = function(model,
 }
 
 
-run_mcmc = function(model, lab_data,
+run_mcmc = function(model, lab_data, lab_data2 = NULL,
                     init.theta = c(beta = 1e10, L = 80, gamma = 30000, alpha = 1e6, tau = 0.3),
                     proposal.sd = init.theta/50000,
                     n.iterations = 10000,
@@ -231,12 +231,21 @@ run_mcmc = function(model, lab_data,
       my_init.state <- c(Be = lab_data$Be[1], Bt = lab_data$Bt[1], Bet = 0,
                          Pl = lab_data$P[1], Pt = 0, Pe = 0)
       
-      return(dLogPosterior(fitmodel = model, theta = theta, init.state = my_init.state, 
-                           data = lab_data, margLogLike = dTrajObs, log = TRUE))
+      logval = dLogPosterior(fitmodel = model, theta = theta, init.state = my_init.state, 
+                             data = lab_data, margLogLike = dTrajObs, log = TRUE)
+      
+      if(!is.null(lab_data2)){
+        my_init.state <- c(Be = lab_data2$Be[1], Bt = lab_data2$Bt[1], Bet = 0,
+                           Pl = lab_data2$P[1], Pt = 0, Pe = 0)
+        logval = logval + dLogPosterior(fitmodel = model, theta = theta, init.state = my_init.state, 
+                                        data = lab_data2, margLogLike = dTrajObs, log = TRUE)
+      }
+      
+      return(logval)
       
     }
     
-    limits = list(lower = c(beta = 1, L = 1, gamma = 1, alpha = 1, tau = 0.167),
+    limits = list(lower = c(beta = 1, L = 2, gamma = 1, alpha = 1, tau = 0.167),
                   upper = c(beta = 1e20, L = 500, gamma = 1e10, alpha = 1e10, tau = 1))
     
   }
@@ -265,12 +274,12 @@ evaluate_fit = function(model, lab_data, theta){
   trigger = round(nrow(theta)/10)
   
   for(i in 1:nrow(theta)){
-
+    
     if(i %% trigger == 0) cat((i/trigger*10), "% done\n")
     
     theta_test = theta[i,]
     theta[i,"log.density"] = dLogPosterior(fitmodel = model, theta = theta_test, init.state = my_init.state, 
-                  data = lab_data, margLogLike = dTrajObs, log = TRUE)
+                                           data = lab_data, margLogLike = dTrajObs, log = TRUE)
     
   }
   

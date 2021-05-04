@@ -10,18 +10,12 @@ source(here::here("Model", "transduction_model_functions.R"))
 # mass_model = readRDS(here::here("Fitting", "mass_model.rds"))
 model = readRDS(here::here("Model", "transduction_model.rds"))
 
-fitted_params3 = c(readRDS(here::here("Fitting", "10_3", "best_params_transduction.rds")),
-                   readRDS(here::here("Fitting", "10_3", "best_params_transduction2.rds")),
-                   readRDS(here::here("Fitting", "10_3", "best_params_transduction3.rds")))
 fitted_params4 = c(readRDS(here::here("Fitting", "10_4", "best_params_transduction.rds")),
                    readRDS(here::here("Fitting", "10_4", "best_params_transduction2.rds")),
                    readRDS(here::here("Fitting", "10_4", "best_params_transduction3.rds")))
 fitted_params4b = c(readRDS(here::here("Fitting", "10_4", "best_params_transduction_b.rds")),
                    readRDS(here::here("Fitting", "10_4", "best_params_transduction2_b.rds")),
                    readRDS(here::here("Fitting", "10_4", "best_params_transduction3_b.rds")))
-fitted_params5 = c(readRDS(here::here("Fitting", "10_5", "best_params_transduction.rds")),
-                   readRDS(here::here("Fitting", "10_5", "best_params_transduction2.rds")),
-                   readRDS(here::here("Fitting", "10_5", "best_params_transduction3.rds")))
 
 
 lab_data_trans = read.csv(here::here("Lab", "Transduction", "summary_10_4.csv")) %>%
@@ -33,26 +27,6 @@ lab_data_trans = read.csv(here::here("Lab", "Transduction", "summary_10_4.csv"))
          Bt = round(Bt),
          Bet = round(Bet),
          P = round(P)) 
-
-lab_data_trans5 = read.csv(here::here("Lab", "Transduction", "summary_10_5.csv")) %>%
-  select(Time, Bacteria, Mean) %>%
-  dcast(Time~Bacteria) %>%
-  select(-Total) %>%
-  rename(time = Time, Bet = DRP, Be = EryR, Bt = TetR) %>%
-  mutate(Be = round(Be),
-         Bt = round(Bt),
-         Bet = round(Bet),
-         P = round(P)) 
-
-lab_data_trans3 = read.csv(here::here("Lab", "Transduction", "summary_10_3.csv")) %>%
-  select(Time, Bacteria, Mean) %>%
-  dcast(Time~Bacteria) %>%
-  select(-Total) %>%
-  rename(time = Time, Bet = DRP, Be = EryR, Bt = TetR) %>%
-  mutate(Be = round(Be),
-         Bt = round(Bt),
-         Bet = round(Bet),
-         P = round(P))
 
 
 ## GO #####
@@ -114,24 +88,24 @@ for(i in 1:nrow(models_to_try)){
   
   models_to_try$model_name[i]
   
-  trace_model3 = fitted_params3[[models_to_try$model_name[i]]]
-  trace_model3 = coda::mcmc(trace_model3)
-  trace_model3 = burnAndThin(trace_model3, burn = 20000, thin = 10)
-  plot(trace_model3)
-  
   trace_model4 = fitted_params4[[models_to_try$model_name[i]]]
   trace_model4 = coda::mcmc(trace_model4)
   trace_model4b = fitted_params4b[[models_to_try$model_name[i]]]
   trace_model4b = coda::mcmc(trace_model4b)
   trace_model4 = mcmc.list(trace_model4, trace_model4b)
   trace_model4 = burnAndThin(trace_model4, burn = 20000, thin = 10)
-  plot(trace_model4)
-  gelman.diag(trace_model4)
+  # plot(trace_model4)
+  # gelman.diag(trace_model4)
   
-  trace_model5 = fitted_params5[[models_to_try$model_name[i]]]
-  trace_model5 = coda::mcmc(trace_model5)
-  trace_model5 = burnAndThin(trace_model5, burn = 20000, thin = 10)
-  plot(trace_model5)
+  trace_model4 = fitted_params4[[models_to_try$model_name[i]]]
+  trace_model4 = coda::mcmc(trace_model4)
+  trace_model4 = burnAndThin(trace_model4, burn = 20000, thin = 10)
+  
+  trace_model4b = fitted_params4b[[models_to_try$model_name[i]]]
+  trace_model4b = coda::mcmc(trace_model4b)
+  trace_model4b = burnAndThin(trace_model4b, burn = 20000, thin = 10)
+  
+  trace_model4 = rbind(trace_model4, trace_model4b)
   
   model = choose_model(model,
                        frequentist = models_to_try$frequentist[i],
@@ -143,14 +117,10 @@ for(i in 1:nrow(models_to_try)){
                        link_delay = models_to_try$link_delay[i],
                        transduction = models_to_try$transduction[i])
   
-  dic3 = DIC(trace_model3, model, lab_data_trans3)
   dic4 = DIC(trace_model4, model, lab_data_trans)
-  dic5 = DIC(trace_model5, model, lab_data_trans5)
-  
+
   summary_dic = rbind(summary_dic, 
-                      c(models_to_try$model_name[i], "10_3", dic3),
-                      c(models_to_try$model_name[i], "10_4", dic4),
-                      c(models_to_try$model_name[i], "10_5", dic5))
+                      c(models_to_try$model_name[i], "10_4", dic4))
   
 }
 

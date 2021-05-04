@@ -114,7 +114,7 @@ for(i in 1:nrow(models_to_try)){
                        transduction = models_to_try$transduction[i])
   
   trace_model = fitted_params[[models_to_try$model_name[i]]]
-  params = trace_model[which.max(trace_model[,"log.density"]),]
+  params = apply(trace_model, 2, median)
   
   data_model = data
   
