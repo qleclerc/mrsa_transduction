@@ -14,6 +14,9 @@ model = readRDS(here::here("Model", "transduction_model.rds"))
 fitted_params = c(readRDS(here::here("Fitting", "10_4", "best_params_transduction.rds")),
                   readRDS(here::here("Fitting", "10_4", "best_params_transduction2.rds")),
                   readRDS(here::here("Fitting", "10_4", "best_params_transduction3.rds")))
+fitted_paramsb = c(readRDS(here::here("Fitting", "10_4", "best_params_transduction_b.rds")),
+                  readRDS(here::here("Fitting", "10_4", "best_params_transduction2_b.rds")),
+                  readRDS(here::here("Fitting", "10_4", "best_params_transduction3_b.rds")))
 
 
 data = read.xlsx(here::here("Lab", "Varying_MOI", "jake_data3.xlsx"))
@@ -114,6 +117,15 @@ for(i in 1:nrow(models_to_try)){
                        transduction = models_to_try$transduction[i])
   
   trace_model = fitted_params[[models_to_try$model_name[i]]]
+  trace_model = coda::mcmc(trace_model)
+  trace_model = burnAndThin(trace_model, burn = 20000, thin = 10)
+  
+  trace_modelb = fitted_paramsb[[models_to_try$model_name[i]]]
+  trace_modelb = coda::mcmc(trace_modelb)
+  trace_modelb = burnAndThin(trace_modelb, burn = 20000, thin = 10)
+  
+  trace_model = rbind(trace_model, trace_modelb)
+  
   params = apply(trace_model, 2, median)
   
   data_model = data

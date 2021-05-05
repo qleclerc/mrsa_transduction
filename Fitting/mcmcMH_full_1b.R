@@ -86,7 +86,7 @@ for(i in 1:nrow(models_to_try)){
 
 
   init.theta = c(beta = 9e9, L = 80, gamma = 400, alpha = 7e6, tau = 0.4)
-  mcmc_fit = run_mcmc(model, lab_data_trans4, lab_data_trans5,
+  mcmc_fit = run_mcmc(model, lab_data_trans3, lab_data_trans5,
                       init.theta = init.theta,
                       proposal.sd = c(init.theta[1]/50,
                                       init.theta[2]/50,
