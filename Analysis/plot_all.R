@@ -141,11 +141,7 @@ for(i in 1:nrow(models_to_try)){
   trace_model4b = fitted_params4b[[models_to_try$model_name[i]]]
   trace_model4b = coda::mcmc(trace_model4b)
   trace_model4b = burnAndThin(trace_model4b, burn = 20000, thin = 10)
-  
-  trace_model5 = fitted_params5[[models_to_try$model_name[i]]]
-  trace_model5 = coda::mcmc(trace_model5)
-  trace_model5 = burnAndThin(trace_model5, burn = 20000, thin = 10)
-  
+
   trace_model4 = rbind(trace_model4,trace_model4b)
   
   #plot(trace_model)

@@ -100,42 +100,18 @@ for(i in 1:nrow(models_to_try)){
                        link_L = models_to_try$link_L[i], 
                        link_delay = models_to_try$link_delay[i],
                        transduction = models_to_try$transduction[i])
-  
-  # model = choose_model(model,
-  #                      frequentist = T,
-  #                      second_beta = T,
-  #                      delay = T,
-  #                      fixed_delay = 0.5,
-  #                      decay = T,
-  #                      link_beta = T,
-  #                      link_L = T,
-  #                      link_delay = F,
-  #                      transduction = T)
-  
-  # init.theta = c(beta = 1e10, L = 60, gamma = 30000, alpha = 9e5, tau = 0.6)
-  # mcmc_fit = run_mcmc(model, lab_data_trans3,
-  #                     init.theta = init.theta,
-  #                     proposal.sd = c(init.theta[1]/100,
-  #                                     init.theta[2]/10,
-  #                                     init.theta[3]/1000,
-  #                                     init.theta[4]/10,
-  #                                     init.theta[5]/100),
-  #                     n.iterations = 100000,
-  #                     adapt.size.start = NULL,
-  #                     adapt.shape.start = NULL,
-  #                     adapt.size.cooling = 0.999)
-  
-  init.theta = c(beta = 1e10, L = 60, gamma = 300, alpha = 9e6, tau = 0.6)
+
+  init.theta = c(beta = 5e9, L = 60, gamma = 300, alpha = 1e6, tau = 0.6)
   mcmc_fit = run_mcmc(model, lab_data_trans3, lab_data_trans5,
                       init.theta = init.theta,
-                      proposal.sd = c(init.theta[1]/100,
+                      proposal.sd = c(init.theta[1]/1000,
                                       init.theta[2]/100,
                                       init.theta[3]/100,
-                                      init.theta[4]/100,
+                                      init.theta[4]/1000,
                                       init.theta[5]/100),
                       n.iterations = 125000,
                       adapt.size.start = 1000,
-                      adapt.shape.start = 4000,
+                      adapt.shape.start = NULL,
                       adapt.size.cooling = 0.999)
   
   # init.theta = c(beta = 1e10, L = 60, gamma = 30000, alpha = 9e5, tau = 0.6)

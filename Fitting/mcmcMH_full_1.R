@@ -85,17 +85,17 @@ for(i in 1:nrow(models_to_try)){
                        transduction = models_to_try$transduction[i])
 
 
-  init.theta = c(beta = 1e10, L = 60, gamma = 300, alpha = 9e6, tau = 0.6)
+  init.theta = c(beta = 5e9, L = 60, gamma = 300, alpha = 1e6, tau = 0.6)
   mcmc_fit = run_mcmc(model, lab_data_trans3, lab_data_trans5,
                       init.theta = init.theta,
-                      proposal.sd = c(init.theta[1]/100,
+                      proposal.sd = c(init.theta[1]/1000,
                                       init.theta[2]/100,
                                       init.theta[3]/100,
-                                      init.theta[4]/100,
+                                      init.theta[4]/1000,
                                       init.theta[5]/100),
                       n.iterations = 125000,
                       adapt.size.start = 1000,
-                      adapt.shape.start = 4000,
+                      adapt.shape.start = NULL,
                       adapt.size.cooling = 0.999)
 
 

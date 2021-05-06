@@ -358,9 +358,9 @@ multi_run2 = function(model, theta_trace, init.state, times = seq(0, 24, 1), nru
     
     traj[,-1] = apply(traj[,-1], c(1,2),
                       function(x){
-                        dec = max(nchar(as.character(round(x))),2)
-                        val = rpois(1,x/(10^(dec-2)))
-                        val*(10^(dec-2))
+                        dec = max(floor(log10(x)),1)
+                        val = rpois(1,x/(10^(dec-1)))
+                        val*(10^(dec-1))
                       })
     
     for (name in names(init.state)) {
