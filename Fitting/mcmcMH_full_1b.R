@@ -88,14 +88,14 @@ for(i in 1:nrow(models_to_try)){
   init.theta = c(beta = 9e9, L = 80, gamma = 400, alpha = 7e6, tau = 0.4)
   mcmc_fit = run_mcmc(model, lab_data_trans3, lab_data_trans5,
                       init.theta = init.theta,
-                      proposal.sd = c(init.theta[1]/50,
-                                      init.theta[2]/50,
-                                      init.theta[3]/50,
-                                      init.theta[4]/50,
-                                      init.theta[5]/50),
+                      proposal.sd = c(init.theta[1]/100,
+                                      init.theta[2]/100,
+                                      init.theta[3]/100,
+                                      init.theta[4]/100,
+                                      init.theta[5]/100),
                       n.iterations = 125000,
                       adapt.size.start = 1000,
-                      adapt.shape.start = NULL,
+                      adapt.shape.start = 4000,
                       adapt.size.cooling = 0.999)
 
   #replicate 4
