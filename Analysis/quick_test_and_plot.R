@@ -60,7 +60,7 @@ lab_data_trans3M = read.csv(here::here("Lab", "Transduction", "summary_10_3.csv"
   filter(Bacteria != "Total")
 
 model = choose_model(model,
-                     frequentist = F,
+                     frequentist = T,
                      delay = T,
                      fixed_delay = NA,
                      decay = T,
@@ -78,7 +78,7 @@ trace_model4b = burnAndThin(trace_model4b, burn = 20000, thin = 10)
 
 trace_model = rbind(trace_model4,trace_model4b)
 params = apply(trace_model, 2, median)
-params = c(beta = 9229252894.26 , L = 122.17 , gamma = 224.23 , alpha = 7412998.23 , tau = 0.65)
+params = c(beta = 7255825175.83, L = 118.29, gamma = 529.47, alpha = 10377933.86, tau = 0.72)
 
 
 # params[["beta"]] = 5.9e9

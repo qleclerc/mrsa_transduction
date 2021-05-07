@@ -127,6 +127,7 @@ for(i in 1:nrow(models_to_try)){
   trace_model = rbind(trace_model, trace_modelb)
   
   params = apply(trace_model, 2, median)
+  params = c(beta = 7255825175.83, L = 118.29, gamma = 529.47, alpha = 10377933.86, tau = 0.72)
   
   data_model = data
   
