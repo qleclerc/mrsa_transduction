@@ -11,6 +11,11 @@ library(scales)
 
 source(here::here("Model", "transduction_model_functions.R"))
 
+fitted_params4 = c(readRDS(here::here("Fitting", "10_4", "best_params_transduction_b.rds")),
+                   readRDS(here::here("Fitting", "10_4", "best_params_transduction2_b.rds")),
+                   readRDS(here::here("Fitting", "10_4", "best_params_transduction3_b.rds")))
+
+
 # mass_model = readRDS(here::here("Fitting", "mass_model.rds"))
 model = readRDS(here::here("Model", "transduction_model.rds"))
 
@@ -102,14 +107,17 @@ for(i in 1:nrow(models_to_try)){
                        transduction = models_to_try$transduction[i])
   
 
-  init.theta = c(beta = 4e9, L = 20, gamma = 500, alpha = 9e5, tau = 0.4)
+  trace_model4 = fitted_params4[[models_to_try$model_name[i]]]
+  init.theta = trace_model4[nrow(trace_model4),-6]
+  
+  #init.theta = c(beta = 4e9, L = 20, gamma = 500, alpha = 9e5, tau = 0.4)
   mcmc_fit = run_mcmc(model, lab_data_trans3, lab_data_trans5,
                       init.theta = init.theta,
-                      proposal.sd = c(init.theta[1]/200,
-                                      init.theta[2]/200,
-                                      init.theta[3]/200,
-                                      init.theta[4]/200,
-                                      init.theta[5]/200),
+                      proposal.sd = c(init.theta[1]/300,
+                                      init.theta[2]/300,
+                                      init.theta[3]/300,
+                                      init.theta[4]/300,
+                                      init.theta[5]/300),
                       n.iterations = 125000,
                       adapt.size.start = 1000,
                       adapt.shape.start = NULL,
@@ -249,7 +257,7 @@ for(i in 1:nrow(models_to_try)){
   filename = paste0(models_to_try$model_name[i], "_b.png")
   ggsave(here::here("Fitting", "10_4", "Best_fits", filename))
   
-  all_theta[[i]] = mcmc_fit$trace
+  all_theta[[i]] = rbind(trace_model4, mcmc_fit$trace)
   names(all_theta)[i] = models_to_try$model_name[i]
   
 }

@@ -11,6 +11,11 @@ library(scales)
 
 source(here::here("Model", "transduction_model_functions.R"))
 
+fitted_params4 = c(readRDS(here::here("Fitting", "10_4", "best_params_transduction.rds")),
+                   readRDS(here::here("Fitting", "10_4", "best_params_transduction2.rds")),
+                   readRDS(here::here("Fitting", "10_4", "best_params_transduction3.rds")))
+
+
 # mass_model = readRDS(here::here("Fitting", "mass_model.rds"))
 model = readRDS(here::here("Model", "transduction_model.rds"))
 
@@ -100,63 +105,27 @@ for(i in 1:nrow(models_to_try)){
                        link_delay = models_to_try$link_delay[i],
                        transduction = models_to_try$transduction[i])
   
-  init.theta = c(beta = 5e9, L = 60, gamma = 300, alpha = 1e6, tau = 0.6)
+  trace_model4 = fitted_params4[[models_to_try$model_name[i]]]
+  init.theta = trace_model4[nrow(trace_model4),-6]
+  
+  #init.theta = c(beta = 5e9, L = 60, gamma = 300, alpha = 1e6, tau = 0.6)
   mcmc_fit = run_mcmc(model, lab_data_trans3, lab_data_trans5,
                       init.theta = init.theta,
-                      proposal.sd = c(init.theta[1]/200,
-                                      init.theta[2]/200,
-                                      init.theta[3]/200,
-                                      init.theta[4]/200,
-                                      init.theta[5]/200),
+                      proposal.sd = c(init.theta[1]/300,
+                                      init.theta[2]/300,
+                                      init.theta[3]/300,
+                                      init.theta[4]/300,
+                                      init.theta[5]/300),
                       n.iterations = 125000,
                       adapt.size.start = 1000,
                       adapt.shape.start = NULL,
                       adapt.size.cooling = 0.999)
-  
-  # init.theta = c(beta = 1e10, L = 60, gamma = 30000, alpha = 9e5, tau = 0.6)
-  # mcmc_fit = run_mcmc(model, lab_data_trans5,
-  #                     init.theta = init.theta,
-  #                     proposal.sd = c(init.theta[1]/300,
-  #                                     init.theta[2]/30,
-  #                                     init.theta[3]/3000,
-  #                                     init.theta[4]/5,
-  #                                     init.theta[5]/100),
-  #                     n.iterations = 100000,
-  #                     adapt.size.start = NULL,
-  #                     adapt.shape.start = NULL,
-  #                     adapt.size.cooling = 0.999)
-  
-  # mcmc_fit2 = run_mcmc(model, lab_data_trans5,
-  #                     init.theta = c(beta = 8e7, L = 100, gamma = 30000, alpha = 1e5, tau = 0.5),
-  #                     n.iterations = 10000,
-  #                     adapt.size.start = 500,
-  #                     adapt.shape.start = 1000)
-  
-  
-  # mcmc.trace = coda::mcmc(mcmc_fit$trace)
-  # plot(mcmc.trace)
-  # effectiveSize(mcmc.trace)
-  # plotESSBurn(mcmc.trace)
-  # autocorr.plot(mcmc.trace)
-  # mcmc.trace = burnAndThin(mcmc.trace, burn = 2500, thin = 10)
-  
-  # mcmc.trace2 = coda::mcmc(mcmc_fit2$trace)
-  # plot(mcmc.trace2)
-  # effectiveSize(mcmc.trace2)
-  # plotESSBurn(mcmc.trace2)
-  # autocorr.plot(mcmc.trace2)
-  # mcmc.trace2 = burnAndThin(mcmc.trace2, burn = 2000, thin = 10)
-  
-  
+
   #replicate 4
   init.state = c(Be = lab_data_trans4$Be[1], Bt = lab_data_trans4$Bt[1], Bet = 0,
                  Pl = lab_data_trans4$P[1], Pe = 0, Pt = 0)
   theta = mcmc_fit$trace[which.max(mcmc_fit$trace[,"log.density"]),]
-  
-  #theta = c(beta = 8e9, L = 20, gamma = 30000, alpha = 1e5)
-  # theta["alpha"] = 1e6
-  #theta["beta2"] = 1
-  
+
   traj = model$simulate(theta, init.state, times = seq(0, 30, 1))
   
   p4 = ggplot() +
@@ -194,19 +163,6 @@ for(i in 1:nrow(models_to_try)){
   
   
   #replicate 5
-  # 
-  #   mcmc_fit = run_mcmc(model, lab_data_trans5,
-  #                       init.theta = init.theta,
-  #                       proposal.sd = c(init.theta[1]/5000,
-  #                                       init.theta[2]/5000,
-  #                                       init.theta[3]/5000,
-  #                                       init.theta[4]/5000,
-  #                                       init.theta[5]/5000,
-  #                                       init.theta[6]/5000),
-  #                       n.iterations = 100000,
-  #                       adapt.size.start = 20000)
-  #   trace = rbind(trace, mcmc_fit$trace[-c(1:20000),])
-  
   init.state = c(Be = lab_data_trans5$Be[1], Bt = lab_data_trans5$Bt[1], Bet = 0,
                  Pl = lab_data_trans5$P[1], Pe = 0, Pt = 0)
   theta = mcmc_fit$trace[which.max(mcmc_fit$trace[,"log.density"]),]
@@ -247,18 +203,6 @@ for(i in 1:nrow(models_to_try)){
   
   
   #replicate 3
-  # mcmc_fit = run_mcmc(model, lab_data_trans3,
-  #                     init.theta = init.theta,
-  #                     proposal.sd = c(init.theta[1]/5000,
-  #                                     init.theta[2]/5000,
-  #                                     init.theta[3]/5000,
-  #                                     init.theta[4]/5000,
-  #                                     init.theta[5]/5000,
-  #                                     init.theta[6]/5000),
-  #                     n.iterations = 100000,
-  #                     adapt.size.start = 20000)
-  # trace = rbind(trace, mcmc_fit$trace[-c(1:20000),])
-  
   init.state = c(Be = lab_data_trans3$Be[1], Bt = lab_data_trans3$Bt[1], Bet = 0,
                  Pl = lab_data_trans3$P[1], Pe = 0, Pt = 0)
   theta = mcmc_fit$trace[which.max(mcmc_fit$trace[,"log.density"]),]
@@ -309,7 +253,7 @@ for(i in 1:nrow(models_to_try)){
   filename = paste0(models_to_try$model_name[i], ".png")
   ggsave(here::here("Fitting", "10_4", "Best_fits", filename))
   
-  all_theta[[i]] = mcmc_fit$trace
+  all_theta[[i]] = rbind(trace_model4, mcmc_fit$trace)
   names(all_theta)[i] = models_to_try$model_name[i]
   
 }
