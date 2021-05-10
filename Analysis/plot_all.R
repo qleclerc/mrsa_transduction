@@ -19,36 +19,17 @@ fitted_params4 = c(readRDS(here::here("Fitting", "10_4", "best_params_transducti
 fitted_params4b = c(readRDS(here::here("Fitting", "10_4", "best_params_transduction_b.rds")),
                    readRDS(here::here("Fitting", "10_4", "best_params_transduction2_b.rds")),
                    readRDS(here::here("Fitting", "10_4", "best_params_transduction3_b.rds")))
-fitted_params5 = c(readRDS(here::here("Fitting", "10_5", "best_params_transduction.rds")),
-                   readRDS(here::here("Fitting", "10_5", "best_params_transduction2.rds")),
-                   readRDS(here::here("Fitting", "10_5", "best_params_transduction3.rds")))
 
-# lab_dataM = read.csv(here::here("Lab", "Triculture", "summary.csv")) %>%
-#   select(Time, Bacteria, Mean, se) %>%
-#   #mutate(se = se*sqrt(3)) %>%
-#   filter(Bacteria != "Total")
 lab_data_transM = read.csv(here::here("Lab", "Transduction", "summary_10_4.csv")) %>%
   select(Time, Bacteria, Mean, se) %>%
-  #mutate(se = se*sqrt(3)) %>%
   filter(Bacteria != "Total")
 lab_data_trans5M = read.csv(here::here("Lab", "Transduction", "summary_10_5.csv")) %>%
   select(Time, Bacteria, Mean, se)%>%
-  #mutate(se = se*sqrt(3)) %>%
   filter(Bacteria != "Total")
 lab_data_trans3M = read.csv(here::here("Lab", "Transduction", "summary_10_3.csv")) %>%
   select(Time, Bacteria, Mean, se) %>%
-  #mutate(se = se*sqrt(3)) %>%
   filter(Bacteria != "Total")
 
-
-# lab_data = read.csv(here::here("Lab", "Triculture", "summary.csv")) %>%
-#   select(Time, Bacteria, Mean) %>%
-#   dcast(Time~Bacteria) %>%
-#   select(-Total) %>%
-#   rename(time = Time, Bet = DRP, Be = EryR, Bt = TetR) %>%
-#   mutate(Be = round(Be),
-#          Bt = round(Bt),
-#          Bet = round(Bet))
 
 lab_data_trans = read.csv(here::here("Lab", "Transduction", "summary_10_4.csv")) %>%
   select(Time, Bacteria, Mean) %>%
