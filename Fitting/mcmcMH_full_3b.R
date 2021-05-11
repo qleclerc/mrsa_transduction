@@ -120,7 +120,7 @@ for(i in 1:nrow(models_to_try)){
                                       init.theta[5]/300),
                       n.iterations = 125000,
                       adapt.size.start = 1000,
-                      adapt.shape.start = NULL,
+                      adapt.shape.start = 3000,
                       adapt.size.cooling = 0.999)
   
 
