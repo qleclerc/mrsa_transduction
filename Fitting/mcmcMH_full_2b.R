@@ -112,6 +112,7 @@ for(i in 1:nrow(models_to_try)){
                        transduction = models_to_try$transduction[i])
   
   trace_model4 = fitted_params4[[models_to_try$model_name[i]]]
+  trace_model4 = trace_model4[c(1:(nrow(trace_model4)-125000)),]
   init.theta = trace_model4[nrow(trace_model4),-6]
 
   #init.theta = c(beta = 4e9, L = 20, gamma = 500, alpha = 9e5, tau = 0.4)
@@ -124,7 +125,7 @@ for(i in 1:nrow(models_to_try)){
                                       init.theta[5]/300),
                       n.iterations = 125000,
                       adapt.size.start = 1000,
-                      adapt.shape.start = 3000,
+                      adapt.shape.start = NULL,
                       adapt.size.cooling = 0.999)
 
   
