@@ -86,21 +86,21 @@ params = c(beta = 7255825175.83, L = 118.29, gamma = 529.47, alpha = 10377933.86
 
 #replicate 4
 init.state = c(Be = lab_data_trans$Be[1], Bt = lab_data_trans$Bt[1], Bet = 0,
-               Pl = lab_data_trans$P[1], Pe = 0, Pt = 0)
+               Pl = lab_data_trans$P[1], Pe = 0, Pt = 0, Pl_inst = lab_data_trans$P[1])
 
 traj4 = multi_run2(model, params, init.state,
                    times = seq(0, 24, 1), nruns = 100)
 
 #replicate 5
 init.state = c(Be = lab_data_trans5$Be[1], Bt = lab_data_trans5$Bt[1], Bet = 0,
-               Pl = lab_data_trans5$P[1], Pe = 0, Pt = 0)
+               Pl = lab_data_trans5$P[1], Pe = 0, Pt = 0, Pl_inst = lab_data_trans5$P[1])
 
 traj5 = multi_run2(model, params, init.state,
                    times = seq(0, 24, 1), nruns = 100)
 
 #replicate 3
 init.state = c(Be = lab_data_trans3$Be[1], Bt = lab_data_trans3$Bt[1], Bet = 0,
-               Pl = lab_data_trans3$P[1], Pe = 0, Pt = 0)
+               Pl = lab_data_trans3$P[1], Pe = 0, Pt = 0, Pl_inst = lab_data_trans3$P[1])
 
 traj3 = multi_run2(model, params, init.state,
                    times = seq(0, 24, 1), nruns = 100)
@@ -109,8 +109,10 @@ traj4[traj4<0.01] = 0.01
 traj5[traj5<0.01] = 0.01
 traj3[traj3<0.01] = 0.01
 
-
-p4 = ggplot() +
+ggplot() +
+  geom_line(data = traj4, aes(time, Pl_inst, linetype = "Model"), size = 0.8) +
+  geom_ribbon(data = traj4, aes(x = time, ymin = pmax(Pl_inst - 1.96*Pl_inst_sd, 0),
+                                ymax = Pl_inst + 1.96*Pl_inst_sd,), alpha = 0.1) +
   geom_line(data = traj4, aes(time, Pl, colour = "PL", linetype = "Model"), size = 0.8) +
   geom_ribbon(data = traj4, aes(x = time, ymin = pmax(Pl - 1.96*Pl_sd, 0), ymax = Pl + 1.96*Pl_sd,
                                 fill = "PL"), alpha = 0.1) +

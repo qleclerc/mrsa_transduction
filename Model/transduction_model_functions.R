@@ -32,6 +32,7 @@ choose_model = function(model,
         Pl = state[["Pl"]]
         Pe = state[["Pe"]]
         Pt = state[["Pt"]]
+        Pl_inst = state[["Pl_inst"]]
         
         N = Be + Bt + Bet
         
@@ -109,7 +110,11 @@ choose_model = function(model,
         dPe = phi_Pl_past * L * alpha * (Be_past + Bet_past)/N_past - lambda * Pe - gamma * Pe
         dPt = phi_Pl_past * L * alpha * (Bt_past + Bet_past)/N_past - lambda * Pt - gamma * Pt
         
-        return(list(c(dBe, dBt, dBet, dPl, dPe, dPt)))
+        dPl_inst = phi_Pl * L * (1 - alpha*(Be+Bt+2*Bet)/N) +
+          phi_Pl_past * L * (1 - alpha*(Be_past+Bt_past+2*Bet_past)/N_past) -
+          lambda * Pl - gamma * Pl
+          
+        return(list(c(dBe, dBt, dBet, dPl, dPe, dPt, dPl_inst)))
         
       }
       

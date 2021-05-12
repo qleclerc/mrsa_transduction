@@ -17,8 +17,8 @@ fitted_params4 = c(readRDS(here::here("Fitting", "10_4", "best_params_transducti
                    readRDS(here::here("Fitting", "10_4", "best_params_transduction2.rds")),
                    readRDS(here::here("Fitting", "10_4", "best_params_transduction3.rds")))
 fitted_params4b = c(readRDS(here::here("Fitting", "10_4", "best_params_transduction_b.rds")),
-                   readRDS(here::here("Fitting", "10_4", "best_params_transduction2_b.rds")),
-                   readRDS(here::here("Fitting", "10_4", "best_params_transduction3_b.rds")))
+                    readRDS(here::here("Fitting", "10_4", "best_params_transduction2_b.rds")),
+                    readRDS(here::here("Fitting", "10_4", "best_params_transduction3_b.rds")))
 
 lab_data_transM = read.csv(here::here("Lab", "Transduction", "summary_10_4.csv")) %>%
   select(Time, Bacteria, Mean, se) %>%
@@ -116,13 +116,22 @@ for(i in 1:nrow(models_to_try)){
                        link_delay = models_to_try$link_delay[i],
                        transduction = models_to_try$transduction[i])
   
-  trace_model4 = fitted_params4[[models_to_try$model_name[i]]]
-  trace_model4 = coda::mcmc(trace_model4)
-  trace_model4 = burnAndThin(trace_model4, burn = 100000, thin = 10)
-  trace_model4b = fitted_params4b[[models_to_try$model_name[i]]]
-  trace_model4b = coda::mcmc(trace_model4b)
-  trace_model4b = burnAndThin(trace_model4b, burn = 100000, thin = 10)
-
+  if(i %in% c(1,3,4,6)){
+    trace_model4 = fitted_params4[[models_to_try$model_name[i]]]
+    trace_model4 = coda::mcmc(trace_model4)
+    trace_model4 = burnAndThin(trace_model4, burn = 200000, thin = 20)
+    trace_model4b = fitted_params4b[[models_to_try$model_name[i]]]
+    trace_model4b = coda::mcmc(trace_model4b)
+    trace_model4b = burnAndThin(trace_model4b, burn = 200000, thin = 20)
+  } else {
+    trace_model4 = fitted_params4[[models_to_try$model_name[i]]]
+    trace_model4 = coda::mcmc(trace_model4)
+    trace_model4 = burnAndThin(trace_model4, burn = 20000, thin = 10)
+    trace_model4b = fitted_params4b[[models_to_try$model_name[i]]]
+    trace_model4b = coda::mcmc(trace_model4b)
+    trace_model4b = burnAndThin(trace_model4b, burn = 20000, thin = 10)
+    
+  }
   trace_model4 = rbind(trace_model4,trace_model4b)
   
   #plot(trace_model)
@@ -169,7 +178,7 @@ for(i in 1:nrow(models_to_try)){
   traj$model = models_to_try$model_name[i]
   all_traj_3 = rbind(all_traj_3, traj)
   
-
+  
 }
 
 quants_names = c("model_name")
@@ -199,7 +208,7 @@ all_traj_4 = all_traj_4 %>%
                                              "mass_decay_link_both",
                                              "frequentist_decay_link_beta",
                                              "frequentist_decay_link_both"), "other"))
-  
+
 all_traj_5$group = all_traj_5$model
 all_traj_5 = all_traj_5 %>% 
   mutate(model = replace(model, group %in% c("mass_decay_link_beta",
