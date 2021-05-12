@@ -185,13 +185,13 @@ levels(all_results_both$model) = c("Density model", "Data", "Frequency model")
 
 ggplot(all_results_L) + 
   geom_pointrange(aes(x = init_pha, y = Be, ymin = pmax(Be - Be_se, 0.01), ymax = Be + Be_se, colour = "Be"),
-                  position = position_jitter(height=0.1, width=0.1), alpha = 1, size = 0.5, linetype = "solid") +
+                  position = position_jitter(height=0, width=0.1), alpha = 1, size = 0.5, linetype = "solid") +
   geom_pointrange(aes(x = init_pha, y = Bt, ymin = pmax(Bt - Bt_se, 0.01), ymax = Bt + Bt_se, colour = "Bt"),
-                  position = position_jitter(height=0.1, width=0.1), alpha = 1, size = 0.5, linetype = "solid") +
+                  position = position_jitter(height=0, width=0.1), alpha = 1, size = 0.5, linetype = "solid") +
   geom_pointrange(aes(x = init_pha, y = Bet, ymin = pmax(Bet - Bet_se, 0.01), ymax = Bet + Bet_se, colour = "Bet"),
-                  position = position_jitter(height=0.1, width=0.1), alpha = 1, size = 0.5, linetype = "solid") +
+                  position = position_jitter(height=0, width=0.1), alpha = 1, size = 0.5, linetype = "solid") +
   geom_pointrange(aes(x = init_pha, y = Pl, ymin = pmax(Pl - Pl_se, 0.01), ymax = Pl + Pl_se, colour = "Pl"),
-                  position = position_jitter(height=0.1, width=0.1), alpha = 1, size = 0.5, linetype = "solid") +
+                  position = position_jitter(height=0, width=0.1), alpha = 1, size = 0.5, linetype = "solid") +
   geom_line(stat = "smooth", aes(as.numeric(init_pha), Be, colour = "Be"), alpha = 0.1, size = 5) +
   geom_line(stat = "smooth", aes(as.numeric(init_pha), Bt, colour = "Bt"), alpha = 0.1, size = 5) +
   geom_line(stat = "smooth", aes(as.numeric(init_pha), Bet, colour = "Bet"), alpha = 0.1, size = 5) +
@@ -221,18 +221,18 @@ ggplot(all_results_L) +
 ggsave(here::here("Lab", "Plots", "varying_MOI_L.png"))
 
 ggplot(all_results_beta) + 
-  geom_point(aes(init_pha, Be, colour = "Be"), size = 2.5) +
+  geom_pointrange(aes(x = init_pha, y = Be, ymin = pmax(Be - Be_se, 0.01), ymax = Be + Be_se, colour = "Be"),
+                  position = position_jitter(height=0, width=0.1), alpha = 1, size = 0.5, linetype = "solid") +
+  geom_pointrange(aes(x = init_pha, y = Bt, ymin = pmax(Bt - Bt_se, 0.01), ymax = Bt + Bt_se, colour = "Bt"),
+                  position = position_jitter(height=0, width=0.1), alpha = 1, size = 0.5, linetype = "solid") +
+  geom_pointrange(aes(x = init_pha, y = Bet, ymin = pmax(Bet - Bet_se, 0.01), ymax = Bet + Bet_se, colour = "Bet"),
+                  position = position_jitter(height=0, width=0.1), alpha = 1, size = 0.5, linetype = "solid") +
+  geom_pointrange(aes(x = init_pha, y = Pl, ymin = pmax(Pl - Pl_se, 0.01), ymax = Pl + Pl_se, colour = "Pl"),
+                  position = position_jitter(height=0, width=0.1), alpha = 1, size = 0.5, linetype = "solid") +
   geom_line(stat = "smooth", aes(as.numeric(init_pha), Be, colour = "Be"), alpha = 0.1, size = 5) +
-  geom_errorbar(aes(init_pha, ymin = pmax(Be - Be_se, 0.01), ymax = Be + Be_se, colour = "Be"), size = 0.8) +
-  geom_point(aes(init_pha, Bt, colour = "Bt"), size = 2.5) +
   geom_line(stat = "smooth", aes(as.numeric(init_pha), Bt, colour = "Bt"), alpha = 0.1, size = 5) +
-  geom_errorbar(aes(init_pha, ymin = pmax(Bt - Bt_se, 0.01), ymax = Bt + Bt_se, colour = "Bt"), size = 0.8) +
-  geom_point(aes(init_pha, Bet, colour = "Bet"), size = 2.5) +
   geom_line(stat = "smooth", aes(as.numeric(init_pha), Bet, colour = "Bet"), alpha = 0.1, size = 5) +
-  geom_errorbar(aes(init_pha, ymin = pmax(Bet - Bet_se, 0.01), ymax = Bet + Bet_se, colour = "Bet"), size = 0.8) +
-  geom_point(aes(init_pha, Pl, colour = "Pl"), size = 2.5, shape = 17) +
   geom_line(stat = "smooth", aes(as.numeric(init_pha), Pl, colour = "Pl"), alpha = 0.1, size = 5) +
-  geom_errorbar(aes(init_pha, ymin = pmax(Pl - Pl_se, 0.01), ymax = Pl + Pl_se, colour = "Pl"), size = 0.8) +
   scale_y_continuous(trans=log10_trans(),
                      breaks=trans_breaks("log10", function(x) 10^x, n = 6),
                      labels=c("x", "0", expression(10^0),
@@ -258,18 +258,18 @@ ggplot(all_results_beta) +
 ggsave(here::here("Lab", "Plots", "varying_MOI_beta.png"))
 
 ggplot(all_results_both) + 
-  geom_point(aes(init_pha, Be, colour = "Be"), size = 2.5) +
+  geom_pointrange(aes(x = init_pha, y = Be, ymin = pmax(Be - Be_se, 0.01), ymax = Be + Be_se, colour = "Be"),
+                  position = position_jitter(height=0, width=0.1), alpha = 1, size = 0.5, linetype = "solid") +
+  geom_pointrange(aes(x = init_pha, y = Bt, ymin = pmax(Bt - Bt_se, 0.01), ymax = Bt + Bt_se, colour = "Bt"),
+                  position = position_jitter(height=0, width=0.1), alpha = 1, size = 0.5, linetype = "solid") +
+  geom_pointrange(aes(x = init_pha, y = Bet, ymin = pmax(Bet - Bet_se, 0.01), ymax = Bet + Bet_se, colour = "Bet"),
+                  position = position_jitter(height=0, width=0.1), alpha = 1, size = 0.5, linetype = "solid") +
+  geom_pointrange(aes(x = init_pha, y = Pl, ymin = pmax(Pl - Pl_se, 0.01), ymax = Pl + Pl_se, colour = "Pl"),
+                  position = position_jitter(height=0, width=0.1), alpha = 1, size = 0.5, linetype = "solid") +
   geom_line(stat = "smooth", aes(as.numeric(init_pha), Be, colour = "Be"), alpha = 0.1, size = 5) +
-  geom_errorbar(aes(init_pha, ymin = pmax(Be - Be_se, 0.01), ymax = Be + Be_se, colour = "Be"), size = 0.8) +
-  geom_point(aes(init_pha, Bt, colour = "Bt"), size = 2.5) +
   geom_line(stat = "smooth", aes(as.numeric(init_pha), Bt, colour = "Bt"), alpha = 0.1, size = 5) +
-  geom_errorbar(aes(init_pha, ymin = pmax(Bt - Bt_se, 0.01), ymax = Bt + Bt_se, colour = "Bt"), size = 0.8) +
-  geom_point(aes(init_pha, Bet, colour = "Bet"), size = 2.5) +
   geom_line(stat = "smooth", aes(as.numeric(init_pha), Bet, colour = "Bet"), alpha = 0.1, size = 5) +
-  geom_errorbar(aes(init_pha, ymin = pmax(Bet - Bet_se, 0.01), ymax = Bet + Bet_se, colour = "Bet"), size = 0.8) +
-  geom_point(aes(init_pha, Pl, colour = "Pl"), size = 2.5, shape = 17) +
   geom_line(stat = "smooth", aes(as.numeric(init_pha), Pl, colour = "Pl"), alpha = 0.1, size = 5) +
-  geom_errorbar(aes(init_pha, ymin = pmax(Pl - Pl_se, 0.01), ymax = Pl + Pl_se, colour = "Pl"), size = 0.8) +
   scale_y_continuous(trans=log10_trans(),
                      breaks=trans_breaks("log10", function(x) 10^x, n = 6),
                      labels=c("x", "0", expression(10^0),

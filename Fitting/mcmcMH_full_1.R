@@ -89,11 +89,8 @@ for(i in 1:nrow(models_to_try)){
                        link_delay = models_to_try$link_delay[i],
                        transduction = models_to_try$transduction[i])
 
-  trace_model4 = fitted_params4[[models_to_try$model_name[i]]]
-  trace_model4 = trace_model4[c(1:(nrow(trace_model4)-125000)),]
-  init.theta = trace_model4[nrow(trace_model4),-6]
-  
-  #init.theta = c(beta = 5e9, L = 60, gamma = 300, alpha = 1e6, tau = 0.6)
+
+  init.theta = c(beta = 5e9, L = 60, gamma = 300, alpha = 1e6, tau = 0.6)
   mcmc_fit = run_mcmc(model, lab_data_trans3, lab_data_trans5,
                       init.theta = init.theta,
                       proposal.sd = c(init.theta[1]/300,
@@ -103,7 +100,7 @@ for(i in 1:nrow(models_to_try)){
                                       init.theta[5]/300),
                       n.iterations = 125000,
                       adapt.size.start = 1000,
-                      adapt.shape.start = NULL,
+                      adapt.shape.start = 3000,
                       adapt.size.cooling = 0.999)
 
 
