@@ -11,10 +11,6 @@ library(scales)
 
 source(here::here("Model", "transduction_model_functions.R"))
 
-fitted_params4 = c(readRDS(here::here("Fitting", "10_4", "best_params_transduction_b.rds")),
-                   readRDS(here::here("Fitting", "10_4", "best_params_transduction2_b.rds")),
-                   readRDS(here::here("Fitting", "10_4", "best_params_transduction3_b.rds")))
-
 
 model = readRDS(here::here("Model", "transduction_model.rds"))
 
@@ -63,12 +59,10 @@ lab_data_trans3 = read.csv(here::here("Lab", "Transduction", "summary_10_3.csv")
 # FIT PHAGE #####
 
 models_to_try = data.frame(model_name="mass_decay_link_L", frequentist=FALSE,
-                           delay=TRUE,
                            fixed_delay=NA, decay=TRUE,
                            link_beta=FALSE, link_L=TRUE, link_delay=FALSE, transduction=TRUE)
 models_to_try = rbind(models_to_try,
                       data.frame(model_name="frequentist_decay_link_L", frequentist=TRUE,
-                                 delay=TRUE,
                                  fixed_delay=NA, decay=TRUE,
                                  link_beta=FALSE, link_L=TRUE, link_delay=FALSE, transduction=TRUE))
 
@@ -81,7 +75,6 @@ for(i in 1:nrow(models_to_try)){
 
   model = choose_model(model,
                        frequentist = models_to_try$frequentist[i],
-                       delay = models_to_try$delay[i],
                        fixed_delay = models_to_try$fixed_delay[i],
                        decay = models_to_try$decay[i],
                        link_beta = models_to_try$link_beta[i],
@@ -98,7 +91,7 @@ for(i in 1:nrow(models_to_try)){
                                       init.theta[3]/100,
                                       init.theta[4]/100,
                                       init.theta[5]/100),
-                      n.iterations = 125000,
+                      n.iterations = 100000,
                       adapt.size.start = 1000,
                       adapt.shape.start = 4000,
                       adapt.size.cooling = 0.999)
@@ -233,12 +226,12 @@ for(i in 1:nrow(models_to_try)){
             legend)
 
   filename = paste0(models_to_try$model_name[i], "_b.png")
-  ggsave(here::here("Fitting", "10_4", "Best_fits", filename))
+  ggsave(here::here("Fitting", "Full_chains", "Best_fits", filename))
 
   all_theta[[i]] = mcmc_fit$trace
   names(all_theta)[i] = models_to_try$model_name[i]
 
 }
 
-saveRDS(all_theta, here::here("Fitting", "10_4", "best_params_transduction_b.rds"))
+saveRDS(all_theta, here::here("Fitting", "Full_chains", "best_params_transduction_b.rds"))
 

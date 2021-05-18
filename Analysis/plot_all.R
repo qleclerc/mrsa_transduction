@@ -13,12 +13,18 @@ source(here::here("Model", "transduction_model_functions.R"))
 # mass_model = readRDS(here::here("Fitting", "mass_model.rds"))
 model = readRDS(here::here("Model", "transduction_model.rds"))
 
-fitted_params4 = c(readRDS(here::here("Fitting", "10_4", "best_params_transduction.rds")),
-                   readRDS(here::here("Fitting", "10_4", "best_params_transduction2.rds")),
-                   readRDS(here::here("Fitting", "10_4", "best_params_transduction3.rds")))
-fitted_params4b = c(readRDS(here::here("Fitting", "10_4", "best_params_transduction_b.rds")),
-                    readRDS(here::here("Fitting", "10_4", "best_params_transduction2_b.rds")),
-                    readRDS(here::here("Fitting", "10_4", "best_params_transduction3_b.rds")))
+files = list.files(here::here("Fitting", "Fitted_params"))
+
+params = vector("list", length(files))
+i=1
+
+for(f in files){
+  params[[i]] = read.csv(here::here("Fitting", "Fitted_params", f))
+  i = i+1
+}
+
+names(params) = gsub(".csv", "", gsub("params_", "", files))
+
 
 lab_data_transM = read.csv(here::here("Lab", "Transduction", "summary_10_4.csv")) %>%
   select(Time, Bacteria, Mean, se) %>%
@@ -65,33 +71,27 @@ lab_data_trans3 = read.csv(here::here("Lab", "Transduction", "summary_10_3.csv")
 ## GO #####
 
 
-models_to_try = data.frame(model_name="mass_decay_link_beta", frequentist=FALSE,
-                           delay=TRUE, 
+models_to_try = data.frame(model_name="dens_beta", frequentist=FALSE,
                            fixed_delay=NA, decay=TRUE,
                            link_beta=TRUE, link_L=FALSE, link_delay=FALSE, transduction=TRUE)
 models_to_try = rbind(models_to_try,
-                      data.frame(model_name="mass_decay_link_L", frequentist=FALSE,
-                                 delay=TRUE,
+                      data.frame(model_name="dens_burst", frequentist=FALSE,
                                  fixed_delay=NA, decay=TRUE,
                                  link_beta=FALSE, link_L=TRUE, link_delay=FALSE, transduction=TRUE))
 models_to_try = rbind(models_to_try,
-                      data.frame(model_name="mass_decay_link_both", frequentist=FALSE,
-                                 delay=TRUE, 
+                      data.frame(model_name="dens_both", frequentist=FALSE,
                                  fixed_delay=NA, decay=TRUE,
                                  link_beta=TRUE, link_L=TRUE, link_delay=FALSE, transduction=TRUE))
 models_to_try = rbind(models_to_try,
-                      data.frame(model_name="frequentist_decay_link_beta", frequentist=TRUE,
-                                 delay=TRUE,
+                      data.frame(model_name="freq_beta", frequentist=TRUE,
                                  fixed_delay=NA, decay=TRUE,
                                  link_beta=TRUE, link_L=FALSE, link_delay=FALSE, transduction=TRUE))
 models_to_try = rbind(models_to_try,
-                      data.frame(model_name="frequentist_decay_link_L", frequentist=TRUE,
-                                 delay=TRUE, 
+                      data.frame(model_name="freq_burst", frequentist=TRUE,
                                  fixed_delay=NA, decay=TRUE,
                                  link_beta=FALSE, link_L=TRUE, link_delay=FALSE, transduction=TRUE))
 models_to_try = rbind(models_to_try,
-                      data.frame(model_name="frequentist_decay_link_both", frequentist=TRUE,
-                                 delay=TRUE, 
+                      data.frame(model_name="freq_both", frequentist=TRUE,
                                  fixed_delay=NA, decay=TRUE,
                                  link_beta=TRUE, link_L=TRUE, link_delay=FALSE, transduction=TRUE))
 
@@ -108,7 +108,6 @@ for(i in 1:nrow(models_to_try)){
   
   model = choose_model(model,
                        frequentist = models_to_try$frequentist[i],
-                       delay = models_to_try$delay[i],
                        fixed_delay = models_to_try$fixed_delay[i],
                        decay = models_to_try$decay[i], 
                        link_beta = models_to_try$link_beta[i],
@@ -116,28 +115,9 @@ for(i in 1:nrow(models_to_try)){
                        link_delay = models_to_try$link_delay[i],
                        transduction = models_to_try$transduction[i])
   
-  if(i %in% c(1,3,4,6)){
-    trace_model4 = fitted_params4[[models_to_try$model_name[i]]]
-    trace_model4 = coda::mcmc(trace_model4)
-    trace_model4 = burnAndThin(trace_model4, burn = 200000, thin = 20)
-    trace_model4b = fitted_params4b[[models_to_try$model_name[i]]]
-    trace_model4b = coda::mcmc(trace_model4b)
-    trace_model4b = burnAndThin(trace_model4b, burn = 200000, thin = 20)
-  } else {
-    trace_model4 = fitted_params4[[models_to_try$model_name[i]]]
-    trace_model4 = coda::mcmc(trace_model4)
-    trace_model4 = burnAndThin(trace_model4, burn = 20000, thin = 10)
-    trace_model4b = fitted_params4b[[models_to_try$model_name[i]]]
-    trace_model4b = coda::mcmc(trace_model4b)
-    trace_model4b = burnAndThin(trace_model4b, burn = 20000, thin = 10)
-    
-  }
-  trace_model4 = rbind(trace_model4,trace_model4b)
-  
-  #plot(trace_model)
-  #next
-  
-  quants = apply(trace_model4, 2, function(x) quantile(x, probs = c(0.025, 0.5, 0.975)))
+  trace_model = params[[models_to_try$model_name[i]]]
+
+  quants = apply(trace_model, 2, function(x) quantile(x, probs = c(0.025, 0.5, 0.975)))
   quants_s = c(models_to_try$model_name[i])
   for(j in 1:(ncol(quants)-1)){
     quants_s = c(quants_s, quants[2,j], quants[1,j], quants[3,j])
@@ -151,7 +131,7 @@ for(i in 1:nrow(models_to_try)){
   init.state = c(Be = lab_data_trans$Be[1], Bt = lab_data_trans$Bt[1], Bet = 0,
                  Pl = lab_data_trans$P[1], Pe = 0, Pt = 0)
   
-  traj = multi_run2(model, trace_model4, init.state,
+  traj = multi_run2(model, trace_model, init.state,
                     times = seq(0, 24, 1), nruns = 500)
   
   traj$model = models_to_try$model_name[i]
@@ -162,7 +142,7 @@ for(i in 1:nrow(models_to_try)){
   init.state = c(Be = lab_data_trans5$Be[1], Bt = lab_data_trans5$Bt[1], Bet = 0,
                  Pl = lab_data_trans5$P[1], Pe = 0, Pt = 0)
   
-  traj = multi_run2(model, trace_model4, init.state,
+  traj = multi_run2(model, trace_model, init.state,
                     times = seq(0, 24, 1), nruns = 500)
   
   traj$model = models_to_try$model_name[i]
@@ -172,7 +152,7 @@ for(i in 1:nrow(models_to_try)){
   init.state = c(Be = lab_data_trans3$Be[1], Bt = lab_data_trans3$Bt[1], Bet = 0,
                  Pl = lab_data_trans3$P[1], Pe = 0, Pt = 0)
   
-  traj = multi_run2(model, trace_model4, init.state,
+  traj = multi_run2(model, trace_model, init.state,
                     times = seq(0, 24, 1), nruns = 500)
   
   traj$model = models_to_try$model_name[i]
@@ -193,7 +173,7 @@ colnames(best_params) = quants_names
 best_params[,-1] = apply(best_params[,-1], c(1,2), as.numeric)
 best_params[,c(2,3,4,8:13)] = apply(best_params[,c(2,3,4,8:13)], c(1,2), function(x) 1/x)
 
-write.csv(best_params, here::here("Fitting", "best_params4.csv"), row.names = F)
+write.csv(best_params, here::here("Fitting", "best_params.csv"), row.names = F)
 
 
 
@@ -204,23 +184,23 @@ all_traj_3[all_traj_3<0.01] = 0.01
 
 all_traj_4$group = all_traj_4$model
 all_traj_4 = all_traj_4 %>% 
-  mutate(model = replace(model, group %in% c("mass_decay_link_beta",
-                                             "mass_decay_link_both",
-                                             "frequentist_decay_link_beta",
-                                             "frequentist_decay_link_both"), "other"))
+  mutate(model = replace(model, group %in% c("dens_beta",
+                                             "dens_both",
+                                             "freq_beta",
+                                             "freq_both"), "other"))
 
 all_traj_5$group = all_traj_5$model
 all_traj_5 = all_traj_5 %>% 
-  mutate(model = replace(model, group %in% c("mass_decay_link_beta",
-                                             "mass_decay_link_both",
-                                             "frequentist_decay_link_beta",
-                                             "frequentist_decay_link_both"), "other"))
+  mutate(model = replace(model, group %in% c("dens_beta",
+                                             "dens_both",
+                                             "freq_beta",
+                                             "freq_both"), "other"))
 all_traj_3$group = all_traj_3$model
 all_traj_3 = all_traj_3 %>% 
-  mutate(model = replace(model, group %in% c("mass_decay_link_beta",
-                                             "mass_decay_link_both",
-                                             "frequentist_decay_link_beta",
-                                             "frequentist_decay_link_both"), "other"))
+  mutate(model = replace(model, group %in% c("dens_beta",
+                                             "dens_both",
+                                             "freq_beta",
+                                             "freq_both"), "other"))
 
 p4 = ggplot() +
   geom_line(data = all_traj_4, aes(time, Pl, group = group, colour = model,
@@ -252,12 +232,12 @@ p4 = ggplot() +
   scale_colour_manual(breaks = c("PL", "BET"),
                       labels = c(bquote(P[L]), bquote(B[ET])),
                       values = c("#c2484d", "#29709e", "#5ad3ec", "grey", "#c88a33")) +
-  scale_fill_manual(breaks = c("mass_decay_link_L", "frequentist_decay_link_L", "other"),
+  scale_fill_manual(breaks = c("dens_burst", "freq_burst", "other"),
                     labels = c("Density, link burst size", "Frequency, link burst size", "Other"),
                     values = c("#5ad3ec", "#29709e", "grey"),
                     guide = guide_legend(override.aes = list(size = c(0.8,0.8,0.5),
                                                              linetype = c(2,2,2)))) +
-  scale_size_manual(breaks = c("mass_decay_link_L", "frequentist_decay_link_L", "other"),
+  scale_size_manual(breaks = c("dens_burst", "freq_burst", "other"),
                     labels = c("Density, link burst size", "Frequency, link burst size", "Other"),
                     values = c(0.8,0.8,0.5)) +
   labs(x = "Time (hours)", y = "cfu or pfu per mL", linetype = "Source:",
@@ -305,12 +285,12 @@ p5 = ggplot() +
   scale_colour_manual(breaks = c("PL", "BET"),
                       labels = c(bquote(P[L]), bquote(B[ET])),
                       values = c("#c2484d", "#29709e", "#5ad3ec", "grey", "#c88a33")) +
-  scale_fill_manual(breaks = c("mass_decay_link_L", "frequentist_decay_link_L", "other"),
+  scale_fill_manual(breaks = c("dens_burst", "freq_burst", "other"),
                     labels = c("Density, link burst size", "Frequency, link burst size", "Other"),
                     values = c("#5ad3ec", "#29709e", "grey"),
                     guide = guide_legend(override.aes = list(size = c(0.8,0.8,0.5),
                                                              linetype = c(2,2,2)))) +
-  scale_size_manual(breaks = c("mass_decay_link_L", "frequentist_decay_link_L", "other"),
+  scale_size_manual(breaks = c("dens_burst", "freq_burst", "other"),
                     labels = c("Density, link burst size", "Frequency, link burst size", "Other"),
                     values = c(0.8,0.8,0.5)) +
   labs(x = "Time (hours)", y = "cfu or pfu per mL", linetype = "Source:",
@@ -357,12 +337,12 @@ p3 = ggplot() +
   scale_colour_manual(breaks = c("PL", "BET"),
                       labels = c(bquote(P[L]), bquote(B[ET])),
                       values = c("#c2484d", "#29709e", "#5ad3ec", "grey", "#c88a33")) +
-  scale_fill_manual(breaks = c("mass_decay_link_L", "frequentist_decay_link_L", "other"),
+  scale_fill_manual(breaks = c("dens_burst", "freq_burst", "other"),
                     labels = c("Density, link burst size", "Frequency, link burst size", "Other"),
                     values = c("#5ad3ec", "#29709e", "grey"),
                     guide = guide_legend(override.aes = list(size = c(0.8,0.8,0.5),
                                                              linetype = c(2,2,2)))) +
-  scale_size_manual(breaks = c("mass_decay_link_L", "frequentist_decay_link_L", "other"),
+  scale_size_manual(breaks = c("dens_burst", "freq_burst", "other"),
                     labels = c("Density, link burst size", "Frequency, link burst size", "Other"),
                     values = c(0.8,0.8,0.5)) +
   labs(x = "Time (hours)", y = "cfu or pfu per mL", linetype = "Source:",
@@ -387,4 +367,4 @@ plot_grid(p3 + theme(legend.position = "none"),
           p5 + theme(legend.position = "none"),
           legend)
 
-ggsave("plot_compare_all4.png")
+ggsave("plot_compare_all.png")

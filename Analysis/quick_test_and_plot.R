@@ -12,12 +12,17 @@ source(here::here("Model", "transduction_model_functions.R"))
 # mass_model = readRDS(here::here("Fitting", "mass_model.rds"))
 model = readRDS(here::here("Model", "transduction_model.rds"))
 
-fitted_params4 = c(readRDS(here::here("Fitting", "10_4", "best_params_transduction.rds")),
-                   readRDS(here::here("Fitting", "10_4", "best_params_transduction2.rds")),
-                   readRDS(here::here("Fitting", "10_4", "best_params_transduction3.rds")))
-fitted_params4b = c(readRDS(here::here("Fitting", "10_4", "best_params_transduction_b.rds")),
-                    readRDS(here::here("Fitting", "10_4", "best_params_transduction2_b.rds")),
-                    readRDS(here::here("Fitting", "10_4", "best_params_transduction3_b.rds")))
+files = list.files(here::here("Fitting", "Fitted_params"))
+
+params = vector("list", length(files))
+i=1
+
+for(f in files){
+  params[[i]] = read.csv(here::here("Fitting", "Fitted_params", f))
+  i = i+1
+}
+
+names(params) = gsub(".csv", "", gsub("params_", "", files))
 
 lab_data_trans = read.csv(here::here("Lab", "Transduction", "summary_10_4.csv")) %>%
   select(Time, Bacteria, Mean) %>%
@@ -48,20 +53,16 @@ lab_data_trans3 = read.csv(here::here("Lab", "Transduction", "summary_10_3.csv")
          P = round(P))
 lab_data_transM = read.csv(here::here("Lab", "Transduction", "summary_10_4.csv")) %>%
   select(Time, Bacteria, Mean, se) %>%
-  #mutate(se = se*sqrt(3)) %>%
   filter(Bacteria != "Total")
 lab_data_trans5M = read.csv(here::here("Lab", "Transduction", "summary_10_5.csv")) %>%
   select(Time, Bacteria, Mean, se)%>%
-  #mutate(se = se*sqrt(3)) %>%
   filter(Bacteria != "Total")
 lab_data_trans3M = read.csv(here::here("Lab", "Transduction", "summary_10_3.csv")) %>%
   select(Time, Bacteria, Mean, se) %>%
-  #mutate(se = se*sqrt(3)) %>%
   filter(Bacteria != "Total")
 
 model = choose_model(model,
                      frequentist = T,
-                     delay = T,
                      fixed_delay = NA,
                      decay = T,
                      link_beta = F,
@@ -69,18 +70,11 @@ model = choose_model(model,
                      link_delay = F,
                      transduction = T)
 
-trace_model4 = fitted_params4[["frequentist_decay_link_L"]]
-trace_model4 = coda::mcmc(trace_model4)
-trace_model4 = burnAndThin(trace_model4, burn = 20000, thin = 10)
-trace_model4b = fitted_params4b[["frequentist_decay_link_L"]]
-trace_model4b = coda::mcmc(trace_model4b)
-trace_model4b = burnAndThin(trace_model4b, burn = 20000, thin = 10)
-
-trace_model = rbind(trace_model4,trace_model4b)
+trace_model = params[["freq_burst"]]
 params = apply(trace_model, 2, median)
-params = c(beta = 7255825175.83, L = 118.29, gamma = 529.47, alpha = 10377933.86, tau = 0.72)
+#params = c(beta = 7255825175.83, L = 118.29, gamma = 529.47, alpha = 10377933.86, tau = 0.72)
 
-
+params[["L"]] = 80
 # params[["beta"]] = 5.9e9
 # params[["alpha"]] = 7e6
 
@@ -89,21 +83,21 @@ init.state = c(Be = lab_data_trans$Be[1], Bt = lab_data_trans$Bt[1], Bet = 0,
                Pl = lab_data_trans$P[1], Pe = 0, Pt = 0)
 
 traj4 = multi_run2(model, params, init.state,
-                   times = seq(0, 24, 1), nruns = 100)
+                   times = seq(0, 24, 1), nruns = 10)
 
 #replicate 5
 init.state = c(Be = lab_data_trans5$Be[1], Bt = lab_data_trans5$Bt[1], Bet = 0,
                Pl = lab_data_trans5$P[1], Pe = 0, Pt = 0)
 
 traj5 = multi_run2(model, params, init.state,
-                   times = seq(0, 24, 1), nruns = 100)
+                   times = seq(0, 24, 1), nruns = 10)
 
 #replicate 3
 init.state = c(Be = lab_data_trans3$Be[1], Bt = lab_data_trans3$Bt[1], Bet = 0,
                Pl = lab_data_trans3$P[1], Pe = 0, Pt = 0)
 
 traj3 = multi_run2(model, params, init.state,
-                   times = seq(0, 24, 1), nruns = 100)
+                   times = seq(0, 24, 1), nruns = 10)
 
 traj4[traj4<0.01] = 0.01
 traj5[traj5<0.01] = 0.01
