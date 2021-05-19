@@ -11,6 +11,10 @@ library(scales)
 
 source(here::here("Model", "transduction_model_functions.R"))
 
+fitted_params4 = c(readRDS(here::here("Fitting", "Full_chains", "best_params_transduction.rds")),
+                   readRDS(here::here("Fitting", "Full_chains", "best_params_transduction2.rds")),
+                   readRDS(here::here("Fitting", "Full_chains", "best_params_transduction3.rds")))
+
 
 model = readRDS(here::here("Model", "transduction_model.rds"))
 
@@ -70,9 +74,9 @@ models_to_try = rbind(models_to_try,
 all_theta = vector("list", nrow(models_to_try))
 
 for(i in 1:nrow(models_to_try)){
-
+  
   cat("Working on", models_to_try$model_name[i], "\n")
-
+  
   model = choose_model(model,
                        frequentist = models_to_try$frequentist[i],
                        fixed_delay = models_to_try$fixed_delay[i],
@@ -81,9 +85,12 @@ for(i in 1:nrow(models_to_try)){
                        link_L = models_to_try$link_L[i],
                        link_delay = models_to_try$link_delay[i],
                        transduction = models_to_try$transduction[i])
-
-
-  init.theta = c(beta = 5e9, L = 60, gamma = 300, alpha = 1e6, tau = 0.6)
+  
+  trace_model4 = fitted_params4[[models_to_try$model_name[i]]]
+  init.theta = trace_model4[nrow(trace_model4),-6]
+  
+  
+  #init.theta = c(beta = 5e9, L = 60, gamma = 300, alpha = 1e6, tau = 0.6)
   mcmc_fit = run_mcmc(model, lab_data_trans3, lab_data_trans5,
                       init.theta = init.theta,
                       proposal.sd = c(init.theta[1]/300,
@@ -95,15 +102,15 @@ for(i in 1:nrow(models_to_try)){
                       adapt.size.start = 1000,
                       adapt.shape.start = NULL,
                       adapt.size.cooling = 0.999)
-
-
+  
+  
   #replicate 4
   init.state = c(Be = lab_data_trans4$Be[1], Bt = lab_data_trans4$Bt[1], Bet = 0,
                  Pl = lab_data_trans4$P[1], Pe = 0, Pt = 0)
   theta = mcmc_fit$trace[which.max(mcmc_fit$trace[,"log.density"]),]
-
+  
   traj = model$simulate(theta, init.state, times = seq(0, 30, 1))
-
+  
   p4 = ggplot() +
     geom_line(data = traj, aes(time, Be, colour = "Model", linetype = "Bacteria"), size = 0.8) +
     geom_line(data = traj, aes(time, Bt, colour = "Model", linetype = "Bacteria"), size = 0.8) +
@@ -135,16 +142,16 @@ for(i in 1:nrow(models_to_try)){
           legend.title = element_text(size=12),
           strip.text.x = element_text(size=12)) +
     scale_colour_manual(values=c("#685cc4","#6db356"))
-
-
-
+  
+  
+  
   #replicate 5
   init.state = c(Be = lab_data_trans5$Be[1], Bt = lab_data_trans5$Bt[1], Bet = 0,
                  Pl = lab_data_trans5$P[1], Pe = 0, Pt = 0)
   theta = mcmc_fit$trace[which.max(mcmc_fit$trace[,"log.density"]),]
-
+  
   traj = model$simulate(theta, init.state, times = seq(0, 30, 1))
-
+  
   p5 = ggplot() +
     geom_line(data = traj, aes(time, Be, colour = "Model", linetype = "Bacteria"), size = 0.8) +
     geom_line(data = traj, aes(time, Bt, colour = "Model", linetype = "Bacteria"), size = 0.8) +
@@ -176,15 +183,15 @@ for(i in 1:nrow(models_to_try)){
           legend.title = element_text(size=12),
           strip.text.x = element_text(size=12)) +
     scale_colour_manual(values=c("#685cc4","#6db356"))
-
-
+  
+  
   #replicate 3
   init.state = c(Be = lab_data_trans3$Be[1], Bt = lab_data_trans3$Bt[1], Bet = 0,
                  Pl = lab_data_trans3$P[1], Pe = 0, Pt = 0)
   theta = mcmc_fit$trace[which.max(mcmc_fit$trace[,"log.density"]),]
-
+  
   traj = model$simulate(theta, init.state, times = seq(0, 30, 1))
-
+  
   p3 = ggplot() +
     geom_line(data = traj, aes(time, Be, colour = "Model", linetype = "Bacteria"), size = 0.8) +
     geom_line(data = traj, aes(time, Bt, colour = "Model", linetype = "Bacteria"), size = 0.8) +
@@ -216,22 +223,22 @@ for(i in 1:nrow(models_to_try)){
           legend.title = element_text(size=12),
           strip.text.x = element_text(size=12)) +
     scale_colour_manual(values=c("#685cc4","#6db356"))
-
-
+  
+  
   #final plot
   legend = get_legend(p4 + theme(legend.position = "bottom", legend.box = "vertical"))
-
+  
   plot_grid(p3 + theme(legend.position = "none"),
             p4 + theme(legend.position = "none"),
             p5 + theme(legend.position = "none"),
             legend)
-
+  
   filename = paste0(models_to_try$model_name[i], ".png")
   ggsave(here::here("Fitting", "Full_chains", "Best_fits", filename))
-
-  all_theta[[i]] = mcmc_fit$trace
+  
+  all_theta[[i]] = rbind(trace_model4, mcmc_fit$trace)
   names(all_theta)[i] = models_to_try$model_name[i]
-
+  
 }
 
 saveRDS(all_theta, here::here("Fitting", "Full_chains", "best_params_transduction.rds"))
