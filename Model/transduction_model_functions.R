@@ -4,7 +4,8 @@ choose_model = function(model,
                         fixed_delay = NA,
                         decay = FALSE,
                         link_beta = FALSE, link_L = FALSE, link_delay = FALSE,
-                        transduction = FALSE){
+                        transduction = FALSE,
+                        prop_Bet = FALSE){
   
   model_simulateDeterministic = function(theta, init.state, times) {
     
@@ -101,6 +102,10 @@ choose_model = function(model,
       dBt = mu_t * link * (Bt - growth_correction*((phi_Pl + phi_Pe) * Bt/N) ) - (phi_Pl + phi_Pe) * Bt/N
       dBet = mu_et * link * (Bet - growth_correction*(phi_Pl*Bet/N) ) - phi_Pl * Bet/N +
         phi_Pe * Bt/N + phi_Pt * Be/N
+      
+      if(prop_Bet) cat("\nTime:", time,
+                       "; Ratio new Bet:Bet growth:",
+                       (phi_Pe*Bt/N+phi_Pt*Be/N)/(mu_et*link* (Bet - growth_correction*(phi_Pl*Bet/N))))
       
       dPl = phi_Pl_past * L * (1 - alpha*(Be_past+Bt_past+2*Bet_past)/N_past) -
         lambda * Pl - gamma * Pl

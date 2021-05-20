@@ -68,19 +68,22 @@ model = choose_model(model,
                      link_beta = F,
                      link_L = T,
                      link_delay = F,
-                     transduction = T)
+                     transduction = T, prop_Bet = T)
 
 trace_model = params[["freq_burst"]]
 params = apply(trace_model, 2, median)
-#params = c(beta = 7255825175.83, L = 118.29, gamma = 529.47, alpha = 10377933.86, tau = 0.72)
+params = c(beta = 7646387086.68, L = 91.19, gamma = 11.09, alpha = 46604726.39, tau = 0.41)
 
-params[["L"]] = 80
+
+#params[["L"]] = 80
 # params[["beta"]] = 5.9e9
 # params[["alpha"]] = 7e6
 
 #replicate 4
 init.state = c(Be = lab_data_trans$Be[1], Bt = lab_data_trans$Bt[1], Bet = 0,
                Pl = lab_data_trans$P[1], Pe = 0, Pt = 0)
+
+traj = model$simulate(params, init.state, seq(0,24,1))
 
 traj4 = multi_run2(model, params, init.state,
                    times = seq(0, 24, 1), nruns = 10)
@@ -89,12 +92,16 @@ traj4 = multi_run2(model, params, init.state,
 init.state = c(Be = lab_data_trans5$Be[1], Bt = lab_data_trans5$Bt[1], Bet = 0,
                Pl = lab_data_trans5$P[1], Pe = 0, Pt = 0)
 
+traj = model$simulate(params, init.state, seq(0,24,1))
+
 traj5 = multi_run2(model, params, init.state,
                    times = seq(0, 24, 1), nruns = 10)
 
 #replicate 3
 init.state = c(Be = lab_data_trans3$Be[1], Bt = lab_data_trans3$Bt[1], Bet = 0,
                Pl = lab_data_trans3$P[1], Pe = 0, Pt = 0)
+
+traj = model$simulate(params, init.state, seq(0,24,1))
 
 traj3 = multi_run2(model, params, init.state,
                    times = seq(0, 24, 1), nruns = 10)

@@ -11,16 +11,21 @@ source(here::here("Model", "transduction_model_functions.R"))
 
 # mass_model = readRDS(here::here("Fitting", "mass_model.rds"))
 model = readRDS(here::here("Model", "transduction_model.rds"))
-fitted_params = c(readRDS(here::here("Fitting", "10_4", "best_params_transduction.rds")),
-                  readRDS(here::here("Fitting", "10_4", "best_params_transduction2.rds")),
-                  readRDS(here::here("Fitting", "10_4", "best_params_transduction3.rds")))
-fitted_paramsb = c(readRDS(here::here("Fitting", "10_4", "best_params_transduction_b.rds")),
-                   readRDS(here::here("Fitting", "10_4", "best_params_transduction2_b.rds")),
-                   readRDS(here::here("Fitting", "10_4", "best_params_transduction3_b.rds")))
+
+files = list.files(here::here("Fitting", "Fitted_params"))
+
+all_params = vector("list", length(files))
+i=1
+
+for(f in files){
+  all_params[[i]] = read.csv(here::here("Fitting", "Fitted_params", f))
+  i = i+1
+}
+
+names(all_params) = gsub(".csv", "", gsub("params_", "", files))
 
 
 data = read.xlsx(here::here("Lab", "Varying_MOI", "jake_data4.xlsx"))
-#data = read.xlsx(here::here("Lab", "Varying_MOI", "jake_data2.xlsx"))
 
 data = data[c(2:34),c(1:29)]
 data$se_bac = apply(data[,c(18,19,20)], 1, function(x) sd(x)/sqrt(3))
@@ -59,7 +64,6 @@ data = as.data.frame(apply(data, c(1,2), as.numeric))[,-3]
 colnames(data)[c(3,4)] = c("Be", "Bt")
 
 data_pha = read.xlsx(here::here("Lab", "Varying_MOI", "jake_data4.xlsx"),sheet = 2)[c(2:12),]
-#data_pha = read.xlsx(here::here("Lab", "Varying_MOI", "jake_data2.xlsx"),sheet = 2)[c(2:9),]
 
 data_pha$se_pha = apply(data_pha[,c(8,9,10)], 1, function(x) sd(x)/sqrt(3))
 
@@ -67,33 +71,27 @@ data$Pl = rev(data_pha$`Mean.PFU/mL`)
 data$Pl_sd = rev(data_pha$se_pha)
 
 
-models_to_try = data.frame(model_name="mass_decay_link_L", frequentist=FALSE,
-                           delay=TRUE, 
+models_to_try = data.frame(model_name="dens_burst", frequentist=FALSE,
                            fixed_delay=NA, decay=TRUE,
                            link_beta=FALSE, link_L=TRUE, link_delay=FALSE, transduction=TRUE)
 models_to_try = rbind(models_to_try,
-                      data.frame(model_name="mass_decay_link_beta", frequentist=FALSE,
-                                 delay=TRUE,
+                      data.frame(model_name="dens_beta", frequentist=FALSE,
                                  fixed_delay=NA, decay=TRUE,
                                  link_beta=TRUE, link_L=FALSE, link_delay=FALSE, transduction=TRUE))
 models_to_try = rbind(models_to_try,
-                      data.frame(model_name="mass_decay_link_both", frequentist=FALSE,
-                                 delay=TRUE, 
+                      data.frame(model_name="dens_both", frequentist=FALSE,
                                  fixed_delay=NA, decay=TRUE,
                                  link_beta=TRUE, link_L=TRUE, link_delay=FALSE, transduction=TRUE))
 models_to_try = rbind(models_to_try,
-                      data.frame(model_name="frequentist_decay_link_beta", frequentist=TRUE,
-                                 delay=TRUE,
+                      data.frame(model_name="freq_beta", frequentist=TRUE,
                                  fixed_delay=NA, decay=TRUE,
                                  link_beta=TRUE, link_L=FALSE, link_delay=FALSE, transduction=TRUE))
 models_to_try = rbind(models_to_try,
-                      data.frame(model_name="frequentist_decay_link_both", frequentist=TRUE,
-                                 delay=TRUE, 
+                      data.frame(model_name="freq_both", frequentist=TRUE,
                                  fixed_delay=NA, decay=TRUE,
                                  link_beta=TRUE, link_L=TRUE, link_delay=FALSE, transduction=TRUE))
 models_to_try = rbind(models_to_try,
-                      data.frame(model_name="frequentist_decay_link_L", frequentist=TRUE,
-                                 delay=TRUE, 
+                      data.frame(model_name="freq_burst", frequentist=TRUE,
                                  fixed_delay=NA, decay=TRUE,
                                  link_beta=FALSE, link_L=TRUE, link_delay=FALSE, transduction=TRUE))
 
@@ -108,7 +106,6 @@ for(i in 1:nrow(models_to_try)){
   
   model = choose_model(model,
                        frequentist = models_to_try$frequentist[i],
-                       delay = models_to_try$delay[i],
                        fixed_delay = models_to_try$fixed_delay[i],
                        decay = models_to_try$decay[i], 
                        link_beta = models_to_try$link_beta[i],
@@ -116,15 +113,7 @@ for(i in 1:nrow(models_to_try)){
                        link_delay = models_to_try$link_delay[i],
                        transduction = models_to_try$transduction[i])
   
-  trace_model = fitted_params[[models_to_try$model_name[i]]]
-  trace_model = coda::mcmc(trace_model)
-  trace_model = burnAndThin(trace_model, burn = 20000, thin = 10)
-  
-  trace_modelb = fitted_paramsb[[models_to_try$model_name[i]]]
-  trace_modelb = coda::mcmc(trace_modelb)
-  trace_modelb = burnAndThin(trace_modelb, burn = 20000, thin = 10)
-  
-  trace_model = rbind(trace_model, trace_modelb)
+  trace_model = all_params[[models_to_try$model_name[i]]]
   
   params = apply(trace_model, 2, median)
   
@@ -176,26 +165,25 @@ all_results$Bet_sd[is.na(all_results$Bet_sd)] = 0
 all_results$Pl_sd[is.na(all_results$Pl_sd)] = 0
 
 all_results$init_pha = as.factor(format(unique(all_results$init_pha), scientific = T, digits = 2))
-#all_results$init_pha = factor(all_results$init_pha, levels(all_results$init_pha)[c(1,3,5,7,2,4,6,8)])
 all_results$init_pha = factor(all_results$init_pha, levels(all_results$init_pha)[c(9,2,5,8,1,4,7,10,3,6,11)])
 
 all_results_L = all_results %>%
-  filter(model %in% c("frequentist_decay_link_L", "data", "mass_decay_link_L"))
+  filter(model %in% c("freq_burst", "data", "dens_burst"))
 all_results_beta = all_results %>%
-  filter(model %in% c("frequentist_decay_link_beta", "data", "mass_decay_link_beta"))
+  filter(model %in% c("freq_beta", "data", "dens_beta"))
 all_results_both = all_results %>%
-  filter(model %in% c("frequentist_decay_link_both", "data", "mass_decay_link_both"))
+  filter(model %in% c("freq_both", "data", "dens_both"))
 
 all_results_L$model = as.factor(all_results_L$model)
-all_results_L$model = factor(all_results_L$model, levels(all_results_L$model)[c(2,1,3)])
+all_results_L$model = factor(all_results_L$model, levels(all_results_L$model)[c(3,1,2)])
 levels(all_results_L$model) = c("Frequency model", "Data", "Density model")
 
 all_results_beta$model = as.factor(all_results_beta$model)
-all_results_beta$model = factor(all_results_beta$model, levels(all_results_beta$model)[c(2,1,3)])
+all_results_beta$model = factor(all_results_beta$model, levels(all_results_beta$model)[c(3,1,2)])
 levels(all_results_beta$model) = c("Frequency model", "Data", "Density model")
 
 all_results_both$model = as.factor(all_results_both$model)
-all_results_both$model = factor(all_results_both$model, levels(all_results_both$model)[c(2,1,3)])
+all_results_both$model = factor(all_results_both$model, levels(all_results_both$model)[c(3,1,2)])
 levels(all_results_both$model) = c("Frequency model", "Data", "Density model")
 
 
