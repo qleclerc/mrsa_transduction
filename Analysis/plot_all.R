@@ -234,7 +234,7 @@ p4 = ggplot() +
                       values = c("#c2484d", "darkgreen", "#5ad3ec", "grey", "#c88a33")) +
   scale_fill_manual(breaks = c("dens_burst", "freq_burst", "other"),
                     labels = c("Density, link burst size", "Frequency, link burst size", "Other"),
-                    values = c("#5ad3ec", "darkgreen", "grey"),
+                    values = c("darkgreen", "#5ad3ec", "grey"),
                     guide = guide_legend(override.aes = list(size = c(0.8,0.8,0.5),
                                                              linetype = c(2,2,2)))) +
   scale_size_manual(breaks = c("dens_burst", "freq_burst", "other"),
@@ -287,7 +287,7 @@ p5 = ggplot() +
                       values = c("#c2484d", "darkgreen", "#5ad3ec", "grey", "#c88a33")) +
   scale_fill_manual(breaks = c("dens_burst", "freq_burst", "other"),
                     labels = c("Density, link burst size", "Frequency, link burst size", "Other"),
-                    values = c("#5ad3ec", "darkgreen", "grey"),
+                    values = c("darkgreen", "#5ad3ec", "grey"),
                     guide = guide_legend(override.aes = list(size = c(0.8,0.8,0.5),
                                                              linetype = c(2,2,2)))) +
   scale_size_manual(breaks = c("dens_burst", "freq_burst", "other"),
@@ -339,7 +339,7 @@ p3 = ggplot() +
                       values = c("#c2484d", "darkgreen", "#5ad3ec", "grey", "#c88a33")) +
   scale_fill_manual(breaks = c("dens_burst", "freq_burst", "other"),
                     labels = c("Density, link burst size", "Frequency, link burst size", "Other"),
-                    values = c("#5ad3ec", "darkgreen", "grey"),
+                    values = c("darkgreen", "#5ad3ec", "grey"),
                     guide = guide_legend(override.aes = list(size = c(0.8,0.8,0.5),
                                                              linetype = c(2,2,2)))) +
   scale_size_manual(breaks = c("dens_burst", "freq_burst", "other"),
@@ -391,7 +391,7 @@ p5_extra = ggplot() +
                       values = c("#c2484d", "darkgreen", "#5ad3ec", "grey", "#c88a33")) +
   scale_fill_manual(breaks = c("dens_burst", "freq_burst", "other"),
                     labels = c("Density, link burst size", "Frequency, link burst size", "Other"),
-                    values = c("#5ad3ec", "darkgreen", "grey"),
+                    values = c("darkgreen", "#5ad3ec", "grey"),
                     guide = guide_legend(override.aes = list(size = c(0.8,0.8,0.5),
                                                              linetype = c(2,2,2)))) +
   scale_size_manual(breaks = c("dens_burst", "freq_burst", "other"),
