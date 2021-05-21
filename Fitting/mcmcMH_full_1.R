@@ -236,7 +236,7 @@ for(i in 1:nrow(models_to_try)){
   filename = paste0(models_to_try$model_name[i], ".png")
   ggsave(here::here("Fitting", "Full_chains", "Best_fits", filename))
   
-  all_theta[[i]] = rbind(fitted_params4, mcmc_fit$trace)
+  all_theta[[i]] = rbind(trace_model4, mcmc_fit$trace)
   names(all_theta)[i] = models_to_try$model_name[i]
   
 }
