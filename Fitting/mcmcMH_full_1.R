@@ -100,7 +100,7 @@ for(i in 1:nrow(models_to_try)){
                                       init.theta[5]/400),
                       n.iterations = 50000,
                       adapt.size.start = 1000,
-                      adapt.shape.start = NULL,
+                      adapt.shape.start = 4000,
                       adapt.size.cooling = 0.999)
   
   
