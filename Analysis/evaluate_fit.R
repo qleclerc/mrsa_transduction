@@ -87,7 +87,7 @@ for(i in 1:nrow(models_to_try)){
   trace_model4b = fitted_params4b[[models_to_try$model_name[i]]]
   trace_model4b = coda::mcmc(trace_model4b)
   trace_model4 = mcmc.list(trace_model4, trace_model4b)
-  trace_model4 = burnAndThin(trace_model4, burn = 20000, thin = 1)
+  trace_model4 = burnAndThin(trace_model4, burn = 200000, thin = 5)
   plot(trace_model4)
   gelman.diag(trace_model4)
   
