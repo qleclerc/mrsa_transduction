@@ -25,7 +25,7 @@ for(f in files){
 names(all_params) = gsub(".csv", "", gsub("params_", "", files))
 
 
-data = read.xlsx(here::here("Lab", "Varying_MOI", "jake_data4.xlsx"))
+data = read.xlsx(here::here("Lab", "Varying_MOI", "jake_data_final.xlsx"))
 
 data = data[c(2:34),c(1:29)]
 data$se_bac = apply(data[,c(18,19,20)], 1, function(x) sd(x)/sqrt(3))
@@ -63,7 +63,7 @@ data = cbind(data, data_sd)
 data = as.data.frame(apply(data, c(1,2), as.numeric))[,-3]
 colnames(data)[c(3,4)] = c("Be", "Bt")
 
-data_pha = read.xlsx(here::here("Lab", "Varying_MOI", "jake_data4.xlsx"),sheet = 2)[c(2:12),]
+data_pha = read.xlsx(here::here("Lab", "Varying_MOI", "jake_data_final.xlsx"),sheet = 2)[c(2:12),]
 
 data_pha$se_pha = apply(data_pha[,c(8,9,10)], 1, function(x) sd(x)/sqrt(3))
 
