@@ -87,7 +87,7 @@ for(i in 1:nrow(models_to_try)){
   trace_model4b = fitted_params4b[[models_to_try$model_name[i]]]
   trace_model4b = coda::mcmc(trace_model4b)
   trace_model4 = mcmc.list(trace_model4, trace_model4b)
-  trace_model4 = burnAndThin(trace_model4, burn = 10000, thin = 1)
+  trace_model4 = burnAndThin(trace_model4, burn = 60000, thin = 1)
   plot(trace_model4)
   gelman.diag(trace_model4)
   
@@ -121,4 +121,3 @@ for(i in 1:nrow(models_to_try)){
 colnames(summary_dic) = c("model_name", "init_pha", "DIC")
 summary_dic$DIC = as.numeric(summary_dic$DIC)
 write.csv(summary_dic, here::here("Fitting", "DIC_values.csv"), row.names = F)
-
