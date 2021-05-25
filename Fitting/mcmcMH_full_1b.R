@@ -86,20 +86,20 @@ for(i in 1:nrow(models_to_try)){
                        link_delay = models_to_try$link_delay[i],
                        transduction = models_to_try$transduction[i])
   
-  trace_model4 = fitted_params4[[models_to_try$model_name[i]]]
-  init.theta = trace_model4[nrow(trace_model4),-6]
+  # trace_model4 = fitted_params4[[models_to_try$model_name[i]]]
+  # init.theta = trace_model4[nrow(trace_model4),-6]
   
-  # init.theta = c(beta = 4e9, L = 20, gamma = 500, alpha = 9e5, tau = 0.4)
+  init.theta = c(beta = 4e9, L = 20, gamma = 500, alpha = 9e5, tau = 0.4)
   mcmc_fit = run_mcmc(model, lab_data_trans3, lab_data_trans5,
                       init.theta = init.theta,
-                      proposal.sd = c(init.theta[1]/500,
-                                      init.theta[2]/500,
-                                      init.theta[3]/500,
-                                      init.theta[4]/500,
-                                      init.theta[5]/500),
-                      n.iterations = 125000,
+                      proposal.sd = c(init.theta[1]/300,
+                                      init.theta[2]/300,
+                                      init.theta[3]/300,
+                                      init.theta[4]/300,
+                                      init.theta[5]/300),
+                      n.iterations = 25000,
                       adapt.size.start = 1000,
-                      adapt.shape.start = NULL,
+                      adapt.shape.start = 2000,
                       adapt.size.cooling = 0.999)
 
   #replicate 4
@@ -234,8 +234,8 @@ for(i in 1:nrow(models_to_try)){
   filename = paste0(models_to_try$model_name[i], "_b.png")
   ggsave(here::here("Fitting", "Full_chains", "Best_fits", filename))
 
-  all_theta[[i]] = rbind(trace_model4, mcmc_fit$trace)
-  # all_theta[[i]] = mcmc_fit$trace
+  # all_theta[[i]] = rbind(trace_model4, mcmc_fit$trace)
+  all_theta[[i]] = mcmc_fit$trace
   names(all_theta)[i] = models_to_try$model_name[i]
 
 }
