@@ -20,7 +20,7 @@ choose_model = function(model,
       
       beta = 1/parameters[["beta"]]
       L = parameters[["L"]]
-      gamma = ifelse(decay, 1/parameters[["gamma"]], 0)
+      # gamma = ifelse(decay, 1/parameters[["gamma"]], 0)
       alpha = ifelse(transduction, 1/parameters[["alpha"]], 0)
       tau = ifelse(is.na(fixed_delay), parameters[["tau"]], fixed_delay)
       
@@ -108,9 +108,9 @@ choose_model = function(model,
                        (phi_Pe*Bt/N+phi_Pt*Be/N)/(mu_et*link* (Bet - growth_correction*(phi_Pl*Bet/N))))
       
       dPl = phi_Pl_past * L * (1 - alpha*(Be_past+Bt_past+2*Bet_past)/N_past) -
-        lambda * Pl - gamma * Pl
-      dPe = phi_Pl_past * L * alpha * (Be_past + Bet_past)/N_past - lambda * Pe - gamma * Pe
-      dPt = phi_Pl_past * L * alpha * (Bt_past + Bet_past)/N_past - lambda * Pt - gamma * Pt
+        lambda * Pl #- gamma * Pl
+      dPe = phi_Pl_past * L * alpha * (Be_past + Bet_past)/N_past - lambda * Pe #- gamma * Pe
+      dPt = phi_Pl_past * L * alpha * (Bt_past + Bet_past)/N_past - lambda * Pt #- gamma * Pt
       
       return(list(c(dBe, dBt, dBet, dPl, dPe, dPt)))
       
@@ -174,8 +174,8 @@ run_mcmc = function(model, lab_data, lab_data2 = NULL,
       
     }
     
-    limits = list(lower = c(beta = 1, L = 2, gamma = 1, alpha = 1, tau = 0.167),
-                  upper = c(beta = 1e20, L = 500, gamma = 1e10, alpha = 1e10, tau = 1))
+    limits = list(lower = c(beta = 1, L = 2, alpha = 1, tau = 0.167),
+                  upper = c(beta = 1e20, L = 500, alpha = 1e10, tau = 1))
     
   }
   

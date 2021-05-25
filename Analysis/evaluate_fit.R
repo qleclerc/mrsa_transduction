@@ -84,20 +84,20 @@ for(i in 1:nrow(models_to_try)){
   
   trace_model4 = fitted_params4[[models_to_try$model_name[i]]]
   trace_model4 = coda::mcmc(trace_model4)
-  trace_model4b = fitted_params4b[[models_to_try$model_name[i]]]
+  trace_model4b = fitted_params4b[[models_to_try$model_name[i]]][-c(1:30000),]
   trace_model4b = coda::mcmc(trace_model4b)
   trace_model4 = mcmc.list(trace_model4, trace_model4b)
-  trace_model4 = burnAndThin(trace_model4, burn = 80000)
+  trace_model4 = burnAndThin(trace_model4, burn = 95000, thin = 1)
   plot(trace_model4)
   gelman.diag(trace_model4)
   
   trace_model4 = fitted_params4[[models_to_try$model_name[i]]]
   trace_model4 = coda::mcmc(trace_model4)
-  trace_model4 = burnAndThin(trace_model4, burn = 50000, thin = 5)
+  trace_model4 = burnAndThin(trace_model4, burn = 95000, thin = 1)
   
-  trace_model4b = fitted_params4b[[models_to_try$model_name[i]]]
+  trace_model4b = fitted_params4b[[models_to_try$model_name[i]]][-c(1:30000),]
   trace_model4b = coda::mcmc(trace_model4b)
-  trace_model4b = burnAndThin(trace_model4b, burn = 50000, thin = 5)
+  trace_model4b = burnAndThin(trace_model4b, burn = 95000, thin = 1)
   
   trace_model4 = rbind(trace_model4, trace_model4b)
   write.csv(trace_model4, "params_dens_burst.csv", row.names = F)
