@@ -88,7 +88,7 @@ for(i in 1:nrow(models_to_try)){
 
 
   trace_model4 = fitted_params4[[models_to_try$model_name[i]]]
-  init.theta = trace_model4[nrow(trace_model4),-6]
+  init.theta = trace_model4[nrow(trace_model4),-5]
 
   # init.theta = c(beta = 4e9, L = 20, alpha = 9e5, tau = 0.4)
   mcmc_fit = run_mcmc(model, lab_data_trans3, lab_data_trans5,

@@ -171,7 +171,7 @@ for(j in 1:(ncol(quants)-1)){
 colnames(best_params) = quants_names
 
 best_params[,-1] = apply(best_params[,-1], c(1,2), as.numeric)
-best_params[,c(2,3,4,8:13)] = apply(best_params[,c(2,3,4,8:13)], c(1,2), function(x) 1/x)
+best_params[,c(2:4,8:10)] = apply(best_params[,c(2:4,8:10)], c(1,2), function(x) 1/x)
 
 write.csv(best_params, here::here("Fitting", "best_params.csv"), row.names = F)
 
