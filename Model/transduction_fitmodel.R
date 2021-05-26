@@ -34,8 +34,7 @@ model_pointLike <- function(data.point, model.point, theta, log = FALSE){
   # dpoisBt = dpois(x = data.point[["Bt"]],
   #                 lambda = model.point[["Bt"]],
   #                 log = log)
-  dpoisBe = dpoisBt = dpoisPe = dpoisPt = 0
-  
+
   #model_Bet = max(model.point[["Bet"]], 0)
   #model_Pl = max(model.point[["Pl"]], 0)
   
@@ -51,7 +50,7 @@ model_pointLike <- function(data.point, model.point, theta, log = FALSE){
   #if(is.infinite(dpoisPl)) dpoisPl = -1e7
   
   ## the prevalence is observed through a Poisson process
-  return(sum(dpoisBe, dpoisBt, dpoisBet, dpoisPl, dpoisPe, dpoisPt))
+  return(sum(dpoisBet, dpoisPl))
 }
 
 ## function to generate observation from a model simulation
