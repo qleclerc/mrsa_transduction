@@ -117,9 +117,9 @@ choose_model = function(model,
     }
     
     trajectory = data.frame(dede(y = init.state,
-                                  times = times,
-                                  func = model_dde,
-                                  parms = theta))
+                                 times = times,
+                                 func = model_dde,
+                                 parms = theta))
     
     return(trajectory)
     
@@ -158,14 +158,14 @@ run_mcmc = function(model, lab_data, lab_data2 = NULL,
     target_function = function(theta){
       
       my_init.state = c(Be = lab_data$Be[1], Bt = lab_data$Bt[1], Bet = 0,
-                         Pl = lab_data$P[1], Pt = 0, Pe = 0)
+                        Pl = lab_data$P[1], Pt = 0, Pe = 0)
       
       logval = dLogPosterior(fitmodel = model, theta = theta, init.state = my_init.state, 
                              data = lab_data, margLogLike = dTrajObs, log = TRUE)
       
       if(!is.null(lab_data2)){
         my_init.state = c(Be = lab_data2$Be[1], Bt = lab_data2$Bt[1], Bet = 0,
-                           Pl = lab_data2$P[1], Pt = 0, Pe = 0)
+                          Pl = lab_data2$P[1], Pt = 0, Pe = 0)
         logval = logval + dLogPosterior(fitmodel = model, theta = theta, init.state = my_init.state, 
                                         data = lab_data2, margLogLike = dTrajObs, log = TRUE)
       }
@@ -215,59 +215,13 @@ evaluate_fit = function(model, lab_data, theta){
   theta
 }
 
-multi_run = function(model, theta_trace, init.state, times = seq(0, 24, 1), nruns = 5000){
-  
-  theta_trace = theta_trace[,-ncol(theta_trace)]
-  
-  summary_runs = list()
-  index = 1
-  for (i in names(init.state)) {
-    summary_runs[[index]] = matrix(0, length(times), nruns)
-    index = index + 1
-  }
-  names(summary_runs) = names(init.state)
-  
-  
-  for(i in 1:nruns){
-    
-    theta = apply(theta_trace, 2, FUN = function(x) sample(x, 1))
-    #theta = theta_trace[sample(1:nrow(theta_trace), 1),]
-    
-    traj = model$simulate(theta, init.state, times)
-    
-    for (name in names(init.state)) {
-      summary_runs[[name]][,i] = traj[,name]
-    }
-    
-  }
-  
-  
-  #combine all results into a single dataframe with mean and sd
-  summary_results = data.frame(time = times)
-  
-  for (name in names(init.state)) {
-    summary_results = cbind(summary_results, 
-                            rowMeans(summary_runs[[name]]), 
-                            apply(summary_runs[[name]], 1, sd))
-  }
-  
-  summary_colnames = c()
-  for (name in names(init.state)) {
-    summary_colnames = c(summary_colnames,
-                         name,
-                         paste0(name, "_sd"))
-  }
-  
-  colnames(summary_results) = c("time", summary_colnames)
-  
-  summary_results
-  
-}
 
-multi_run2 = function(model, theta_trace, init.state, times = seq(0, 24, 1), nruns = 5000){
+multi_run2 = function(model, theta_trace, init.state, times = seq(0, 24, 1), nruns = 5000, median = TRUE){
   
-  if(!is.null(nrow(theta_trace))) theta = apply(theta_trace, 2, median)#theta_trace[which.max(theta_trace[,"log.density"]),]
-  else theta = theta_trace
+  if(median){
+    if(!is.null(nrow(theta_trace))) theta = apply(theta_trace, 2, median)#theta_trace[which.max(theta_trace[,"log.density"]),]
+    else theta = theta_trace
+  }
   
   summary_runs = list()
   index = 1
@@ -280,8 +234,8 @@ multi_run2 = function(model, theta_trace, init.state, times = seq(0, 24, 1), nru
   
   for(i in 1:nruns){
     
-    #theta = apply(theta_trace, 2, FUN = function(x) sample(x, 1))
-    #theta = theta_trace[sample(1:nrow(theta_trace), 1),]
+    #if(!median) theta = apply(theta_trace, 2, FUN = function(x) sample(x, 1))
+    if(!median) theta = theta_trace[sample(1:nrow(theta_trace), 1),]
     
     traj = model$simulate(theta, init.state, times)
     

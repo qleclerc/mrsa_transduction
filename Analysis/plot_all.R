@@ -132,7 +132,7 @@ for(i in 1:nrow(models_to_try)){
                  Pl = lab_data_trans$P[1], Pe = 0, Pt = 0)
   
   traj = multi_run2(model, trace_model, init.state,
-                    times = seq(0, 24, 1), nruns = 100)
+                    times = seq(0, 24, 1), nruns = 100, median = F)
   
   traj$model = models_to_try$model_name[i]
   all_traj_4 = rbind(all_traj_4, traj)
@@ -143,7 +143,7 @@ for(i in 1:nrow(models_to_try)){
                  Pl = lab_data_trans5$P[1], Pe = 0, Pt = 0)
   
   traj = multi_run2(model, trace_model, init.state,
-                    times = seq(0, 24, 1), nruns = 100)
+                    times = seq(0, 24, 1), nruns = 100, median = F)
   
   traj$model = models_to_try$model_name[i]
   all_traj_5 = rbind(all_traj_5, traj)
@@ -153,7 +153,7 @@ for(i in 1:nrow(models_to_try)){
                  Pl = lab_data_trans3$P[1], Pe = 0, Pt = 0)
   
   traj = multi_run2(model, trace_model, init.state,
-                    times = seq(0, 24, 1), nruns = 100)
+                    times = seq(0, 24, 1), nruns = 100, median = F)
   
   traj$model = models_to_try$model_name[i]
   all_traj_3 = rbind(all_traj_3, traj)
