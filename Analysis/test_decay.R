@@ -53,7 +53,7 @@ models_to_try = rbind(models_to_try,
 
 all_results3 = c()
 
-try_decay = c(10^-4, 10^-3.5, 10^-3, 10^-2.5, 10^-2, 10^-1.5, 10^-1)
+try_decay = c(10^-5, 10^-4.5, 10^-4, 10^-3.5, 10^-3, 10^-2.5, 10^-2, 10^-1.5, 10^-1)
 
 for(i in 1:nrow(models_to_try)){
   
@@ -94,7 +94,6 @@ all_results3$initial = "10^3"
 
 all_results4 = c()
 
-try_decay = c(10^-4, 10^-3.5, 10^-3, 10^-2.5, 10^-2, 10^-1.5, 10^-1)
 
 for(i in 1:nrow(models_to_try)){
   
@@ -135,7 +134,6 @@ all_results4$initial = "10^4"
 
 all_results5 = c()
 
-try_decay = c(10^-4, 10^-3.5, 10^-3, 10^-2.5, 10^-2, 10^-1.5, 10^-1)
 
 for(i in 1:nrow(models_to_try)){
   
@@ -188,7 +186,7 @@ ggplot(all_results) +
   #                    labels=trans_format("log10", math_format(10^.x))) +
   coord_cartesian(ylim = c(1e4, 1e8)) +
   facet_wrap(~initial) +
-  labs(colour = "Model:", x="Log phage decay rate (phage per h)", y="pfu per mL after 24h") +
+  labs(colour = "Model:", x="Log phage decay rate", y="pfu per mL after 24h") +
   theme_bw() +
   scale_colour_manual(breaks= c("dens_beta", "dens_burst", "dens_both", "freq_beta", "freq_burst", "freq_both"),
                       values = c("#579dd9", "#5383ea", "#2c56a7", "firebrick1", "firebrick3", "firebrick4"),
