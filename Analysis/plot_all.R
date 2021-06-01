@@ -132,7 +132,7 @@ for(i in 1:nrow(models_to_try)){
                  Pl = lab_data_trans$P[1], Pe = 0, Pt = 0)
   
   traj = multi_run2(model, trace_model, init.state,
-                    times = seq(0, 24, 1), nruns = 100, median = F)
+                    times = seq(0, 24, 1), nruns = 100, median = T)
   
   traj$model = models_to_try$model_name[i]
   all_traj_4 = rbind(all_traj_4, traj)
@@ -143,7 +143,7 @@ for(i in 1:nrow(models_to_try)){
                  Pl = lab_data_trans5$P[1], Pe = 0, Pt = 0)
   
   traj = multi_run2(model, trace_model, init.state,
-                    times = seq(0, 24, 1), nruns = 100, median = F)
+                    times = seq(0, 24, 1), nruns = 100, median = T)
   
   traj$model = models_to_try$model_name[i]
   all_traj_5 = rbind(all_traj_5, traj)
@@ -153,7 +153,7 @@ for(i in 1:nrow(models_to_try)){
                  Pl = lab_data_trans3$P[1], Pe = 0, Pt = 0)
   
   traj = multi_run2(model, trace_model, init.state,
-                    times = seq(0, 24, 1), nruns = 100, median = F)
+                    times = seq(0, 24, 1), nruns = 100, median = T)
   
   traj$model = models_to_try$model_name[i]
   all_traj_3 = rbind(all_traj_3, traj)
@@ -222,10 +222,10 @@ p4 = ggplot() +
                         values = c(1, 2)) +
   scale_colour_manual(breaks = c("PL"),
                       labels = c("Lytic phage"),
-                      values = c("darkgreen", "#5ad3ec", "grey", "#c88a33")) +
+                      values = c("darkgreen", "#5ad3ec", "black", "#c88a33")) +
   scale_fill_manual(breaks = c("dens_burst", "freq_burst", "other"),
                     labels = c("Density, link burst size", "Frequency, link burst size", "Other"),
-                    values = c("darkgreen", "#5ad3ec", "grey"),
+                    values = c("darkgreen", "#5ad3ec", "black"),
                     guide = guide_legend(override.aes = list(size = c(0.8,0.8,0.5),
                                                              linetype = c(2,2,2)))) +
   scale_size_manual(breaks = c("dens_burst", "freq_burst", "other"),
@@ -266,10 +266,10 @@ p5 = ggplot() +
                         values = c(1, 2)) +
   scale_colour_manual(breaks = c("PL"),
                       labels = c("Lytic phage"),
-                      values = c("darkgreen", "#5ad3ec", "grey", "#c88a33")) +
+                      values = c("darkgreen", "#5ad3ec", "black", "#c88a33")) +
   scale_fill_manual(breaks = c("dens_burst", "freq_burst", "other"),
                     labels = c("Density, link burst size", "Frequency, link burst size", "Other"),
-                    values = c("darkgreen", "#5ad3ec", "grey"),
+                    values = c("darkgreen", "#5ad3ec", "black"),
                     guide = guide_legend(override.aes = list(size = c(0.8,0.8,0.5),
                                                              linetype = c(2,2,2)))) +
   scale_size_manual(breaks = c("dens_burst", "freq_burst", "other"),
@@ -309,10 +309,10 @@ p3 = ggplot() +
                         values = c(1, 2)) +
   scale_colour_manual(breaks = c("PL"),
                       labels = c("Lytic phage"),
-                      values = c("darkgreen", "#5ad3ec", "grey", "#c88a33")) +
+                      values = c("darkgreen", "#5ad3ec", "black", "#c88a33")) +
   scale_fill_manual(breaks = c("dens_burst", "freq_burst", "other"),
                     labels = c("Density, link burst size", "Frequency, link burst size", "Other"),
-                    values = c("darkgreen", "#5ad3ec", "grey"),
+                    values = c("darkgreen", "#5ad3ec", "black"),
                     guide = guide_legend(override.aes = list(size = c(0.8,0.8,0.5),
                                                              linetype = c(2,2,2)))) +
   scale_size_manual(breaks = c("dens_burst", "freq_burst", "other"),
@@ -361,10 +361,10 @@ p5_extra = ggplot() +
                         values = c(1, 2)) +
   scale_colour_manual(breaks = c("PL", "BET"),
                       labels = c("Lytic phage", "Double resistant bacteria (DRP)"),
-                      values = c("#c2484d", "darkgreen", "#5ad3ec", "grey", "#c88a33")) +
+                      values = c("#c2484d", "darkgreen", "#5ad3ec", "black", "#c88a33")) +
   scale_fill_manual(breaks = c("dens_burst", "freq_burst", "other"),
                     labels = c("Density, link burst size", "Frequency, link burst size", "Other"),
-                    values = c("darkgreen", "#5ad3ec", "grey"),
+                    values = c("darkgreen", "#5ad3ec", "black"),
                     guide = guide_legend(override.aes = list(size = c(0.8,0.8,0.5),
                                                              linetype = c(2,2,2)))) +
   scale_size_manual(breaks = c("dens_burst", "freq_burst", "other"),
@@ -394,20 +394,17 @@ p4_bet = ggplot() +
   geom_errorbar(data = lab_data_transM %>% filter(Bacteria == "DRP"), 
                 aes(x = Time, ymin = pmax(Mean - se, 0), ymax = Mean + se,
                     colour= "BET"), size = 0.8) +
-  scale_y_continuous(trans=log10_trans(),
-                     breaks=trans_breaks("log10", function(x) 10^x, n = 4),
-                     labels=trans_format("log10", math_format(10^.x)),) +
   scale_x_continuous(breaks = seq(0,24,4)) +
-  coord_cartesian(ylim = c(0.1, 1e2)) +
+  coord_cartesian(ylim = c(0, 30)) +
   scale_linetype_manual(breaks = c("Data", "Model"),
                         labels = c("Data", "Model"),
                         values = c(1, 2)) +
   scale_colour_manual(breaks = c("BET"),
                       labels = c("Double resistant bacteria"),
-                      values = c("#c2484d", "darkgreen", "#5ad3ec", "grey")) +
+                      values = c("#c2484d", "darkgreen", "#5ad3ec", "black")) +
   scale_fill_manual(breaks = c("dens_burst", "freq_burst", "other"),
                     labels = c("Density, link burst size", "Frequency, link burst size", "Other"),
-                    values = c("darkgreen", "#5ad3ec", "grey"),
+                    values = c("darkgreen", "#5ad3ec", "black"),
                     guide = guide_legend(override.aes = list(size = c(0.8,0.8,0.5),
                                                              linetype = c(2,2,2)))) +
   scale_size_manual(breaks = c("dens_burst", "freq_burst", "other"),
@@ -438,20 +435,17 @@ p5_bet = ggplot() +
   geom_errorbar(data = lab_data_trans5M %>% filter(Bacteria == "DRP"), 
                 aes(x = Time, ymin = pmax(Mean - se, 0), ymax = Mean + se,
                     colour= "BET"), size = 0.8) +
-  scale_y_continuous(trans=log10_trans(),
-                     breaks=trans_breaks("log10", function(x) 10^x, n = 4),
-                     labels=trans_format("log10", math_format(10^.x))) +
   scale_x_continuous(breaks = seq(0,24,4)) +
-  coord_cartesian(ylim = c(0.1, 1e2)) +
+  coord_cartesian(ylim = c(0, 30)) +
   scale_linetype_manual(breaks = c("Data", "Model"),
                         labels = c("Data", "Model"),
                         values = c(1, 2)) +
   scale_colour_manual(breaks = c("BET"),
                       labels = c("Double resistant bacteria"),
-                      values = c("#c2484d", "darkgreen", "#5ad3ec", "grey")) +
+                      values = c("#c2484d", "darkgreen", "#5ad3ec", "black")) +
   scale_fill_manual(breaks = c("dens_burst", "freq_burst", "other"),
                     labels = c("Density, link burst size", "Frequency, link burst size", "Other"),
-                    values = c("darkgreen", "#5ad3ec", "grey"),
+                    values = c("darkgreen", "#5ad3ec", "black"),
                     guide = guide_legend(override.aes = list(size = c(0.8,0.8,0.5),
                                                              linetype = c(2,2,2)))) +
   scale_size_manual(breaks = c("dens_burst", "freq_burst", "other"),
@@ -481,20 +475,17 @@ p3_bet = ggplot() +
   geom_errorbar(data = lab_data_trans3M %>% filter(Bacteria == "DRP"), 
                 aes(x = Time, ymin = pmax(Mean - se, 0), ymax = Mean + se,
                     colour= "BET"), size = 0.8) +
-  scale_y_continuous(trans=log10_trans(),
-                     breaks=trans_breaks("log10", function(x) 10^x, n = 4),
-                     labels=trans_format("log10", math_format(10^.x))) +
   scale_x_continuous(breaks = seq(0,24,4)) +
-  coord_cartesian(ylim = c(0.1, 1e2)) +
+  coord_cartesian(ylim = c(0, 30)) +
   scale_linetype_manual(breaks = c("Data", "Model"),
                         labels = c("Data", "Model"),
                         values = c(1, 2)) +
   scale_colour_manual(breaks = c("BET"),
                       labels = c("Double resistant bacteria"),
-                      values = c("#c2484d", "darkgreen", "#5ad3ec", "grey")) +
+                      values = c("#c2484d", "darkgreen", "#5ad3ec", "black")) +
   scale_fill_manual(breaks = c("dens_burst", "freq_burst", "other"),
                     labels = c("Density, link burst size", "Frequency, link burst size", "Other"),
-                    values = c("darkgreen", "#5ad3ec", "grey"),
+                    values = c("darkgreen", "#5ad3ec", "black"),
                     guide = guide_legend(override.aes = list(size = c(0.8,0.8,0.5),
                                                              linetype = c(2,2,2)))) +
   scale_size_manual(breaks = c("dens_burst", "freq_burst", "other"),

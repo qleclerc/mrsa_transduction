@@ -84,7 +84,7 @@ for(i in 1:nrow(models_to_try)){
   
   trace_model4 = fitted_params4[[models_to_try$model_name[i]]]
   trace_model4 = coda::mcmc(trace_model4)
-  trace_model4b = fitted_params4b[[models_to_try$model_name[i]]][-c(100001:125000),]
+  trace_model4b = fitted_params4b[[models_to_try$model_name[i]]][-c(300001:400000),]
   trace_model4b = coda::mcmc(trace_model4b)
   trace_model4 = mcmc.list(trace_model4, trace_model4b)
   trace_model4 = burnAndThin(trace_model4, burn = 200000, thin = 1)
@@ -95,13 +95,18 @@ for(i in 1:nrow(models_to_try)){
   trace_model4 = coda::mcmc(trace_model4)
   trace_model4 = burnAndThin(trace_model4, burn = 200000, thin = 1)
   
-  trace_model4b = fitted_params4b[[models_to_try$model_name[i]]][-c(100001:125000),]
+  trace_model4b = fitted_params4b[[models_to_try$model_name[i]]][-c(300001:400000),]
   trace_model4b = coda::mcmc(trace_model4b)
   trace_model4b = burnAndThin(trace_model4b, burn = 200000, thin = 1)
   
   trace_model4 = rbind(trace_model4, trace_model4b)
-  write.csv(trace_model4, "params_freq_both.csv", row.names = F)
+  write.csv(trace_model4, "params_dens_burst.csv", row.names = F)
 
+  tt = readRDS(here::here("Fitting", "Full_chains", "best_params_transduction_b.rds"))
+  tt$mass_decay_link_L = tt$mass_decay_link_L[-c(1:200000),]
+  tt$frequentist_decay_link_L = tt$frequentist_decay_link_L[-c(1:200000),]
+  saveRDS(tt, here::here("Fitting", "Full_chains", "best_params_transduction_b.rds"))
+  
   model = choose_model(model,
                        frequentist = models_to_try$frequentist[i],
                        fixed_delay = models_to_try$fixed_delay[i],
