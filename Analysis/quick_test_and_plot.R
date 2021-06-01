@@ -14,15 +14,15 @@ model = readRDS(here::here("Model", "transduction_model.rds"))
 
 files = list.files(here::here("Fitting", "Fitted_params"))
 
-params = vector("list", length(files))
+all_params = vector("list", length(files))
 i=1
 
 for(f in files){
-  params[[i]] = read.csv(here::here("Fitting", "Fitted_params", f))
+  all_params[[i]] = read.csv(here::here("Fitting", "Fitted_params", f))
   i = i+1
 }
 
-names(params) = gsub(".csv", "", gsub("params_", "", files))
+names(all_params) = gsub(".csv", "", gsub("params_", "", files))
 
 lab_data_trans = read.csv(here::here("Lab", "Transduction", "summary_10_4.csv")) %>%
   select(Time, Bacteria, Mean) %>%
@@ -62,17 +62,17 @@ lab_data_trans3M = read.csv(here::here("Lab", "Transduction", "summary_10_3.csv"
   filter(Bacteria != "Total")
 
 model = choose_model(model,
-                     frequentist = T,
+                     frequentist = F,
                      fixed_delay = NA,
-                     decay = T,
-                     link_beta = F,
+                     decay = F,
+                     link_beta = T,
                      link_L = T,
                      link_delay = F,
                      transduction = T, prop_Bet = T)
 
-trace_model = params[["freq_burst"]]
+trace_model = all_params[["dens_both"]]
 params = apply(trace_model, 2, median)
-params = c(beta = 7646387086.68, L = 91.19, gamma = 11.09, alpha = 46604726.39, tau = 0.41)
+#params = c(beta = 7646387086.68, L = 91.19, gamma = 11.09, alpha = 46604726.39, tau = 0.41)
 
 
 #params[["L"]] = 80

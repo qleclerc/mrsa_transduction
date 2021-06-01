@@ -395,7 +395,7 @@ p4_bet = ggplot() +
                 aes(x = Time, ymin = pmax(Mean - se, 0), ymax = Mean + se,
                     colour= "BET"), size = 0.8) +
   scale_x_continuous(breaks = seq(0,24,4)) +
-  coord_cartesian(ylim = c(0, 30)) +
+  coord_cartesian(ylim = c(0, 15)) +
   scale_linetype_manual(breaks = c("Data", "Model"),
                         labels = c("Data", "Model"),
                         values = c(1, 2)) +
@@ -476,7 +476,8 @@ p3_bet = ggplot() +
                 aes(x = Time, ymin = pmax(Mean - se, 0), ymax = Mean + se,
                     colour= "BET"), size = 0.8) +
   scale_x_continuous(breaks = seq(0,24,4)) +
-  coord_cartesian(ylim = c(0, 30)) +
+  scale_y_continuous(breaks = c(0,2,4,6,8,10)) +
+  coord_cartesian(ylim = c(0, 10)) +
   scale_linetype_manual(breaks = c("Data", "Model"),
                         labels = c("Data", "Model"),
                         values = c(1, 2)) +
