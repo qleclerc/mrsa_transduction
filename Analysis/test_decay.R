@@ -174,6 +174,11 @@ all_results5$initial = "10^5"
 
 all_results = rbind(all_results3, all_results4, all_results5)
 
+all_results$initial = as.factor(all_results$initial)
+levels(all_results$initial) = c(expression(paste(10^3, " phage")),
+                                expression(paste(10^4, " phage")),
+                                expression(paste(10^5, " phage")))
+
 
 ggplot(all_results) + 
   geom_pointrange(aes(x = log10(decay), y = Pl, ymin = pmax(Pl - Pl_sd, 0.01), ymax = Pl + Pl_sd, colour = model),
@@ -185,7 +190,7 @@ ggplot(all_results) +
   #                    breaks=trans_breaks("log10", function(x) 10^x, n = 6),
   #                    labels=trans_format("log10", math_format(10^.x))) +
   coord_cartesian(ylim = c(1e4, 1e8)) +
-  facet_wrap(~initial) +
+  facet_wrap(~initial, labeller = label_parsed) +
   labs(colour = "Model:", x="Log phage decay rate", y="pfu per mL after 24h") +
   theme_bw() +
   scale_colour_manual(breaks= c("dens_beta", "dens_burst", "dens_both", "freq_beta", "freq_burst", "freq_both"),

@@ -1,6 +1,6 @@
 model_name <- "transduction model"
 model_state.names <- c("Be","Bt","Bet","Pl", "Pe", "Pt")
-model_theta.names <- c("beta", "L", "gamma", "alpha", "tau")
+model_theta.names <- c("beta", "L", "alpha", "tau")
 
 model_simulateDeterministic <- function(theta,init.state,times) {
   

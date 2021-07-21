@@ -5,7 +5,7 @@ choose_model = function(model,
                         decay = FALSE,
                         link_beta = FALSE, link_L = FALSE, link_delay = FALSE,
                         transduction = FALSE,
-                        prop_Bet = FALSE){
+                        fig5 = FALSE){
   
   model_simulateDeterministic = function(theta, init.state, times) {
     
@@ -103,16 +103,23 @@ choose_model = function(model,
       dBet = mu_et * link * (Bet - growth_correction*(phi_Pl*Bet/N) ) - phi_Pl * Bet/N +
         phi_Pe * Bt/N + phi_Pt * Be/N
       
-      if(prop_Bet) cat("\nTime:", time,
-                       "; Ratio new Bet:Bet growth:",
-                       (phi_Pe*Bt/N+phi_Pt*Be/N)/(mu_et*link* (Bet - growth_correction*(phi_Pl*Bet/N))))
       
       dPl = phi_Pl_past * L * (1 - alpha*(Be_past+Bt_past+2*Bet_past)/N_past) -
         lambda * Pl - gamma * Pl
       dPe = phi_Pl_past * L * alpha * (Be_past + Bet_past)/N_past - lambda * Pe - gamma * Pe
       dPt = phi_Pl_past * L * alpha * (Bt_past + Bet_past)/N_past - lambda * Pt - gamma * Pt
       
-      return(list(c(dBe, dBt, dBet, dPl, dPe, dPt)))
+      if(fig5){
+        Bet_tr = unname(phi_Pe*Bt/N + phi_Pt*Be/N) 
+        Bet_gr = unname(mu_et*link* (Bet - growth_correction*(phi_Pl*Bet/N)))
+        Pl_inc = unname(phi_Pl_past * L * (1 - alpha*(Be_past+Bt_past+2*Bet_past)/N_past))
+        Pe_inc = unname(phi_Pl_past * L * alpha * (Be_past + Bet_past)/N_past)
+        Pt_inc = unname(phi_Pl_past * L * alpha * (Bt_past + Bet_past)/N_past)
+        Be_gr = unname(mu_e * link * (Be - growth_correction*((phi_Pl + phi_Pt) * Be/N) ))
+        Bt_gr = unname(mu_t * link * (Bt - growth_correction*((phi_Pl + phi_Pe) * Bt/N) ))
+        return(list(c(dBe, dBt, dBet, dPl, dPe, dPt), Bet_tr = Bet_tr, Bet_gr = Bet_gr,
+                    Pl_inc = Pl_inc, Pe_inc = Pe_inc, Pt_inc = Pt_inc, Be_gr = Be_gr, Bt_gr = Bt_gr))
+      } else return(list(c(dBe, dBt, dBet, dPl, dPe, dPt)))
       
     }
     
@@ -216,20 +223,24 @@ evaluate_fit = function(model, lab_data, theta){
 }
 
 
-multi_run2 = function(model, theta_trace, init.state, times = seq(0, 24, 1), nruns = 5000, median = TRUE){
+multi_run2 = function(model, theta_trace, init.state, times = seq(0, 24, 1), nruns = 100,
+                      median = TRUE, sampling_error = TRUE, fig5 = FALSE){
   
   if(median){
     if(!is.null(nrow(theta_trace))) theta = apply(theta_trace, 2, median)#theta_trace[which.max(theta_trace[,"log.density"]),]
     else theta = theta_trace
   }
   
+  variables = names(init.state)
+  if(fig5) variables = c(variables, "Bet_tr", "Bet_gr", "Pl_inc", "Pe_inc", "Pt_inc")
+  
   summary_runs = list()
   index = 1
-  for (i in names(init.state)) {
+  for (i in variables) {
     summary_runs[[index]] = matrix(0, length(times), nruns)
     index = index + 1
   }
-  names(summary_runs) = names(init.state)
+  names(summary_runs) = variables
   
   
   for(i in 1:nruns){
@@ -239,14 +250,16 @@ multi_run2 = function(model, theta_trace, init.state, times = seq(0, 24, 1), nru
     
     traj = model$simulate(theta, init.state, times)
     
-    traj[,-1] = apply(traj[,-1], c(1,2),
-                      function(x){
-                        dec = max(floor(log10(x)),1)
-                        val = rpois(1,x/(10^(dec-1)))
-                        val*(10^(dec-1))
-                      })
+    if(sampling_error){
+      traj[,-1] = apply(traj[,-1], c(1,2),
+                        function(x){
+                          dec = max(floor(log10(x)),1)
+                          val = rpois(1,x/(10^(dec-1)))
+                          val*(10^(dec-1))
+                        })
+    }
     
-    for (name in names(init.state)) {
+    for (name in variables) {
       summary_runs[[name]][,i] = traj[,name]
     }
     
@@ -256,14 +269,14 @@ multi_run2 = function(model, theta_trace, init.state, times = seq(0, 24, 1), nru
   #combine all results into a single dataframe with mean and sd
   summary_results = data.frame(time = times)
   
-  for (name in names(init.state)) {
+  for (name in variables) {
     summary_results = cbind(summary_results, 
                             rowMeans(summary_runs[[name]]), 
                             apply(summary_runs[[name]], 1, sd))
   }
   
   summary_colnames = c()
-  for (name in names(init.state)) {
+  for (name in variables) {
     summary_colnames = c(summary_colnames,
                          name,
                          paste0(name, "_sd"))
