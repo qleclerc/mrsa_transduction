@@ -3,15 +3,10 @@ library(ggplot2)
 library(scales)
 library(dplyr)
 
-"#8d57bf"
-"#aca549"
-"#944d61"
-"#79a097"
-
-data = read.csv(here::here("Lab", "Triculture", "summary.csv"))
-data3 = read.csv(here::here("Lab", "Transduction", "summary_10_3.csv"))
-data4 = read.csv(here::here("Lab", "Transduction", "summary_10_4.csv"))
-data5 = read.csv(here::here("Lab", "Transduction", "summary_10_5.csv"))
+data = read.csv(here::here("Data", "growth_summary.csv"))
+data3 = read.csv(here::here("Data", "transduction_summary_10_3.csv"))
+data4 = read.csv(here::here("Data", "transduction_summary_10_4.csv"))
+data5 = read.csv(here::here("Data", "transduction_summary_10_5.csv"))
 
 data$Type = "No phage"
 data3$Type = "10^3"
@@ -73,35 +68,7 @@ ggplot(data_all %>% filter(Type != "No phage"), aes(x=Time, y=Mean, colour=Bacte
         strip.text.x = element_text(size=12))
 
 
-ggsave(here::here("Lab", "Plots", "all_lab_data_wrap.png"))
-
-
-ggplot(data_all %>% filter(Type == "No phage"), aes(x=Time, y=Mean, colour=Bacteria))+
-  geom_point(size = 2)+
-  geom_line(alpha=0.3)+
-  geom_line(data = data_all %>% filter(Type == "No phage") %>% filter(Time < 9), size = 0.8) +
-  geom_line(data = data_all %>% filter(Type == "No phage") %>% filter(Time > 15), size = 0.8) +
-  geom_errorbar(aes(x=Time, ymin=se_min, ymax=se_max), size = 0.8) +
-  scale_x_continuous(breaks=seq(0,max(data$Time),4))+
-  scale_y_continuous(trans=log10_trans(),
-                     breaks=trans_breaks("log10", function(x) 10^x),
-                     labels=trans_format("log10", math_format(10^.x)))+
-  labs(y = "cfu or pfu per mL", x = "Time (hours)", colour = "")+
-  theme_bw() +
-  scale_colour_manual(values=c("#685cc4","#6db356","#c2484d"),
-                      labels = c(expression(B[E]),
-                                 expression(B[T]),
-                                 expression(B[ET]))) +
-  guides(linetype = F) +
-  theme(axis.text.x = element_text(size=12),
-        axis.title.x = element_text(size=12),
-        axis.text.y = element_text(size=12),
-        axis.title.y = element_text(size=12),
-        legend.text = element_text(size=12),
-        strip.text.x = element_text(size=12))
-
-ggsave(here::here("Lab", "Plots", "growth_lab_data.png"))
-
+ggsave(here::here("Figures", "fig2.png"))
 
 ggplot(data_all %>% filter(Type != "No phage"), aes(x=Time, y=Mean,
                                                     colour=Bacteria, linetype= Type))+
@@ -116,12 +83,16 @@ ggplot(data_all %>% filter(Type != "No phage"), aes(x=Time, y=Mean,
                      labels=trans_format("log10", math_format(10^.x)))+
   labs(y = "cfu or pfu per mL", x = "Time (hours)", colour = "Organism:", linetype = "Initial phage:")+
   theme_bw() +
-  scale_colour_manual(values=c("#685cc4","#6db356","#c2484d","#c88a33"),
-                      labels = c(expression(B[E]),
-                                 expression(B[T]),
-                                 expression(B[ET]),
-                                 expression(P[L])),
-                      guide = guide_legend(override.aes = list(shape = c(19,19,19,17)))) +
+  scale_colour_manual(values=c("white","#685cc4","#6db356","#c2484d","white","white","#c88a33"),
+                      drop = FALSE,
+                      labels = c("Bacteria:",
+                                 bquote(B[E]),
+                                 bquote(B[T]),
+                                 bquote(B[ET]),
+                                 " ",
+                                 "Phage:",
+                                 bquote(P[L])),
+                      guide = guide_legend(override.aes = list(shape = c(19,19,19,19,19,19,17)))) +
   scale_linetype_manual(values = c(1,2,3),
                         labels = c(expression(10^3),
                                    expression(10^4),
@@ -135,7 +106,7 @@ ggplot(data_all %>% filter(Type != "No phage"), aes(x=Time, y=Mean,
         legend.title = element_text(size=12),
         strip.text.x = element_text(size=12))
 
-ggsave(here::here("Lab", "Plots", "all_lab_data_together.png"))
+ggsave(here::here("Figures", "supp_fig2.png"))
 
 
 fitness = function(data, str1, str2){

@@ -10,16 +10,14 @@ library(scales)
 
 source(here::here("Model", "transduction_model_functions.R"))
 
-# mass_model = readRDS(here::here("Fitting", "mass_model.rds"))
 model = readRDS(here::here("Model", "growth_model.rds"))
 
-lab_dataM = read.csv(here::here("Lab", "Triculture", "summary.csv")) %>%
+lab_dataM = read.csv(here::here("Data", "growth_summary.csv")) %>%
   select(Time, Bacteria, Mean, se) %>%
-  #mutate(se = se*sqrt(3)) %>%
   filter(Bacteria != "Total")
 
 
-lab_data = read.csv(here::here("Lab", "Triculture", "summary.csv")) %>%
+lab_data = read.csv(here::here("Data", "growth_summary.csv")) %>%
   select(Time, Bacteria, Mean) %>%
   dcast(Time~Bacteria) %>%
   select(-Total) %>%
@@ -111,8 +109,7 @@ ggplot() +
         strip.text.x = element_text(size=12))
 
 
-ggsave(here::here("Fitting", "growth_model.png"))
+ggsave(here::here("Figures", "supp_fig1.png"))
 
 
-saveRDS(mcmc_fit$trace, here::here("Fitting", "best_params_growth.rds"))
 

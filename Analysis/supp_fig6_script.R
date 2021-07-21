@@ -6,7 +6,6 @@ data = read.csv(here::here("Fitting", "Fitted_params", "params_freq_burst.csv"))
 data1 = data[1:50000,]
 data2 = data[50001:100000,]
 
-#beta l alpha tau
 
 pbeta = ggplot() +
   geom_line(data = data1, aes(seq(1,50000,1), beta)) +
@@ -25,7 +24,6 @@ pbeta = ggplot() +
 
 pbetahist = ggplot() +
   geom_histogram(data = data, aes(beta)) +
-  #geom_histogram(aes(rnorm(50000,40,7)), fill = "blue", alpha = 0.3) +
   theme_bw() +
   labs(x = "Adsorption rate", y = "Count") +
   theme(axis.text.x = element_text(size=12),
@@ -84,7 +82,6 @@ palpha = ggplot() +
 
 palphahist = ggplot() +
   geom_histogram(data = data, aes(alpha)) +
-  #geom_histogram(aes(rnorm(50000,40,7)), fill = "blue", alpha = 0.3) +
   theme_bw() +
   labs(x = "Prop. transducing phage", y = "Count") +
   theme(axis.text.x = element_text(size=12),
@@ -133,6 +130,9 @@ plot_grid(pbeta, NULL, pbetahist,
           ptau, NULL, ptauhist,
           nrow = 4,
           rel_widths = c(0.8,0.05,1),
-          labels)
+          labels = c("a", "", "e",
+                     "b", "", "f",
+                     "c", "", "g",
+                     "d", "", "h"))
 
-ggsave("supp_fig_6.png", height = 12, width = 10, dpi = 600)
+ggsave(here::here("Figures", "supp_fig6.png"), height = 12, width = 10, dpi = 600)

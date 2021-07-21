@@ -9,7 +9,6 @@ library(openxlsx)
 
 source(here::here("Model", "transduction_model_functions.R"))
 
-# mass_model = readRDS(here::here("Fitting", "mass_model.rds"))
 model = readRDS(here::here("Model", "transduction_model.rds"))
 
 files = list.files(here::here("Fitting", "Fitted_params"))
@@ -186,12 +185,9 @@ ggplot(all_results) +
   scale_y_continuous(trans=log10_trans(),
                      breaks=trans_breaks("log10", function(x) 10^x, n = 6),
                      labels=trans_format("log10", math_format(10^.x))) +
-  # scale_x_continuous(trans=log10_trans(),
-  #                    breaks=trans_breaks("log10", function(x) 10^x, n = 6),
-  #                    labels=trans_format("log10", math_format(10^.x))) +
   coord_cartesian(ylim = c(1e4, 1e8)) +
   facet_wrap(~initial, labeller = label_parsed) +
-  labs(colour = "Model:", x="Log phage decay rate", y="pfu per mL after 24h") +
+  labs(colour = "Model:", x="Log10 phage decay rate", y="pfu per mL after 24h") +
   theme_bw() +
   scale_colour_manual(breaks= c("dens_beta", "dens_burst", "dens_both", "freq_beta", "freq_burst", "freq_both"),
                       values = c("#579dd9", "#5383ea", "#2c56a7", "firebrick1", "firebrick3", "firebrick4"),
@@ -209,4 +205,4 @@ ggplot(all_results) +
         legend.title = element_text(size=12),
         strip.text.x = element_text(size=12))
 
-ggsave(here::here("Lab", "Plots", "decay_impact.png"))
+ggsave(here::here("Figures", "supp_fig3.png"))

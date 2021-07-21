@@ -1,3 +1,6 @@
+
+#note that fig4ab generated here is then plotted and saved in the "plot_varying_MOI.R" script!
+
 # SETUP ####
 
 library(fitR)
@@ -10,7 +13,6 @@ library(scales)
 
 source(here::here("Model", "transduction_model_functions.R"))
 
-# mass_model = readRDS(here::here("Fitting", "mass_model.rds"))
 model = readRDS(here::here("Model", "transduction_model.rds"))
 
 files = list.files(here::here("Fitting", "Fitted_params"))
@@ -26,18 +28,18 @@ for(f in files){
 names(params) = gsub(".csv", "", gsub("params_", "", files))
 
 
-lab_data_transM = read.csv(here::here("Lab", "Transduction", "summary_10_4.csv")) %>%
+lab_data_transM = read.csv(here::here("Data", "transduction_summary_10_4.csv")) %>%
   select(Time, Bacteria, Mean, se) %>%
   filter(Bacteria != "Total")
-lab_data_trans5M = read.csv(here::here("Lab", "Transduction", "summary_10_5.csv")) %>%
+lab_data_trans5M = read.csv(here::here("Data", "transduction_summary_10_5.csv")) %>%
   select(Time, Bacteria, Mean, se)%>%
   filter(Bacteria != "Total")
-lab_data_trans3M = read.csv(here::here("Lab", "Transduction", "summary_10_3.csv")) %>%
+lab_data_trans3M = read.csv(here::here("Data", "transduction_summary_10_3.csv")) %>%
   select(Time, Bacteria, Mean, se) %>%
   filter(Bacteria != "Total")
 
 
-lab_data_trans = read.csv(here::here("Lab", "Transduction", "summary_10_4.csv")) %>%
+lab_data_trans = read.csv(here::here("Data", "transduction_summary_10_4.csv")) %>%
   select(Time, Bacteria, Mean) %>%
   dcast(Time~Bacteria) %>%
   select(-Total) %>%
@@ -47,7 +49,7 @@ lab_data_trans = read.csv(here::here("Lab", "Transduction", "summary_10_4.csv"))
          Bet = round(Bet),
          P = round(P)) 
 
-lab_data_trans5 = read.csv(here::here("Lab", "Transduction", "summary_10_5.csv")) %>%
+lab_data_trans5 = read.csv(here::here("Data", "transduction_summary_10_5.csv")) %>%
   select(Time, Bacteria, Mean) %>%
   dcast(Time~Bacteria) %>%
   select(-Total) %>%
@@ -57,7 +59,7 @@ lab_data_trans5 = read.csv(here::here("Lab", "Transduction", "summary_10_5.csv")
          Bet = round(Bet),
          P = round(P)) 
 
-lab_data_trans3 = read.csv(here::here("Lab", "Transduction", "summary_10_3.csv")) %>%
+lab_data_trans3 = read.csv(here::here("Data", "transduction_summary_10_3.csv")) %>%
   select(Time, Bacteria, Mean) %>%
   dcast(Time~Bacteria) %>%
   select(-Total) %>%
@@ -199,7 +201,7 @@ best_params[,c(2:4,8:10)] = apply(best_params[,c(2:4,8:10)], c(1,2), function(x)
 
 best_params$DIC = round(best_params$DIC-(min(best_params$DIC)))
 
-write.csv(best_params, here::here("Fitting", "best_params.csv"), row.names = F)
+write.csv(best_params, here::here("Fitting", "transduction_params.csv"), row.names = F)
 
 
 
@@ -412,13 +414,4 @@ fig4ab = plot_grid(pp + theme(legend.position = "none"),
           labels = c("a","", "b", "", ""))
 
 fig4ab
-
-ggsave("plot_compare_all.png", height = 10, width = 18)
-
-
-all_traj_4 %>%
-  filter(group == "freq_burst") %>%
-  filter(time %in% lab_data_trans$time) %>%
-  mutate(data_Pl = lab_data_trans$P[-1]) %>%
-  mutate(diff = data_Pl/Pl)
 

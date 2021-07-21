@@ -1,4 +1,5 @@
 
+#fig4ab required below comes from "analyse_fitted_models.R" script!
 
 library(fitR)
 library(dplyr)
@@ -10,7 +11,6 @@ library(openxlsx)
 
 source(here::here("Model", "transduction_model_functions.R"))
 
-# mass_model = readRDS(here::here("Fitting", "mass_model.rds"))
 model = readRDS(here::here("Model", "transduction_model.rds"))
 
 files = list.files(here::here("Fitting", "Fitted_params"))
@@ -26,7 +26,7 @@ for(f in files){
 names(all_params) = gsub(".csv", "", gsub("params_", "", files))
 
 
-data = read.xlsx(here::here("Lab", "Varying_MOI", "jake_data_final.xlsx"))
+data = read.xlsx(here::here("Data", "varying_MOI_data.xlsx"))
 
 data = apply(data, c(1,2), as.numeric)
 data = data[-1, (-c(20:28))]
@@ -139,8 +139,6 @@ all_results$Bt_sd[is.na(all_results$Bt_sd)] = 0
 all_results$Bet_sd[is.na(all_results$Bet_sd)] = 0
 all_results$Pl_sd[is.na(all_results$Pl_sd)] = 0
 
-# all_results$init_pha = as.factor(format(unique(all_results$init_pha), scientific = T, digits = 2))
-# all_results$init_pha = factor(all_results$init_pha, levels(all_results$init_pha)[c(9,2,5,8,1,4,7,10,3,6,11)])
 
 all_results_L = all_results %>%
   filter(model %in% c("freq_burst", "data", "dens_burst"))
@@ -257,11 +255,10 @@ fig4c = plot_grid(burst + theme(legend.position = "none"),
           rel_widths = c(1,0.56,0.2),
           labels = c("c", "", ""),
           nrow = 1)
-fig4c
-ggsave(here::here("Lab", "Plots", "varying_MOI_L.png"))
 
+#reminder, fig4ab comes from "analyse_fitted_models.R" script!
 plot_grid(fig4ab, NULL, fig4c, nrow = 3, rel_heights = c(2,0.05,1))
-ggsave(here::here("fig4all.png"), height = 15, width = 18)
+ggsave(here::here("Figures", "fig4.png"), height = 15, width = 18)
 
 
 
@@ -366,5 +363,5 @@ pboth = plot_grid(both + theme(legend.position = "none"),
           nrow = 1)
 
 plot_grid(pbeta, pboth, nrow = 2, labels = c("a", "b"))
-ggsave("supp_fig4.png", height = 10, width = 9)
+ggsave(here::here("Figures", "supp_fig4.png"), height = 10, width = 9)
 
