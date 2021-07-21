@@ -11,25 +11,20 @@ library(scales)
 
 source(here::here("Model", "transduction_model_functions.R"))
 
-fitted_params4 = c(readRDS(here::here("Fitting", "Full_chains", "best_params_transduction_b.rds")),
-                   readRDS(here::here("Fitting", "Full_chains", "best_params_transduction2_b.rds")),
-                   readRDS(here::here("Fitting", "Full_chains", "best_params_transduction3_b.rds")))
-
-
 model = readRDS(here::here("Model", "transduction_model.rds"))
 
-lab_data_transM = read.csv(here::here("Lab", "Transduction", "summary_10_4.csv")) %>%
+lab_data_transM = read.csv(here::here("Data", "transduction_summary_10_4.csv")) %>%
   select(Time, Bacteria, Mean, se) %>%
   filter(Bacteria != "Total")
-lab_data_trans5M = read.csv(here::here("Lab", "Transduction", "summary_10_5.csv")) %>%
+lab_data_trans5M = read.csv(here::here("Data", "transduction_summary_10_5.csv")) %>%
   select(Time, Bacteria, Mean, se)%>%
   filter(Bacteria != "Total")
-lab_data_trans3M = read.csv(here::here("Lab", "Transduction", "summary_10_3.csv")) %>%
+lab_data_trans3M = read.csv(here::here("Data", "transduction_summary_10_3.csv")) %>%
   select(Time, Bacteria, Mean, se) %>%
   filter(Bacteria != "Total")
 
 
-lab_data_trans4 = read.csv(here::here("Lab", "Transduction", "summary_10_4.csv")) %>%
+lab_data_trans4 = read.csv(here::here("Data", "transduction_summary_10_4.csv")) %>%
   select(Time, Bacteria, Mean) %>%
   dcast(Time~Bacteria) %>%
   select(-Total) %>%
@@ -39,7 +34,7 @@ lab_data_trans4 = read.csv(here::here("Lab", "Transduction", "summary_10_4.csv")
          Bet = round(Bet),
          P = round(P))
 
-lab_data_trans5 = read.csv(here::here("Lab", "Transduction", "summary_10_5.csv")) %>%
+lab_data_trans5 = read.csv(here::here("Data", "transduction_summary_10_5.csv")) %>%
   select(Time, Bacteria, Mean) %>%
   dcast(Time~Bacteria) %>%
   select(-Total) %>%
@@ -49,7 +44,7 @@ lab_data_trans5 = read.csv(here::here("Lab", "Transduction", "summary_10_5.csv")
          Bet = round(Bet),
          P = round(P))
 
-lab_data_trans3 = read.csv(here::here("Lab", "Transduction", "summary_10_3.csv")) %>%
+lab_data_trans3 = read.csv(here::here("Data", "transduction_summary_10_3.csv")) %>%
   select(Time, Bacteria, Mean) %>%
   dcast(Time~Bacteria) %>%
   select(-Total) %>%
@@ -86,10 +81,7 @@ for(i in 1:nrow(models_to_try)){
                        link_delay = models_to_try$link_delay[i],
                        transduction = models_to_try$transduction[i])
   
-  trace_model4 = fitted_params4[[models_to_try$model_name[i]]]
-  init.theta = trace_model4[nrow(trace_model4),-5]
-  
-  # init.theta = c(beta = 4e9, L = 20, alpha = 9e5, tau = 0.4)
+  init.theta = c(beta = 4e9, L = 20, alpha = 9e5, tau = 0.4)
   mcmc_fit = run_mcmc(model, lab_data_trans3, lab_data_trans5,
                       init.theta = init.theta,
                       proposal.sd = c(init.theta[1]/600,
@@ -233,11 +225,10 @@ for(i in 1:nrow(models_to_try)){
   filename = paste0(models_to_try$model_name[i], "_b.png")
   ggsave(here::here("Fitting", "Full_chains", "Best_fits", filename))
 
-  all_theta[[i]] = rbind(trace_model4, mcmc_fit$trace)
-  # all_theta[[i]] = mcmc_fit$trace
+  all_theta[[i]] = mcmc_fit$trace
   names(all_theta)[i] = models_to_try$model_name[i]
 
 }
 
-saveRDS(all_theta, here::here("Fitting", "Full_chains", "best_params_transduction_b.rds"))
+saveRDS(all_theta, here::here("Fitting", "Full_chains", "best_params_transduction1_b.rds"))
 

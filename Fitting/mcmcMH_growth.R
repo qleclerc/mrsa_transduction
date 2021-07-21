@@ -45,7 +45,7 @@ mcmc_fit = run_mcmc(model, lab_data,
 
 
 trace = coda::mcmc(mcmc_fit$trace)
-trace = burnAndThin(trace, 10000, 2)
+trace = burnAndThin(trace, 2000, 2)
 plot(trace)
 
 
