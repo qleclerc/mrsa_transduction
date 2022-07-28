@@ -34,13 +34,13 @@ jobs:
         run: |
           Sys.setenv(R_REMOTES_NO_ERRORS_FROM_WARNINGS = "true")
           options(install.packages.check.source = "no")
-          pkgs <- c("devtools", "dplyr", "reshape2", "ggplot2", "cowplot", "scales", "here", "deSolve", "BayesianTools")
+          pkgs <- c("devtools", "dplyr", "reshape2", "ggplot2", "cowplot", "scales", "here", "deSolve", "BayesianTools", "openxlsx")
           install.packages(pkgs, repos = "https://cloud.r-project.org/")
         shell: Rscript {0}
  
       - name: Run MCMC first set
         run: |
-          source(here::here("Fitting", "new_fitting.R"))
+          source(here::here("Fitting", "new_fitting_dens.R"))
         shell: Rscript {0}
 
       - name: Commit and push files
@@ -49,31 +49,80 @@ jobs:
           git config --local user.name "GitHub Action"
           git pull
           git add Fitting
-          git commit -m "New MCMC run"
+          git commit -m "New MCMC run dens"
           git push
 
-#  mcmc-run2:
-#    runs-on: macos-latest
-#    steps:    
-#      - name: Set up Homebrew
-#        id: set-up-homebrew
-#        uses: Homebrew/actions/setup-homebrew@master
-#        
-#      - name: Checkout repos
-#        uses: actions/checkout@v2
-#        with:
-#          ref: master
-#
-#      - name: Setup R
-#       uses: r-lib/actions/setup-r@v1
-#
-#      - name: Install dependencies
-#        run: |
-#          Sys.setenv(R_REMOTES_NO_ERRORS_FROM_WARNINGS = "true")
-#          options(install.packages.check.source = "no")
-#          pkgs <- c("devtools", "coda", "dplyr", "reshape2", "ggplot2", "cowplot", "scales", "here")
-#          install.packages(pkgs, repos = "https://cloud.r-project.org/")
-#          devtools::install_github("sbfnk/fitR")
-#        shell: Rscript {0}
- 
+  mcmc-run2:
+    runs-on: macos-latest
+    steps:    
+      - name: Set up Homebrew
+        id: set-up-homebrew
+        uses: Homebrew/actions/setup-homebrew@master
+        
+      - name: Checkout repos
+        uses: actions/checkout@v2
+        with:
+          ref: master
 
+      - name: Setup R
+        uses: r-lib/actions/setup-r@v1
+
+      - name: Install dependencies
+        run: |
+          Sys.setenv(R_REMOTES_NO_ERRORS_FROM_WARNINGS = "true")
+          options(install.packages.check.source = "no")
+          pkgs <- c("devtools", "dplyr", "reshape2", "ggplot2", "cowplot", "scales", "here", "deSolve", "BayesianTools", "openxlsx")
+          install.packages(pkgs, repos = "https://cloud.r-project.org/")
+        shell: Rscript {0}
+ 
+      - name: Run MCMC first set
+        run: |
+          source(here::here("Fitting", "new_fitting_pow.R"))
+        shell: Rscript {0}
+
+      - name: Commit and push files
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git pull
+          git add Fitting
+          git commit -m "New MCMC run pow"
+          git push 
+
+
+  mcmc-run3:
+    runs-on: macos-latest
+    steps:    
+      - name: Set up Homebrew
+        id: set-up-homebrew
+        uses: Homebrew/actions/setup-homebrew@master
+        
+      - name: Checkout repos
+        uses: actions/checkout@v2
+        with:
+          ref: master
+
+      - name: Setup R
+        uses: r-lib/actions/setup-r@v1
+
+      - name: Install dependencies
+        run: |
+          Sys.setenv(R_REMOTES_NO_ERRORS_FROM_WARNINGS = "true")
+          options(install.packages.check.source = "no")
+          pkgs <- c("devtools", "dplyr", "reshape2", "ggplot2", "cowplot", "scales", "here", "deSolve", "BayesianTools", "openxlsx")
+          install.packages(pkgs, repos = "https://cloud.r-project.org/")
+        shell: Rscript {0}
+ 
+      - name: Run MCMC first set
+        run: |
+          source(here::here("Fitting", "new_fitting_hill.R"))
+        shell: Rscript {0}
+
+      - name: Commit and push files
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git pull
+          git add Fitting
+          git commit -m "New MCMC run hill"
+          git push 
