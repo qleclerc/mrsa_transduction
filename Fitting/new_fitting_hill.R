@@ -229,12 +229,12 @@ likelihood <- function(par, mode = "hill"){
                     predicted105$Bet,
                     log = T)
   
-  # llValues5 = 2*dpois(x = round(obs105$Be[12:18]/(10^(pmax(floor(log10(obs105$Be[12:18])),1)-1))),
-  #                   lambda = predicted105$Be[12:18]/(10^(pmax(floor(log10(obs105$Be[12:18])),1)-1)),
-  #                   log = T)
-  # llValues6 = 2*dpois(x = round(obs105$Bt[12:18]/(10^(pmax(floor(log10(obs105$Bt[12:18])),1)-1))),
-  #                   lambda = predicted105$Bt[12:18]/(10^(pmax(floor(log10(obs105$Bt[12:18])),1)-1)),
-  #                   log = T)
+  llValues5 = 4*dpois(x = round(obs105$Be[12:18]/(10^(pmax(floor(log10(obs105$Be[12:18])),1)-1))),
+                    lambda = predicted105$Be[12:18]/(10^(pmax(floor(log10(obs105$Be[12:18])),1)-1)),
+                    log = T)
+  llValues6 = 4*dpois(x = round(obs105$Bt[12:18]/(10^(pmax(floor(log10(obs105$Bt[12:18])),1)-1))),
+                    lambda = predicted105$Bt[12:18]/(10^(pmax(floor(log10(obs105$Bt[12:18])),1)-1)),
+                    log = T)
   
   # #24h varying MOI
   # llValues7 = rep(0, nrow(MOI_data))
@@ -254,7 +254,7 @@ likelihood <- function(par, mode = "hill"){
   # }
   
   
-  return(sum(llValues1,llValues2,llValues3,llValues4))
+  return(sum(llValues1,llValues2,llValues3,llValues4,llValues5,llValues6))
 }
 
 # optional, you can also directly provide lower, upper in the createBayesianSetup, see help
