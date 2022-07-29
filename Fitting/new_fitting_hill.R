@@ -218,24 +218,24 @@ likelihood <- function(par, mode = "hill"){
                     log = T)
   
   # #24h varying MOI
-  llValues7 = rep(0, nrow(MOI_data))
-  for(i in 1:nrow(MOI_data)){
-
-    predictedi <- phage_tr_model(x,
-                                 c(Be = MOI_data$init_bac[i], Bt = MOI_data$init_bac[i], Bet = 0,
-                                   Pl = MOI_data$init_pha[i], Pe = 0, Pt = 0),
-                                 seq(0,24,1), mode = mode)[25,-1]
-    predictedi[predictedi<=0] = 0.00001
-    
-    llValues7[i] = (dpois(x = round(MOI_data$Pl[i]/(10^(max(floor(log10(MOI_data$Pl[i])),1)-1))),
-                          lambda = predictedi$Pl/(10^(max(floor(log10(MOI_data$Pl[i])),1)-1)),
-                          log = T)) + 2*dpois(MOI_data$Bet[i], predictedi$Bet, log = TRUE)
-
-
-  }
+  # llValues7 = rep(0, nrow(MOI_data))
+  # for(i in 1:nrow(MOI_data)){
+  # 
+  #   predictedi <- phage_tr_model(x,
+  #                                c(Be = MOI_data$init_bac[i], Bt = MOI_data$init_bac[i], Bet = 0,
+  #                                  Pl = MOI_data$init_pha[i], Pe = 0, Pt = 0),
+  #                                seq(0,24,1), mode = mode)[25,-1]
+  #   predictedi[predictedi<=0] = 0.00001
+  #   
+  #   llValues7[i] = (dpois(x = round(MOI_data$Pl[i]/(10^(max(floor(log10(MOI_data$Pl[i])),1)-1))),
+  #                         lambda = predictedi$Pl/(10^(max(floor(log10(MOI_data$Pl[i])),1)-1)),
+  #                         log = T)) + 2*dpois(MOI_data$Bet[i], predictedi$Bet, log = TRUE)
+  # 
+  # 
+  # }
 
   
-  return(sum(llValues1,llValues2,llValues3,llValues4,llValues5,llValues6,llValues7))
+  return(sum(llValues1,llValues2,llValues3,llValues4,llValues5,llValues6))
 }
 
 # optional, you can also directly provide lower, upper in the createBayesianSetup, see help

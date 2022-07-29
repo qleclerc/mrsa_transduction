@@ -246,7 +246,7 @@ prior <- createUniformPrior(lower = refPars$lower[parSel],
 bayesianSetup <- createBayesianSetup(likelihood, prior, names = rownames(refPars)[parSel])
 
 # settings for the sampler, iterations should be increased for real applicatoin
-settings <- list(iterations = 10000, nrChains = 2)
+settings <- list(iterations = 100000, nrChains = 2)
 # settings <- list(iterations = 10000, adapt = T, DRlevels = 2,
 #                  gibbsProbabilities = NULL, temperingFunction = NULL, optimize = T, message = FALSE)
 
