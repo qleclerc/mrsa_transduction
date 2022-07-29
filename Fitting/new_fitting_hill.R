@@ -116,15 +116,7 @@ phage_tr_model = function(parameters,
     
     if(link_L) L = L * link + 1
     
-    if(mode == "pow"){
-      
-      F_PL = (beta * Pl)^pow
-      F_PE = (beta * Pe)^pow
-      F_PT = (beta * Pt)^pow
-      
-      F_PL_past = (beta * Pl_past)^pow
-      
-    } else if(mode == "dens"){
+    if(mode == "dens"){
       
       F_PL = beta * Pl
       F_PE = beta * Pe
@@ -134,16 +126,15 @@ phage_tr_model = function(parameters,
       
     } else if(mode == "hill"){
       
-      F_PL = (beta * Pl)/(1+(Pl^pow)/(P_lim^pow))
-      F_PE = (beta * Pe)/(1+(Pe^pow)/(P_lim^pow))
-      F_PT = (beta * Pt)/(1+(Pt^pow)/(P_lim^pow))
+      F_PL = beta * (Pl^pow)/(1+Pl^pow/P_lim^pow)
+      F_PE = beta * (Pe^pow)/(1+Pe^pow/P_lim^pow)
+      F_PT = beta * (Pt^pow)/(1+Pt^pow/P_lim^pow)
       
-      F_PL_past = (beta * Pl_past)/(1+(Pl_past^pow)/(P_lim^pow))
-      
+      F_PL_past = beta * (Pl_past^pow)/(1+Pl_past^pow/P_lim^pow)
       
     } else {
       
-      stop("Only pow, dens or hill are valid modes")
+      stop("Only dens or hill are valid modes")
       
     }
     
@@ -174,13 +165,37 @@ phage_tr_model = function(parameters,
 #hill pars c(2.9, 60, 1.2, 0.67, 1, 90)
 #pow pars c(0.31, 60, 1, 0.67, 0.72, 90)
 
+# phage_tr_model(c(3, 60, 2, 0.67, 1, 70),
+#                c(Be = obs105$Be[1], Bt = obs105$Be[2], Bet = 0,
+#                  Pl = obs105$Pl[1], Pe = 0, Pt = 0), seq(0,24,0.1), mode = "hill") %>%
+#   ggplot()+
+#   geom_line(aes(time, Be, colour = "Be")) +
+#   geom_line(aes(time, Bt, colour = "Bt")) +
+#   geom_line(aes(time, Bet, colour = "Bet")) +
+#   geom_line(aes(time, Pl, colour = "Pl")) +
+#   geom_line(data = obs105, aes(time, Be, colour = "Be"), linetype = 2) +
+#   geom_line(data = obs105, aes(time, Bt, colour = "Bt"), linetype = 2) +
+#   geom_line(data = obs105, aes(time, Bet, colour = "Bet"), linetype = 2) +
+#   geom_line(data = obs105, aes(time, Pl, colour = "Pl"), linetype = 2) +
+#   scale_y_continuous(trans=log10_trans(),
+#                      breaks=trans_breaks("log10", function(x) 10^x),
+#                      labels=trans_format("log10", math_format(10^.x))) +
+#   coord_cartesian(ylim = c(1,1e11)) +
+#   theme_bw() +
+#   labs(y = "Bacteria and phage", x = "Time", colour = "") +
+#   theme(axis.title = element_text(size = 12),
+#         axis.text = element_text(size = 12),
+#         legend.text = element_text(size=12))
+# 
+# ggsave("better_hill.png")
+
 # load reference parameter definition (upper, lower prior)
-refPars <- data.frame(best = c(2.9, 60, 1.2, 0.67, 1, 90),
-                      lower = c(0.1, 10, 0.1, 0.5, 0.6, 0.1),
-                      upper = c(100, 120, 10, 0.8, 1, 1000))
+refPars <- data.frame(best = c(3, 60, 2, 0.67, 1, 70),
+                      lower = c(0.1, 10, 0.1, 0.6, 0.9, 1),
+                      upper = c(100, 100, 6, 0.8, 1.5, 500))
 rownames(refPars) = c("beta", "L", "alpha", "tau", "pow", "P_lim")
 
-parSel = c(1:4, 6)
+parSel = c(1:6)
 
 # here is the likelihood 
 likelihood <- function(par, mode = "hill"){
@@ -192,30 +207,34 @@ likelihood <- function(par, mode = "hill"){
                                    Pl = obs103$Pl[1], Pe = 0, Pt = 0),
                                  seq(0,24,1), mode = mode)[c(1:9, 17:25), -1] # replace here VSEM with your model 
   predicted103[predicted103<=0] = 0.00001
-  
+
   predicted105 <- phage_tr_model(x,
                                  c(Be = obs105$Be[1], Bt = obs105$Bt[1], Bet = 0,
                                    Pl = obs105$Pl[1], Pe = 0, Pt = 0),
                                  seq(0,24,1), mode = mode)[c(1:9, 17:25), -1] # replace here VSEM with your model 
   predicted105[predicted105<=0] = 0.00001
-  
+
   
   llValues1 = dpois(x = round(obs103$Pl/(10^(pmax(floor(log10(obs103$Pl)),1)-1))),
                     lambda = predicted103$Pl/(10^(pmax(floor(log10(obs103$Pl)),1)-1)),
                     log = T)
-  llValues2 = 2*dpois(obs103$Bet, predicted103$Bet, log = TRUE)
+  llValues2 = dpois(obs103$Bet,
+                    predicted103$Bet,
+                    log = T)
   
   llValues3 = dpois(x = round(obs105$Pl/(10^(pmax(floor(log10(obs105$Pl)),1)-1))),
                     lambda = predicted105$Pl/(10^(pmax(floor(log10(obs105$Pl)),1)-1)),
                     log = T)
-  llValues4 = 2*dpois(obs105$Bet, predicted105$Bet, log = TRUE)
+  llValues4 = dpois(obs105$Bet,
+                    predicted105$Bet,
+                    log = T)
   
-  llValues5 = dpois(x = round(obs105$Be[12:18]/(10^(pmax(floor(log10(obs105$Be[12:18])),1)-1))),
-                    lambda = predicted105$Be[12:18]/(10^(pmax(floor(log10(obs105$Be[12:18])),1)-1)),
-                    log = T)
-  llValues6 = dpois(x = round(obs105$Bt[12:18]/(10^(pmax(floor(log10(obs105$Bt[12:18])),1)-1))),
-                    lambda = predicted105$Bt[12:18]/(10^(pmax(floor(log10(obs105$Bt[12:18])),1)-1)),
-                    log = T)
+  # llValues5 = 2*dpois(x = round(obs105$Be[12:18]/(10^(pmax(floor(log10(obs105$Be[12:18])),1)-1))),
+  #                   lambda = predicted105$Be[12:18]/(10^(pmax(floor(log10(obs105$Be[12:18])),1)-1)),
+  #                   log = T)
+  # llValues6 = 2*dpois(x = round(obs105$Bt[12:18]/(10^(pmax(floor(log10(obs105$Bt[12:18])),1)-1))),
+  #                   lambda = predicted105$Bt[12:18]/(10^(pmax(floor(log10(obs105$Bt[12:18])),1)-1)),
+  #                   log = T)
   
   # #24h varying MOI
   # llValues7 = rep(0, nrow(MOI_data))
@@ -233,9 +252,9 @@ likelihood <- function(par, mode = "hill"){
   # 
   # 
   # }
-
   
-  return(sum(llValues1,llValues2,llValues3,llValues4,llValues5,llValues6))
+  
+  return(sum(llValues1,llValues2,llValues3,llValues4))
 }
 
 # optional, you can also directly provide lower, upper in the createBayesianSetup, see help
@@ -264,10 +283,7 @@ median_params = rbind(out[[1]][["chain"]][[1]],
 #                       out[[2]][["chain"]])
 # colnames(median_params)[1:5] = c("beta", "L", "alpha", "tau", "pow")
 
-median_params = apply(median_params, 2, median)[1:5]
-names(median_params) = c("beta", "L", "alpha", "tau", "P_lim")
-median_params["pow"] = 1
-median_params = median_params[c(1:4,6,5)]
+median_params = apply(tail(median_params), 2, median)[1:6]
 
 best103 = phage_tr_model(median_params,
                          c(Be = obs103$Be[1], Bt = obs103$Bt[1], Bet = 0,
@@ -343,9 +359,9 @@ p3 = ggplot()+
         legend.text = element_text(size=12))
 
 pp=plot_grid(p1+theme(legend.position = "none"),
-          p2+theme(legend.position = "none"),
-          p3+theme(legend.position = "none"),
-          nrow = 1)
+             p2+theme(legend.position = "none"),
+             p3+theme(legend.position = "none"),
+             nrow = 1)
 
 ggsave(here::here("Fitting", "hill_fitted.png"), pp)
 saveRDS(out, here::here("Fitting", "hill_fitted_out.rds"))
