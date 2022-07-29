@@ -192,7 +192,7 @@ phage_tr_model = function(parameters,
 # load reference parameter definition (upper, lower prior)
 refPars <- data.frame(best = c(3, 60, 2, 0.67, 1, 70),
                       lower = c(0.1, 10, 0.1, 0.6, 0.9, 1),
-                      upper = c(100, 100, 6, 0.8, 1.5, 500))
+                      upper = c(10, 90, 6, 0.8, 1.5, 500))
 rownames(refPars) = c("beta", "L", "alpha", "tau", "pow", "P_lim")
 
 parSel = c(1:6)
