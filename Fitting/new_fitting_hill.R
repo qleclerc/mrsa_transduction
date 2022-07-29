@@ -165,7 +165,7 @@ phage_tr_model = function(parameters,
 #hill pars c(2.9, 60, 1.2, 0.67, 1, 90)
 #pow pars c(0.31, 60, 1, 0.67, 0.72, 90)
 
-# phage_tr_model(c(3, 60, 2, 0.67, 1, 70),
+# phage_tr_model(c(1, 60, 2, 0.67, 1, 70),
 #                c(Be = obs105$Be[1], Bt = obs105$Be[2], Bet = 0,
 #                  Pl = obs105$Pl[1], Pe = 0, Pt = 0), seq(0,24,0.1), mode = "hill") %>%
 #   ggplot()+
@@ -191,11 +191,11 @@ phage_tr_model = function(parameters,
 
 # load reference parameter definition (upper, lower prior)
 refPars <- data.frame(best = c(3, 60, 2, 0.67, 1, 70),
-                      lower = c(0.1, 10, 0.1, 0.6, 0.9, 1),
-                      upper = c(10, 90, 6, 0.8, 1.5, 500))
+                      lower = c(1, 10, 0.1, 0.6, 0.9, 1),
+                      upper = c(10, 90, 6, 0.8, 1.5, 100))
 rownames(refPars) = c("beta", "L", "alpha", "tau", "pow", "P_lim")
 
-parSel = c(1:6)
+parSel = c(1:4,6)
 
 # here is the likelihood 
 likelihood <- function(par, mode = "hill"){
@@ -265,7 +265,7 @@ prior <- createUniformPrior(lower = refPars$lower[parSel],
 bayesianSetup <- createBayesianSetup(likelihood, prior, names = rownames(refPars)[parSel])
 
 # settings for the sampler, iterations should be increased for real applicatoin
-settings <- list(iterations = 50000, nrChains = 2)
+settings <- list(iterations = 100000, nrChains = 2)
 # settings <- list(iterations = 10000, adapt = T, DRlevels = 2,
 #                  gibbsProbabilities = NULL, temperingFunction = NULL, optimize = T, message = FALSE)
 
@@ -283,7 +283,9 @@ median_params = rbind(out[[1]][["chain"]][[1]],
 #                       out[[2]][["chain"]])
 # colnames(median_params)[1:5] = c("beta", "L", "alpha", "tau", "pow")
 
-median_params = apply(tail(median_params), 2, median)[1:6]
+median_params = apply(tail(median_params), 2, median)[1:5]
+median_params["pow"] = 1
+median_params = median_params[c(1:4,6,5)]
 
 best103 = phage_tr_model(median_params,
                          c(Be = obs103$Be[1], Bt = obs103$Bt[1], Bet = 0,
