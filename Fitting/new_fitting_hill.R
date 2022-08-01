@@ -192,8 +192,8 @@ phage_tr_model = function(parameters,
 
 # load reference parameter definition (upper, lower prior)
 refPars <- data.frame(best = c(3, 60, 2, 0.67, 1, 70),
-                      lower = c(1, 10, 0.1, 0.6, 0.9, 1),
-                      upper = c(10, 90, 2.1, 0.8, 1.5, 100))
+                      lower = c(0.1, 10, 1, 0.6, 0.9, 1),
+                      upper = c(100, 90, 2.1, 0.8, 1.5, 1000))
 rownames(refPars) = c("beta", "L", "alpha", "tau", "pow", "P_lim")
 
 parSel = c(1:4,6)
@@ -230,10 +230,10 @@ likelihood <- function(par, mode = "hill"){
                     predicted105$Bet,
                     log = T)
   
-  llValues5 = dpois(x = round(obs105$Be/(10^(pmax(floor(log10(obs105$Be)),1)-1))),
+  llValues5 = 2*dpois(x = round(obs105$Be/(10^(pmax(floor(log10(obs105$Be)),1)-1))),
                     lambda = predicted105$Be/(10^(pmax(floor(log10(obs105$Be)),1)-1)),
                     log = T)
-  llValues6 = dpois(x = round(obs105$Bt/(10^(pmax(floor(log10(obs105$Bt)),1)-1))),
+  llValues6 = 2*dpois(x = round(obs105$Bt/(10^(pmax(floor(log10(obs105$Bt)),1)-1))),
                     lambda = predicted105$Bt/(10^(pmax(floor(log10(obs105$Bt)),1)-1)),
                     log = T)
   
