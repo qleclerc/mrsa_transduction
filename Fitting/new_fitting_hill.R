@@ -9,15 +9,15 @@ library(scales)
 library(cowplot)
 library(openxlsx)
 
-obs103 = read.csv(here::here("Data", "transduction_summary_10_3.csv")) %>%
-  select(Time, Bacteria, Mean) %>%
-  dcast(Time~Bacteria) %>%
-  select(-Total) %>%
-  rename(time = Time, Bet = DRP, Be = EryR, Bt = TetR, Pl = P) %>%
-  mutate(Be = round(Be),
-         Bt = round(Bt),
-         Bet = round(Bet),
-         Pl = round(Pl))
+# obs103 = read.csv(here::here("Data", "transduction_summary_10_3.csv")) %>%
+#   select(Time, Bacteria, Mean) %>%
+#   dcast(Time~Bacteria) %>%
+#   select(-Total) %>%
+#   rename(time = Time, Bet = DRP, Be = EryR, Bt = TetR, Pl = P) %>%
+#   mutate(Be = round(Be),
+#          Bt = round(Bt),
+#          Bet = round(Bet),
+#          Pl = round(Pl))
 
 obs104 = read.csv(here::here("Data", "transduction_summary_10_4.csv")) %>%
   select(Time, Bacteria, Mean) %>%
@@ -29,17 +29,18 @@ obs104 = read.csv(here::here("Data", "transduction_summary_10_4.csv")) %>%
          Bet = round(Bet),
          Pl = round(Pl))
 
-obs105 = read.csv(here::here("Data", "transduction_summary_10_5.csv")) %>%
-  select(Time, Bacteria, Mean) %>%
-  dcast(Time~Bacteria) %>%
-  select(-Total) %>%
-  rename(time = Time, Bet = DRP, Be = EryR, Bt = TetR, Pl = P) %>%
-  mutate(Be = round(Be),
-         Bt = round(Bt),
-         Bet = round(Bet),
-         Pl = round(Pl))
+# obs105 = read.csv(here::here("Data", "transduction_summary_10_5.csv")) %>%
+#   select(Time, Bacteria, Mean) %>%
+#   dcast(Time~Bacteria) %>%
+#   select(-Total) %>%
+#   rename(time = Time, Bet = DRP, Be = EryR, Bt = TetR, Pl = P) %>%
+#   mutate(Be = round(Be),
+#          Bt = round(Bt),
+#          Bet = round(Bet),
+#          Pl = round(Pl))
 
-
+obs103 = read.csv(here::here("Fitting", "103res.csv")) %>% round()
+obs105 = read.csv(here::here("Fitting", "105res.csv")) %>% round()
 
 MOI_data = read.xlsx(here::here("Data", "varying_MOI_data.xlsx"))
 
@@ -205,13 +206,13 @@ likelihood <- function(par, mode = "hill"){
   predicted103 <- phage_tr_model(x,
                                  c(Be = obs103$Be[1], Bt = obs103$Bt[1], Bet = 0,
                                    Pl = obs103$Pl[1], Pe = 0, Pt = 0),
-                                 seq(0,24,1), mode = mode)[c(1:9, 17:25), -1] # replace here VSEM with your model 
+                                 seq(0,30,1), mode = mode) # replace here VSEM with your model 
   predicted103[predicted103<=0] = 0.00001
 
   predicted105 <- phage_tr_model(x,
                                  c(Be = obs105$Be[1], Bt = obs105$Bt[1], Bet = 0,
                                    Pl = obs105$Pl[1], Pe = 0, Pt = 0),
-                                 seq(0,24,1), mode = mode)[c(1:9, 17:25), -1] # replace here VSEM with your model 
+                                 seq(0,30,1), mode = mode) # replace here VSEM with your model 
   predicted105[predicted105<=0] = 0.00001
 
   
@@ -229,11 +230,11 @@ likelihood <- function(par, mode = "hill"){
                     predicted105$Bet,
                     log = T)
   
-  llValues5 = 6*dpois(x = round(obs105$Be[12:18]/(10^(pmax(floor(log10(obs105$Be[12:18])),1)-1))),
-                    lambda = predicted105$Be[12:18]/(10^(pmax(floor(log10(obs105$Be[12:18])),1)-1)),
+  llValues5 = dpois(x = round(obs105$Be/(10^(pmax(floor(log10(obs105$Be)),1)-1))),
+                    lambda = predicted105$Be/(10^(pmax(floor(log10(obs105$Be)),1)-1)),
                     log = T)
-  llValues6 = 6*dpois(x = round(obs105$Bt[12:18]/(10^(pmax(floor(log10(obs105$Bt[12:18])),1)-1))),
-                    lambda = predicted105$Bt[12:18]/(10^(pmax(floor(log10(obs105$Bt[12:18])),1)-1)),
+  llValues6 = dpois(x = round(obs105$Bt/(10^(pmax(floor(log10(obs105$Bt)),1)-1))),
+                    lambda = predicted105$Bt/(10^(pmax(floor(log10(obs105$Bt)),1)-1)),
                     log = T)
   
   # #24h varying MOI
