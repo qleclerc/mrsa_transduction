@@ -71,10 +71,10 @@ phage_tr_model = function(parameters,
   
   model_dde = function(time, state, parameters) {
     
-    mu_e = 1.679
-    mu_t = 1.608
-    mu_et = 1.566
-    Nmax = 2.14e9
+    mu_e = 1.61
+    mu_t = 1.51
+    mu_et = 1.44
+    Nmax = 2.76e9
     
     beta = parameters[[1]]/1e10
     L = parameters[[2]]
