@@ -39,8 +39,8 @@ obs104 = read.csv(here::here("Data", "transduction_summary_10_4.csv")) %>%
 #          Bet = round(Bet),
 #          Pl = round(Pl))
 
-obs103 = read.csv(here::here("Fitting", "103res.csv")) %>% round()
-obs105 = read.csv(here::here("Fitting", "105res.csv")) %>% round()
+obs103 = read.csv(here::here("Fitting", "103res_L.csv")) %>% round()
+obs105 = read.csv(here::here("Fitting", "105res_L.csv")) %>% round()
 
 MOI_data = read.xlsx(here::here("Data", "varying_MOI_data.xlsx"))
 
@@ -66,7 +66,8 @@ phage_tr_model = function(parameters,
                           init.state,
                           times,
                           mode = "dens",    #dens pow or hill
-                          link_L = T){      #link burst size?
+                          link_L = T,      #link burst size?
+                          link_beta = F){      
   
   
   model_dde = function(time, state, parameters) {
@@ -116,6 +117,7 @@ phage_tr_model = function(parameters,
     link = (1 - N/Nmax)
     
     if(link_L) L = L * link + 1
+    if(link_beta) beta = beta * link + 1
     
     if(mode == "dens"){
       
@@ -166,27 +168,28 @@ phage_tr_model = function(parameters,
 #hill pars c(2.9, 60, 1.2, 0.67, 1, 90)
 #pow pars c(0.31, 60, 1, 0.67, 0.72, 90)
 
-# phage_tr_model(c(1, 60, 2, 0.67, 1, 70),
-#                c(Be = obs105$Be[1], Bt = obs105$Be[2], Bet = 0,
-#                  Pl = obs105$Pl[1], Pe = 0, Pt = 0), seq(0,24,0.1), mode = "hill") %>%
-#   ggplot()+
-#   geom_line(aes(time, Be, colour = "Be")) +
-#   geom_line(aes(time, Bt, colour = "Bt")) +
-#   geom_line(aes(time, Bet, colour = "Bet")) +
-#   geom_line(aes(time, Pl, colour = "Pl")) +
-#   geom_line(data = obs105, aes(time, Be, colour = "Be"), linetype = 2) +
-#   geom_line(data = obs105, aes(time, Bt, colour = "Bt"), linetype = 2) +
-#   geom_line(data = obs105, aes(time, Bet, colour = "Bet"), linetype = 2) +
-#   geom_line(data = obs105, aes(time, Pl, colour = "Pl"), linetype = 2) +
-#   scale_y_continuous(trans=log10_trans(),
-#                      breaks=trans_breaks("log10", function(x) 10^x),
-#                      labels=trans_format("log10", math_format(10^.x))) +
-#   coord_cartesian(ylim = c(1,1e11)) +
-#   theme_bw() +
-#   labs(y = "Bacteria and phage", x = "Time", colour = "") +
-#   theme(axis.title = element_text(size = 12),
-#         axis.text = element_text(size = 12),
-#         legend.text = element_text(size=12))
+phage_tr_model(c(1, 60, 2, 0.67, 1, 70),
+               c(Be = obs105$Be[1], Bt = obs105$Be[2], Bet = 0,
+                 Pl = obs105$Pl[1], Pe = 0, Pt = 0), seq(0,24,0.1), mode = "hill",
+               link_beta = F, link_L = T) %>%
+  ggplot()+
+  geom_line(aes(time, Be, colour = "Be")) +
+  geom_line(aes(time, Bt, colour = "Bt")) +
+  geom_line(aes(time, Bet, colour = "Bet")) +
+  geom_line(aes(time, Pl, colour = "Pl")) +
+  geom_line(data = obs105, aes(time, Be, colour = "Be"), linetype = 2) +
+  geom_line(data = obs105, aes(time, Bt, colour = "Bt"), linetype = 2) +
+  geom_line(data = obs105, aes(time, Bet, colour = "Bet"), linetype = 2) +
+  geom_line(data = obs105, aes(time, Pl, colour = "Pl"), linetype = 2) +
+  scale_y_continuous(trans=log10_trans(),
+                     breaks=trans_breaks("log10", function(x) 10^x),
+                     labels=trans_format("log10", math_format(10^.x))) +
+  coord_cartesian(ylim = c(1,1e11)) +
+  theme_bw() +
+  labs(y = "Bacteria and phage", x = "Time", colour = "") +
+  theme(axis.title = element_text(size = 12),
+        axis.text = element_text(size = 12),
+        legend.text = element_text(size=12))
 # 
 # ggsave("better_hill.png")
 
@@ -206,13 +209,15 @@ likelihood <- function(par, mode = "hill"){
   predicted103 <- phage_tr_model(x,
                                  c(Be = obs103$Be[1], Bt = obs103$Bt[1], Bet = 0,
                                    Pl = obs103$Pl[1], Pe = 0, Pt = 0),
-                                 seq(0,30,1), mode = mode) # replace here VSEM with your model 
+                                 seq(0,30,1), mode = mode,
+                                 link_L = T, link_beta = F) # replace here VSEM with your model 
   predicted103[predicted103<=0] = 0.00001
 
   predicted105 <- phage_tr_model(x,
                                  c(Be = obs105$Be[1], Bt = obs105$Bt[1], Bet = 0,
                                    Pl = obs105$Pl[1], Pe = 0, Pt = 0),
-                                 seq(0,30,1), mode = mode) # replace here VSEM with your model 
+                                 seq(0,30,1), mode = mode,
+                                 link_L = T, link_beta = F) # replace here VSEM with your model 
   predicted105[predicted105<=0] = 0.00001
 
   
@@ -291,18 +296,21 @@ median_params = median_params[c(1:4,6,5)]
 best103 = phage_tr_model(median_params,
                          c(Be = obs103$Be[1], Bt = obs103$Bt[1], Bet = 0,
                            Pl = obs103$Pl[1], Pe = 0, Pt = 0), seq(0,30,0.1),
-                         mode = "hill")
+                         mode = "hill",
+                         link_L = T, link_beta = F)
 
 best104 = phage_tr_model(median_params,
                          c(Be = obs104$Be[1], Bt = obs104$Bt[1], Bet = 0,
                            Pl = obs104$Pl[1], Pe = 0, Pt = 0), seq(0,30,0.1),
-                         mode = "hill")
+                         mode = "hill",
+                         link_L = T, link_beta = F)
 
 
 best105 = phage_tr_model(median_params,
                          c(Be = obs105$Be[1], Bt = obs105$Bt[1], Bet = 0,
                            Pl = obs105$Pl[1], Pe = 0, Pt = 0), seq(0,30,0.1),
-                         mode = "hill")
+                         mode = "hill",
+                         link_L = T, link_beta = F)
 
 p1 = ggplot()+
   geom_line(data = best105, aes(time, Be, colour = "Be")) +
@@ -366,6 +374,6 @@ pp=plot_grid(p1+theme(legend.position = "none"),
              p3+theme(legend.position = "none"),
              nrow = 1)
 
-ggsave(here::here("Fitting", "hill_fitted.png"), pp)
-saveRDS(out, here::here("Fitting", "hill_fitted_out.rds"))
+ggsave(here::here("Fitting", "hill_L_fitted.png"), pp)
+saveRDS(out, here::here("Fitting", "hill_L_fitted_out.rds"))
 
