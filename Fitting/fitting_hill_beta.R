@@ -178,7 +178,7 @@ phage_tr_model(c(10, 20, 50, 0.67, 70),
 # load reference parameter definition (upper, lower prior)
 refPars <- data.frame(best = c(10, 20, 50, 0.67, 70),
                       lower = c(0.1, 10, 1, 0.6, 1),
-                      upper = c(100, 90, 100, 0.8, 1000))
+                      upper = c(100, 90, 1000, 0.8, 1000))
 rownames(refPars) = c("beta", "L", "alpha", "tau", "P_lim")
 
 parSel = c(1:5)
@@ -259,6 +259,7 @@ settings <- list(iterations = 100000, nrChains = 2)
 
 out <- runMCMC(bayesianSetup = bayesianSetup, settings = settings)
 
+#out = readRDS(here::here("Fitting", "hill_beta_fitted_out.rds"))
 
 median_params = rbind(out[[1]][["chain"]][[1]],
                       out[[1]][["chain"]][[2]],
