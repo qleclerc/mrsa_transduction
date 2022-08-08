@@ -39,8 +39,27 @@ obs104 = read.csv(here::here("Data", "transduction_summary_10_4.csv")) %>%
 #          Bet = round(Bet),
 #          Pl = round(Pl))
 
-obs103 = read.csv(here::here("Fitting", "103res_beta.csv"))[,-8] %>% round()
-obs105 = read.csv(here::here("Fitting", "105res_beta.csv"))[,-8] %>% round()
+obs103 = read.csv(here::here("Fitting", "103res_dens_L.csv"))[,-8] %>% round()
+obs105 = read.csv(here::here("Fitting", "105res_dens_L.csv"))[,-8] %>% round()
+
+# MOI_data = read.xlsx(here::here("Data", "varying_MOI_data.xlsx"))
+# 
+# MOI_data = apply(MOI_data, c(1,2), as.numeric)
+# MOI_data = MOI_data[-1, (-c(20:28))]
+# 
+# 
+# data_final = data.frame(init_bac = rep(4e6, nrow(MOI_data)))
+# data_final$init_pha = data_final$init_bac*MOI_data[,1]
+# data_final$Be = rowMeans(MOI_data[,c(2:10)])
+# data_final$Be_sd = apply(MOI_data[,c(2:10)], 1, function(x) sd(x)/sqrt(3))
+# data_final$Bt = rowMeans(MOI_data[,c(11:19)])
+# data_final$Bt_sd = apply(MOI_data[,c(11:19)], 1, function(x) sd(x)/sqrt(3))
+# data_final$Bet = rowMeans(MOI_data[,c(20:28)])
+# data_final$Bet_sd = apply(MOI_data[,c(20:28)], 1, function(x) sd(x)/sqrt(3))
+# data_final$Pl = rowMeans(MOI_data[,c(29:37)])
+# data_final$Pl_sd = apply(MOI_data[,c(29:37)], 1, function(x) sd(x)/sqrt(3))
+# 
+# MOI_data = round(data_final)
 
 
 phage_tr_model = function(parameters,
@@ -97,8 +116,7 @@ phage_tr_model = function(parameters,
     link = (1 - N/Nmax)
     
     if(link_L) L = L * link + 1
-    if(link_beta) beta = beta * link
-    
+    if(link_beta) beta = beta * link + 1
     
     if(mode == "dens"){
       
@@ -140,8 +158,7 @@ phage_tr_model = function(parameters,
   trajectory <- data.frame(dede(y = init.state,
                                 times = times,
                                 func = model_dde,
-                                parms = parameters,
-                                method = "lsode"))
+                                parms = parameters, method = "lsode"))
   
   return(trajectory)
   
@@ -150,10 +167,10 @@ phage_tr_model = function(parameters,
 #hill pars c(2.9, 60, 1.2, 0.67, 1, 90)
 #pow pars c(0.31, 60, 1, 0.67, 0.72, 90)
 
-phage_tr_model(c(10, 20, 50, 0.67, 70),
+phage_tr_model(c(1, 60, 2, 0.67, 70),
                c(Be = obs105$Be[1], Bt = obs105$Bt[1], Bet = 0,
-                 Pl = obs105$Pl[1], Pe = 0, Pt = 0), seq(0,24,0.1), mode = "hill",
-                 link_beta = T, link_L = F) %>%
+                 Pl = obs105$Pl[1], Pe = 0, Pt = 0), seq(0,24,0.1), mode = "dens",
+               link_beta = F, link_L = T) %>%
   ggplot()+
   geom_line(aes(time, Be, colour = "Be")) +
   geom_line(aes(time, Bt, colour = "Bt")) +
@@ -176,15 +193,15 @@ phage_tr_model(c(10, 20, 50, 0.67, 70),
 # ggsave("better_hill.png")
 
 # load reference parameter definition (upper, lower prior)
-refPars <- data.frame(best = c(10, 20, 50, 0.67, 70),
+refPars <- data.frame(best = c(3, 60, 2, 0.67, 70),
                       lower = c(0.1, 10, 1, 0.6, 1),
-                      upper = c(100, 90, 1000, 0.8, 1000))
+                      upper = c(100, 90, 2.1, 0.8, 1000))
 rownames(refPars) = c("beta", "L", "alpha", "tau", "P_lim")
 
 parSel = c(1:5)
 
 # here is the likelihood 
-likelihood <- function(par, mode = "hill"){
+likelihood <- function(par, mode = "dens"){
   # set parameters that are not calibrated on default values 
   x = refPars$best
   x[parSel] = par
@@ -192,14 +209,14 @@ likelihood <- function(par, mode = "hill"){
                                  c(Be = obs103$Be[1], Bt = obs103$Bt[1], Bet = 0,
                                    Pl = obs103$Pl[1], Pe = 0, Pt = 0),
                                  seq(0,30,1), mode = mode,
-                                 link_L = F, link_beta = T) # replace here VSEM with your model 
+                                 link_L = T, link_beta = F) # replace here VSEM with your model 
   predicted103[predicted103<=0] = 0.00001
   
   predicted105 <- phage_tr_model(x,
                                  c(Be = obs105$Be[1], Bt = obs105$Bt[1], Bet = 0,
                                    Pl = obs105$Pl[1], Pe = 0, Pt = 0),
                                  seq(0,30,1), mode = mode,
-                                 link_L = F, link_beta = T) # replace here VSEM with your model 
+                                 link_L = T, link_beta = F) # replace here VSEM with your model 
   predicted105[predicted105<=0] = 0.00001
   
   
@@ -259,8 +276,6 @@ settings <- list(iterations = 100000, nrChains = 2)
 
 out <- runMCMC(bayesianSetup = bayesianSetup, settings = settings)
 
-out = readRDS(here::here("Fitting", "hill_beta_fitted_out.rds"))
-summary(out)
 
 median_params = rbind(out[[1]][["chain"]][[1]],
                       out[[1]][["chain"]][[2]],
@@ -278,21 +293,21 @@ median_params = apply(tail(median_params), 2, median)[1:5]
 best103 = phage_tr_model(median_params,
                          c(Be = obs103$Be[1], Bt = obs103$Bt[1], Bet = 0,
                            Pl = obs103$Pl[1], Pe = 0, Pt = 0), seq(0,30,0.1),
-                         mode = "hill",
-                         link_L = F, link_beta = T)
+                         mode = "dens",
+                         link_L = T, link_beta = F)
 
 best104 = phage_tr_model(median_params,
                          c(Be = obs104$Be[1], Bt = obs104$Bt[1], Bet = 0,
                            Pl = obs104$Pl[1], Pe = 0, Pt = 0), seq(0,30,0.1),
-                         mode = "hill",
-                         link_L = F, link_beta = T)
+                         mode = "dens",
+                         link_L = T, link_beta = F)
 
 
 best105 = phage_tr_model(median_params,
                          c(Be = obs105$Be[1], Bt = obs105$Bt[1], Bet = 0,
                            Pl = obs105$Pl[1], Pe = 0, Pt = 0), seq(0,30,0.1),
-                         mode = "hill",
-                         link_L = F, link_beta = T)
+                         mode = "dens",
+                         link_L = T, link_beta = F)
 
 p1 = ggplot()+
   geom_line(data = best105, aes(time, Be, colour = "Be")) +
@@ -356,6 +371,6 @@ pp=plot_grid(p1+theme(legend.position = "none"),
              p3+theme(legend.position = "none"),
              nrow = 1)
 
-ggsave(here::here("Fitting", "hill_beta_fitted.png"), pp)
-saveRDS(out, here::here("Fitting", "hill_beta_fitted_out.rds"))
+ggsave(here::here("Fitting", "dens_L_fitted.png"), pp)
+saveRDS(out, here::here("Fitting", "dens_L_fitted_out.rds"))
 
