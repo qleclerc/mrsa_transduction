@@ -42,108 +42,7 @@ obs104 = read.csv(here::here("Data", "transduction_summary_10_4.csv")) %>%
 obs103 = read.csv(here::here("Fitting", "103res_L_beta.csv"))[,-8] %>% round()
 obs105 = read.csv(here::here("Fitting", "105res_L_beta.csv"))[,-8] %>% round()
 
-
-phage_tr_model = function(parameters,
-                          init.state,
-                          times,
-                          mode = "dens",    #dens pow or hill
-                          link_L = T,      #link burst size?
-                          link_beta = F){      
-  
-  
-  model_dde = function(time, state, parameters) {
-    
-    mu_e = 1.61
-    mu_t = 1.51
-    mu_et = 1.44
-    Nmax = 2.76e9
-    
-    beta = parameters[[1]]/1e10
-    L = parameters[[2]]
-    gamma = 0
-    alpha = parameters[[3]]/1e8
-    tau = parameters[[4]]
-    P_lim = parameters[[5]]*1e8
-    
-    Be = state[["Be"]]
-    Bt = state[["Bt"]]
-    Bet = state[["Bet"]]
-    Pl = state[["Pl"]]
-    Pe = state[["Pe"]]
-    Pt = state[["Pt"]]
-    
-    N = Be + Bt + Bet
-    
-    
-    if(time <= tau){
-      Be_past = 0
-      Bt_past = 0
-      Bet_past = 0
-      Pl_past = 0
-      Pe_past = 0
-      Pt_past = 0
-      N_past = 1
-    } else {
-      Be_past = lagvalue(time - tau, 1)
-      Bt_past = lagvalue(time - tau, 2)
-      Bet_past = lagvalue(time - tau, 3)
-      Pl_past = lagvalue(time - tau, 4)
-      Pe_past = lagvalue(time - tau, 5)
-      Pt_past = lagvalue(time - tau, 6)
-      N_past = Be_past + Bt_past + Bet_past
-    }
-    
-    
-    link = (1 - N/Nmax)
-    
-    if(link_L) L = L * link + 1
-    if(link_beta) beta = beta * link
-    
-    if(mode == "dens"){
-      
-      F_PL = beta * Pl
-      F_PE = beta * Pe
-      F_PT = beta * Pt
-      
-      F_PL_past = beta * Pl_past
-      
-    } else if(mode == "hill"){
-      
-      F_PL = beta * (Pl)/(1+Pl/P_lim)
-      F_PE = beta * (Pe)/(1+Pe/P_lim)
-      F_PT = beta * (Pt)/(1+Pt/P_lim)
-      
-      F_PL_past = beta * (Pl_past)/(1+Pl_past/P_lim)
-      
-    } else {
-      
-      stop("Only dens or hill are valid modes")
-      
-    }
-    
-    dBe = mu_e * link * Be - F_PL * Be - F_PT * Be
-    dBt = mu_t * link * Bt - F_PL * Bt - F_PE * Bt
-    dBet = mu_et * link * Bet  - F_PL * Bet + F_PT * Be + F_PE * Bt
-    
-    dPl = F_PL_past * N_past * L * (1 - alpha*(Be_past+Bt_past+2*Bet_past)/N_past) -
-      F_PL * N - gamma * Pl
-    dPe = F_PL_past * N_past * L * alpha * (Be_past + Bet_past)/N_past -
-      F_PE * N - gamma * Pe
-    dPt = F_PL_past * N_past * L * alpha * (Bt_past + Bet_past)/N_past -
-      F_PT * N - gamma * Pt
-    
-    return(list(c(dBe, dBt, dBet, dPl, dPe, dPt)))
-    
-  }
-  
-  trajectory <- data.frame(dede(y = init.state,
-                                times = times,
-                                func = model_dde,
-                                parms = parameters, method = "lsode"))
-  
-  return(trajectory)
-  
-}
+source(here::here("Model", "model.R"))
 
 #hill pars c(2.9, 60, 1.2, 0.67, 1, 90)
 #pow pars c(0.31, 60, 1, 0.67, 0.72, 90)
@@ -271,8 +170,6 @@ median_params = rbind(out[[1]][["chain"]][[1]],
 # colnames(median_params)[1:5] = c("beta", "L", "alpha", "tau", "pow")
 
 median_params = apply(tail(median_params), 2, median)[1:5]
-median_params["pow"] = 1
-median_params = median_params[c(1:4,6,5)]
 
 best103 = phage_tr_model(median_params,
                          c(Be = obs103$Be[1], Bt = obs103$Bt[1], Bet = 0,
