@@ -40,7 +40,7 @@ jobs:
  
       - name: Run MCMC first set
         run: |
-          source(here::here("Fitting", "fitting_dens_L_beta.R"))
+          source(here::here("Fitting", "fitting_hill_L_beta.R"))
         shell: Rscript {0}
 
       - name: Commit and push files
@@ -114,7 +114,7 @@ jobs:
  
       - name: Run MCMC first set
         run: |
-          source(here::here("Fitting", "fitting_dens_beta.R"))
+          source(here::here("Fitting", "fitting_hill_beta.R"))
         shell: Rscript {0}
 
       - name: Commit and push files
