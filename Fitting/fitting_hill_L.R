@@ -1,4 +1,7 @@
 
+##THIS IS CURRENTLY SETUP TO OUTPUT P1 AS A PLOT WITH OLD MODEL NEW MODEL AND 105 DATA
+
+
 library(dplyr)
 library(openxlsx)
 library(reshape2)
@@ -29,18 +32,19 @@ obs104 = read.csv(here::here("Data", "transduction_summary_10_4.csv")) %>%
          Bet = round(Bet),
          Pl = round(Pl))
 
-# obs105 = read.csv(here::here("Data", "transduction_summary_10_5.csv")) %>%
-#   select(Time, Bacteria, Mean) %>%
-#   dcast(Time~Bacteria) %>%
-#   select(-Total) %>%
-#   rename(time = Time, Bet = DRP, Be = EryR, Bt = TetR, Pl = P) %>%
-#   mutate(Be = round(Be),
-#          Bt = round(Bt),
-#          Bet = round(Bet),
-#          Pl = round(Pl))
+obs105 = read.csv(here::here("Data", "transduction_summary_10_5.csv")) %>%
+  select(Time, Bacteria, Mean) %>%
+  dcast(Time~Bacteria) %>%
+  select(-Total) %>%
+  rename(time = Time, Bet = DRP, Be = EryR, Bt = TetR, Pl = P) %>%
+  mutate(Be = round(Be),
+         Bt = round(Bt),
+         Bet = round(Bet),
+         Pl = round(Pl))
 
 obs103 = read.csv(here::here("Fitting", "103res_L.csv")) %>% round()
 obs105 = read.csv(here::here("Fitting", "105res_L.csv")) %>% round()
+obs105 = read.csv("old_105.csv")
 
 MOI_data = read.xlsx(here::here("Data", "varying_MOI_data.xlsx"))
 
@@ -82,8 +86,7 @@ phage_tr_model = function(parameters,
     gamma = 0
     alpha = parameters[[3]]/1e8
     tau = parameters[[4]]
-    pow = parameters[[5]]
-    P_lim = parameters[[6]]*1e8
+    P_lim = parameters[[5]]*1e8
     
     Be = state[["Be"]]
     Bt = state[["Bt"]]
@@ -129,11 +132,11 @@ phage_tr_model = function(parameters,
       
     } else if(mode == "hill"){
       
-      F_PL = beta * (Pl^pow)/(1+Pl^pow/P_lim^pow)
-      F_PE = beta * (Pe^pow)/(1+Pe^pow/P_lim^pow)
-      F_PT = beta * (Pt^pow)/(1+Pt^pow/P_lim^pow)
+      F_PL = beta * (Pl)/(1+Pl/P_lim)
+      F_PE = beta * (Pe)/(1+Pe/P_lim)
+      F_PT = beta * (Pt)/(1+Pt/P_lim)
       
-      F_PL_past = beta * (Pl_past^pow)/(1+Pl_past^pow/P_lim^pow)
+      F_PL_past = beta * (Pl_past)/(1+Pl_past/P_lim)
       
     } else {
       
@@ -168,7 +171,7 @@ phage_tr_model = function(parameters,
 #hill pars c(2.9, 60, 1.2, 0.67, 1, 90)
 #pow pars c(0.31, 60, 1, 0.67, 0.72, 90)
 
-phage_tr_model(c(1, 60, 2, 0.67, 1, 70),
+phage_tr_model(c(1, 60, 2, 0.67, 70),
                c(Be = obs105$Be[1], Bt = obs105$Be[2], Bet = 0,
                  Pl = obs105$Pl[1], Pe = 0, Pt = 0), seq(0,24,0.1), mode = "hill",
                link_beta = F, link_L = T) %>%
@@ -194,12 +197,12 @@ phage_tr_model(c(1, 60, 2, 0.67, 1, 70),
 # ggsave("better_hill.png")
 
 # load reference parameter definition (upper, lower prior)
-refPars <- data.frame(best = c(3, 60, 2, 0.67, 1, 70),
-                      lower = c(0.1, 10, 1, 0.6, 0.9, 1),
-                      upper = c(100, 90, 2.1, 0.8, 1.5, 1000))
-rownames(refPars) = c("beta", "L", "alpha", "tau", "pow", "P_lim")
+refPars <- data.frame(best = c(3, 60, 2, 0.67, 70),
+                      lower = c(0.1, 10, 1, 0.6, 1),
+                      upper = c(100, 90, 2.1, 0.8, 1000))
+rownames(refPars) = c("beta", "L", "alpha", "tau", "P_lim")
 
-parSel = c(1:4,6)
+parSel = c(1:5)
 
 # here is the likelihood 
 likelihood <- function(par, mode = "hill"){
@@ -277,7 +280,6 @@ settings <- list(iterations = 100000, nrChains = 2)
 
 out <- runMCMC(bayesianSetup = bayesianSetup, settings = settings)
 
-
 median_params = rbind(out[[1]][["chain"]][[1]],
                       out[[1]][["chain"]][[2]],
                       out[[1]][["chain"]][[3]],
@@ -285,51 +287,51 @@ median_params = rbind(out[[1]][["chain"]][[1]],
                       out[[2]][["chain"]][[2]],
                       out[[2]][["chain"]][[3]])
 
-# median_params = rbind(out[[1]][["chain"]],
-#                       out[[2]][["chain"]])
-# colnames(median_params)[1:5] = c("beta", "L", "alpha", "tau", "pow")
 
 median_params = apply(tail(median_params), 2, median)[1:5]
-median_params["pow"] = 1
-median_params = median_params[c(1:4,6,5)]
 
 best103 = phage_tr_model(median_params,
                          c(Be = obs103$Be[1], Bt = obs103$Bt[1], Bet = 0,
-                           Pl = obs103$Pl[1], Pe = 0, Pt = 0), seq(0,30,0.1),
+                           Pl = obs103$Pl[1], Pe = 0, Pt = 0), seq(0,30,1),
                          mode = "hill",
                          link_L = T, link_beta = F)
 
 best104 = phage_tr_model(median_params,
                          c(Be = obs104$Be[1], Bt = obs104$Bt[1], Bet = 0,
-                           Pl = obs104$Pl[1], Pe = 0, Pt = 0), seq(0,30,0.1),
+                           Pl = obs104$Pl[1], Pe = 0, Pt = 0), seq(0,30,1),
                          mode = "hill",
                          link_L = T, link_beta = F)
 
 
 best105 = phage_tr_model(median_params,
                          c(Be = obs105$Be[1], Bt = obs105$Bt[1], Bet = 0,
-                           Pl = obs105$Pl[1], Pe = 0, Pt = 0), seq(0,30,0.1),
+                           Pl = obs105$Pl[1], Pe = 0, Pt = 0), seq(0,30,1),
                          mode = "hill",
                          link_L = T, link_beta = F)
 
 p1 = ggplot()+
-  geom_line(data = best105, aes(time, Be, colour = "Be")) +
-  geom_line(data = best105, aes(time, Bt, colour = "Bt")) +
-  geom_line(data = best105, aes(time, Bet, colour = "Bet")) +
-  geom_line(data = best105, aes(time, Pl, colour = "Pl")) +
-  geom_line(data = obs105, aes(time, Be, colour = "Be"), linetype = 2) +
-  geom_line(data = obs105, aes(time, Bt, colour = "Bt"), linetype = 2) +
-  geom_line(data = obs105, aes(time, Bet, colour = "Bet"), linetype = 2) +
-  geom_line(data = obs105, aes(time, Pl, colour = "Pl"), linetype = 2) +
+  geom_line(data = best105, aes(time, Be, colour = "Be", linetype = "New"), size = 1) +
+  geom_line(data = best105, aes(time, Bt, colour = "Bt", linetype = "New"), size = 1) +
+  geom_line(data = best105, aes(time, Bet, colour = "Bet", linetype = "New"), size = 1) +
+  geom_line(data = best105, aes(time, Pl, colour = "Pl", linetype = "New"), size = 1) +
+  geom_line(data = obs105, aes(time, Be, colour = "Be", linetype = "Original"), size = 1) +
+  geom_line(data = obs105, aes(time, Bt, colour = "Bt", linetype = "Original"), size = 1) +
+  geom_line(data = obs105, aes(time, Bet, colour = "Bet", linetype = "Original"), size = 1) +
+  geom_line(data = obs105, aes(time, Pl, colour = "Pl", linetype = "Original"), size = 1) +
+  geom_line(data = obs105b, aes(time, Be, colour = "Be", linetype = "Data"), size = 1) +
+  geom_line(data = obs105b, aes(time, Bt, colour = "Bt", linetype = "Data"), size = 1) +
+  geom_line(data = obs105b, aes(time, Bet, colour = "Bet", linetype = "Data"), size = 1) +
+  geom_line(data = obs105b, aes(time, Pl, colour = "Pl", linetype = "Data"), size = 1) +
   scale_y_continuous(trans=log10_trans(),
                      breaks=trans_breaks("log10", function(x) 10^x),
                      labels=trans_format("log10", math_format(10^.x))) +
-  coord_cartesian(ylim = c(1,1e10)) +
+  coord_cartesian(ylim = c(1,1e11)) +
   theme_bw() +
-  labs(y = "Bacteria and phage", x = "Time", colour = "") +
+  labs(y = "Bacteria and phage", x = "Time", colour = "Organism:", linetype = "Model:") +
   theme(axis.title = element_text(size = 12),
         axis.text = element_text(size = 12),
-        legend.text = element_text(size=12))
+        legend.text = element_text(size=12),
+        legend.title = element_text(size = 12))
 
 p2 = ggplot()+
   geom_line(data = best104, aes(time, Be, colour = "Be")) +

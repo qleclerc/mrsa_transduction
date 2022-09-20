@@ -1,0 +1,207 @@
+
+library(deSolve)
+
+phage_tr_model = function(parameters,
+                          init.state,
+                          times,
+                          mode = "dens",    #dens pow or hill
+                          link_L = T,      #link burst size?
+                          link_beta = F){      
+  
+  
+  model_dde = function(time, state, parameters) {
+    
+    mu_e = 1.61
+    mu_t = 1.51
+    mu_et = 1.44
+    Nmax = 2.76e9
+    
+    if(mode == "dens"){
+      beta = 1/parameters[[1]]
+      L = parameters[[2]]
+      gamma = 0
+      alpha = 1/parameters[[3]]
+      tau = parameters[[4]]
+    } else {
+      beta = parameters[[1]]/1e10
+      L = parameters[[2]]
+      gamma = 0
+      alpha = parameters[[3]]/1e8
+      tau = parameters[[4]]
+      P_lim = parameters[[5]]*1e8
+    }
+    
+    Be = state[["Be"]]
+    Bt = state[["Bt"]]
+    Bet = state[["Bet"]]
+    Pl = state[["Pl"]]
+    Pe = state[["Pe"]]
+    Pt = state[["Pt"]]
+    
+    N = Be + Bt + Bet
+    
+    
+    if(time <= tau){
+      Be_past = 0
+      Bt_past = 0
+      Bet_past = 0
+      Pl_past = 0
+      Pe_past = 0
+      Pt_past = 0
+      N_past = 1
+    } else {
+      Be_past = lagvalue(time - tau, 1)
+      Bt_past = lagvalue(time - tau, 2)
+      Bet_past = lagvalue(time - tau, 3)
+      Pl_past = lagvalue(time - tau, 4)
+      Pe_past = lagvalue(time - tau, 5)
+      Pt_past = lagvalue(time - tau, 6)
+      N_past = Be_past + Bt_past + Bet_past
+    }
+    
+    
+    link = (1 - N/Nmax)
+    link_past = (1 - N_past/Nmax)
+    
+    if(link_L) L = L * link + 1
+    if(link_beta){
+      beta = beta * link
+      beta_past = beta * link_past
+    } else beta_past = beta
+    
+    if(mode == "dens"){
+      
+      F_PL = beta * Pl
+      F_PE = beta * Pe
+      F_PT = beta * Pt
+      
+      F_PL_past = beta_past * Pl_past
+      
+    } else if(mode == "hill"){
+      
+      F_PL = beta * (Pl)/(1+Pl/P_lim)
+      F_PE = beta * (Pe)/(1+Pe/P_lim)
+      F_PT = beta * (Pt)/(1+Pt/P_lim)
+      
+      F_PL_past = beta_past * (Pl_past)/(1+Pl_past/P_lim)
+      
+    } else {
+      
+      stop("Only dens or hill are valid modes")
+      
+    }
+    
+    dBe = mu_e * link * Be - F_PL * Be - F_PT * Be
+    dBt = mu_t * link * Bt - F_PL * Bt - F_PE * Bt
+    dBet = mu_et * link * Bet  - F_PL * Bet + F_PT * Be + F_PE * Bt
+    
+    dPl = F_PL_past * N_past * L * (1 - alpha*(Be_past+Bt_past+2*Bet_past)/N_past) -
+      F_PL * N - gamma * Pl
+    dPe = F_PL_past * N_past * L * alpha * (Be_past + Bet_past)/N_past -
+      F_PE * N - gamma * Pe
+    dPt = F_PL_past * N_past * L * alpha * (Bt_past + Bet_past)/N_past -
+      F_PT * N - gamma * Pt
+    
+    return(list(c(dBe, dBt, dBet, dPl, dPe, dPt)))
+    
+  }
+  
+  trajectory <- data.frame(dede(y = init.state,
+                                times = times,
+                                func = model_dde,
+                                parms = parameters, method = "lsode"))
+  
+  return(trajectory)
+  
+}
+
+
+likelihood <- function(obs, par, mode = "dens", link_L = F, link_beta = F){
+  # set parameters that are not calibrated on default values 
+  predicted <- phage_tr_model(par,
+                                 c(Be = obs$Be[1], Bt = obs$Bt[1], Bet = 0,
+                                   Pl = obs$Pl[1], Pe = 0, Pt = 0),
+                                 seq(0,max(obs$time),1), mode = mode,
+                                 link_L = link_L, link_beta = link_beta) # replace here VSEM with your model 
+  predicted = predicted[(predicted$time %in% obs$time),]
+  predicted[predicted<=0] = 0.00001
+  
+
+  llValues1 = dpois(x = round(obs$Pl/(10^(pmax(floor(log10(obs$Pl)),1)-1))),
+                    lambda = predicted$Pl/(10^(pmax(floor(log10(obs$Pl)),1)-1)),
+                    log = T)
+  llValues2 = dpois(obs$Bet,
+                    predicted$Bet,
+                    log = T)
+
+  
+  return(sum(llValues1,llValues2))
+}
+
+
+
+multi_run2 = function(theta_trace, init.state, mode,
+                      link_L, link_beta,
+                      times = seq(0, 24, 1), nruns = 300, median = T, sampling_error = T){
+  
+  if(median){
+    if(!is.null(nrow(theta_trace))) theta = apply(theta_trace, 2, median)#theta_trace[which.max(theta_trace[,"log.density"]),]
+    else theta = theta_trace
+  }
+  
+  variables = names(init.state)
+
+  summary_runs = list()
+  index = 1
+  for (i in variables) {
+    summary_runs[[index]] = matrix(0, length(times), nruns)
+    index = index + 1
+  }
+  names(summary_runs) = variables
+  
+  
+  for(i in 1:nruns){
+    
+    #if(!median) theta = apply(theta_trace, 2, FUN = function(x) sample(x, 1))
+    if(!median) theta = theta_trace[sample(1:nrow(theta_trace), 1),]
+    
+    traj = phage_tr_model(theta, init.state, times, mode, link_L, link_beta)
+    
+    if(sampling_error){
+      traj[,-1] = apply(traj[,-1], c(1,2),
+                        function(x){
+                          dec = max(floor(log10(x)),1)
+                          val = rpois(1,x/(10^(dec-1)))
+                          val*(10^(dec-1))
+                        })
+    }
+    
+    for (name in variables) {
+      summary_runs[[name]][,i] = traj[,name]
+    }
+    
+  }
+  
+  
+  #combine all results into a single dataframe with mean and sd
+  summary_results = data.frame(time = times)
+  
+  for (name in variables) {
+    summary_results = cbind(summary_results, 
+                            rowMeans(summary_runs[[name]]), 
+                            apply(summary_runs[[name]], 1, sd))
+  }
+  
+  summary_colnames = c()
+  for (name in variables) {
+    summary_colnames = c(summary_colnames,
+                         name,
+                         paste0(name, "_sd"))
+  }
+  
+  colnames(summary_results) = c("time", summary_colnames)
+  
+  summary_results
+  
+}
+
