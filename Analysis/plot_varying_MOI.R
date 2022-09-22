@@ -9,9 +9,8 @@ library(cowplot)
 library(scales)
 library(openxlsx)
 
-source(here::here("Model", "transduction_model_functions.R"))
+source(here::here("Model", "model.R"))
 
-model = readRDS(here::here("Model", "transduction_model.rds"))
 
 files = list.files(here::here("Fitting", "Fitted_params"))
 
@@ -45,29 +44,23 @@ data_final$Pl_sd = apply(data[,c(29:37)], 1, function(x) sd(x)/sqrt(3))
 
 data = data_final
 
-models_to_try = data.frame(model_name="dens_burst", frequentist=FALSE,
-                           fixed_delay=NA, decay=FALSE,
-                           link_beta=FALSE, link_L=TRUE, link_delay=FALSE, transduction=TRUE)
+models_to_try = data.frame(model_name="dens_beta",
+                           mode = "dens", link_L=FALSE, link_beta=TRUE)
 models_to_try = rbind(models_to_try,
-                      data.frame(model_name="dens_beta", frequentist=FALSE,
-                                 fixed_delay=NA, decay=FALSE,
-                                 link_beta=TRUE, link_L=FALSE, link_delay=FALSE, transduction=TRUE))
+                      data.frame(model_name="dens_burst",
+                                 mode = "dens", link_L=T, link_beta=F))
 models_to_try = rbind(models_to_try,
-                      data.frame(model_name="dens_both", frequentist=FALSE,
-                                 fixed_delay=NA, decay=FALSE,
-                                 link_beta=TRUE, link_L=TRUE, link_delay=FALSE, transduction=TRUE))
+                      data.frame(model_name="dens_both",
+                                 mode = "dens", link_L=T, link_beta=TRUE))
 models_to_try = rbind(models_to_try,
-                      data.frame(model_name="freq_beta", frequentist=TRUE,
-                                 fixed_delay=NA, decay=FALSE,
-                                 link_beta=TRUE, link_L=FALSE, link_delay=FALSE, transduction=TRUE))
+                      data.frame(model_name="hill_beta",
+                                 mode = "hill", link_L=FALSE, link_beta=TRUE))
 models_to_try = rbind(models_to_try,
-                      data.frame(model_name="freq_both", frequentist=TRUE,
-                                 fixed_delay=NA, decay=FALSE,
-                                 link_beta=TRUE, link_L=TRUE, link_delay=FALSE, transduction=TRUE))
+                      data.frame(model_name="hill_burst",
+                                 mode = "hill", link_L=T, link_beta=F))
 models_to_try = rbind(models_to_try,
-                      data.frame(model_name="freq_burst", frequentist=TRUE,
-                                 fixed_delay=NA, decay=FALSE,
-                                 link_beta=FALSE, link_L=TRUE, link_delay=FALSE, transduction=TRUE))
+                      data.frame(model_name="hill_both",
+                                 mode = "hill", link_L=T, link_beta=TRUE))
 
 ## REPEAT WITH OTHER MODELS FOR SUPP MAT
 
@@ -77,15 +70,6 @@ all_results = data
 for(i in 1:nrow(models_to_try)){
   
   cat("\nWorking on", models_to_try$model_name[i])
-  
-  model = choose_model(model,
-                       frequentist = models_to_try$frequentist[i],
-                       fixed_delay = models_to_try$fixed_delay[i],
-                       decay = models_to_try$decay[i], 
-                       link_beta = models_to_try$link_beta[i],
-                       link_L = models_to_try$link_L[i], 
-                       link_delay = models_to_try$link_delay[i],
-                       transduction = models_to_try$transduction[i])
   
   trace_model = all_params[[models_to_try$model_name[i]]]
   
@@ -98,8 +82,9 @@ for(i in 1:nrow(models_to_try)){
     init.state = c(Be = data_model$init_bac[j]/2, Bt = data_model$init_bac[j]/2, Bet = 0,
                    Pl = data_model$init_pha[j], Pe = 0, Pt = 0)
     
-    traj = multi_run2(model, params, init.state, times = seq(0, 24, 1), nruns = 100,
-                      median = T, sampling_error = T)
+    traj = multi_run2(trace_model, init.state, mode = models_to_try$mode[i],
+                      link_L = models_to_try$link_L[i], link_beta = models_to_try$link_beta[i],
+                      times = seq(0, 24, 1), nruns = 300, median = T, sampling_error = T)
     
     data_model$Be[j] = traj$Be[25]
     data_model$Bt[j] = traj$Bt[25]
@@ -141,23 +126,23 @@ all_results$Pl_sd[is.na(all_results$Pl_sd)] = 0
 
 
 all_results_L = all_results %>%
-  filter(model %in% c("freq_burst", "data", "dens_burst"))
+  filter(model %in% c("hill_burst", "data", "dens_burst"))
 all_results_beta = all_results %>%
-  filter(model %in% c("freq_beta", "data", "dens_beta"))
+  filter(model %in% c("hill_beta", "data", "dens_beta"))
 all_results_both = all_results %>%
-  filter(model %in% c("freq_both", "data", "dens_both"))
+  filter(model %in% c("hill_both", "data", "dens_both"))
 
 all_results_L$model = as.factor(all_results_L$model)
 all_results_L$model = factor(all_results_L$model, levels(all_results_L$model)[c(2,1,3)])
-levels(all_results_L$model) = c("Density model", "Data", "Frequency model")
+levels(all_results_L$model) = c("Density model", "Data", "Saturated model")
 
 all_results_beta$model = as.factor(all_results_beta$model)
 all_results_beta$model = factor(all_results_beta$model, levels(all_results_beta$model)[c(2,1,3)])
-levels(all_results_beta$model) = c("Density model", "Data", "Frequency model")
+levels(all_results_beta$model) = c("Density model", "Data", "Saturated model")
 
 all_results_both$model = as.factor(all_results_both$model)
 all_results_both$model = factor(all_results_both$model, levels(all_results_both$model)[c(2,1,3)])
-levels(all_results_both$model) = c("Density model", "Data", "Frequency model")
+levels(all_results_both$model) = c("Density model", "Data", "Saturated model")
 
 
 d = ggplot(all_results_L %>% filter(model == "Data")) + 
@@ -203,8 +188,8 @@ d = ggplot(all_results_L %>% filter(model == "Data")) +
         legend.text = element_text(size=12),
         strip.text.x = element_text(size=12, color = "white", face = "bold"),
         strip.background = element_rect(fill="gray48"))
-  
-  
+
+
 burst = ggplot(all_results_L %>% filter(model != "Data")) + 
   geom_point(aes(x=10^4, y=10^13, colour = "Bacteria:"))+
   geom_point(aes(x=10^4, y=10^13, colour = "Phage:"))+
@@ -250,15 +235,15 @@ burst = ggplot(all_results_L %>% filter(model != "Data")) +
 
 legend = get_legend(d + theme(legend.position = "right", legend.box = "vertical"))
 fig4c = plot_grid(burst + theme(legend.position = "none"),
-          d + theme(legend.position = "none"),
-          legend,
-          rel_widths = c(1,0.56,0.2),
-          labels = c("c", "", ""),
-          nrow = 1)
+                  d + theme(legend.position = "none"),
+                  legend,
+                  rel_widths = c(1,0.56,0.2),
+                  labels = c("c", "", ""),
+                  nrow = 1)
 
 #reminder, fig4ab comes from "analyse_fitted_models.R" script!
 plot_grid(fig4ab, NULL, fig4c, nrow = 3, rel_heights = c(2,0.05,1))
-ggsave(here::here("Figures", "fig4.png"), height = 15, width = 18)
+ggsave(here::here("Figures", "fig4.png"), height = 12, width = 15, dpi=900)
 
 
 
@@ -307,10 +292,10 @@ beta = ggplot(all_results_beta %>% filter(model != "Data")) +
 
 legend = get_legend(d + theme(legend.position = "right", legend.box = "vertical"))
 pbeta = plot_grid(beta + theme(legend.position = "none"),
-          d + theme(legend.position = "none"),
-          legend,
-          rel_widths = c(1,0.56,0.2),
-          nrow = 1)
+                  d + theme(legend.position = "none"),
+                  legend,
+                  rel_widths = c(1,0.56,0.2),
+                  nrow = 1)
 
 both = ggplot(all_results_both %>% filter(model != "Data")) + 
   geom_point(aes(x=10^4, y=10^13, colour = "Bacteria:"))+
@@ -357,11 +342,11 @@ both = ggplot(all_results_both %>% filter(model != "Data")) +
 
 legend = get_legend(d + theme(legend.position = "right", legend.box = "vertical"))
 pboth = plot_grid(both + theme(legend.position = "none"),
-          d + theme(legend.position = "none"),
-          legend,
-          rel_widths = c(1,0.56,0.2),
-          nrow = 1)
+                  d + theme(legend.position = "none"),
+                  legend,
+                  rel_widths = c(1,0.56,0.2),
+                  nrow = 1)
 
 plot_grid(pbeta, pboth, nrow = 2, labels = c("a", "b"))
-ggsave(here::here("Figures", "supp_fig4.png"), height = 10, width = 9)
+ggsave(here::here("Figures", "supp_fig4.png"), height = 10, width = 9, dpi=600)
 

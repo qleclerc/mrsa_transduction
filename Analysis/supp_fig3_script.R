@@ -7,9 +7,7 @@ library(ggplot2)
 library(scales)
 library(openxlsx)
 
-source(here::here("Model", "transduction_model_functions.R"))
-
-model = readRDS(here::here("Model", "transduction_model.rds"))
+source(here::here("Model", "model.R"))
 
 files = list.files(here::here("Fitting", "Fitted_params"))
 
@@ -24,29 +22,23 @@ for(f in files){
 names(all_params) = gsub(".csv", "", gsub("params_", "", files))
 
 
-models_to_try = data.frame(model_name="dens_burst", frequentist=FALSE,
-                           fixed_delay=NA, decay=TRUE,
-                           link_beta=FALSE, link_L=TRUE, link_delay=FALSE, transduction=TRUE)
+models_to_try = data.frame(model_name="dens_beta",
+                           mode = "dens", link_L=FALSE, link_beta=TRUE)
 models_to_try = rbind(models_to_try,
-                      data.frame(model_name="dens_beta", frequentist=FALSE,
-                                 fixed_delay=NA, decay=TRUE,
-                                 link_beta=TRUE, link_L=FALSE, link_delay=FALSE, transduction=TRUE))
+                      data.frame(model_name="dens_burst",
+                                 mode = "dens", link_L=T, link_beta=F))
 models_to_try = rbind(models_to_try,
-                      data.frame(model_name="dens_both", frequentist=FALSE,
-                                 fixed_delay=NA, decay=TRUE,
-                                 link_beta=TRUE, link_L=TRUE, link_delay=FALSE, transduction=TRUE))
+                      data.frame(model_name="dens_both",
+                                 mode = "dens", link_L=T, link_beta=TRUE))
 models_to_try = rbind(models_to_try,
-                      data.frame(model_name="freq_beta", frequentist=TRUE,
-                                 fixed_delay=NA, decay=TRUE,
-                                 link_beta=TRUE, link_L=FALSE, link_delay=FALSE, transduction=TRUE))
+                      data.frame(model_name="hill_beta",
+                                 mode = "hill", link_L=FALSE, link_beta=TRUE))
 models_to_try = rbind(models_to_try,
-                      data.frame(model_name="freq_both", frequentist=TRUE,
-                                 fixed_delay=NA, decay=TRUE,
-                                 link_beta=TRUE, link_L=TRUE, link_delay=FALSE, transduction=TRUE))
+                      data.frame(model_name="hill_burst",
+                                 mode = "hill", link_L=T, link_beta=F))
 models_to_try = rbind(models_to_try,
-                      data.frame(model_name="freq_burst", frequentist=TRUE,
-                                 fixed_delay=NA, decay=TRUE,
-                                 link_beta=FALSE, link_L=TRUE, link_delay=FALSE, transduction=TRUE))
+                      data.frame(model_name="hill_both",
+                                 mode = "hill", link_L=T, link_beta=TRUE))
 
 ## REPEAT WITH OTHER MODELS FOR SUPP MAT
 
@@ -61,23 +53,15 @@ for(i in 1:nrow(models_to_try)){
   
   for(j in 1:nrow(model_result)){
     
-    model = choose_model(model,
-                         frequentist = models_to_try$frequentist[i],
-                         fixed_delay = models_to_try$fixed_delay[i],
-                         decay = model_result$decay[j], 
-                         link_beta = models_to_try$link_beta[i],
-                         link_L = models_to_try$link_L[i], 
-                         link_delay = models_to_try$link_delay[i],
-                         transduction = models_to_try$transduction[i])
-    
     trace_model = all_params[[models_to_try$model_name[i]]]
-    
-    params = apply(trace_model, 2, median)
     
     init.state = c(Be = 1e4, Bt = 1e4, Bet = 0,
                    Pl = 1e3, Pe = 0, Pt = 0)
     
-    traj = multi_run2(model, params, init.state, times = seq(0, 24, 1), nruns = 10)
+    traj = multi_run2(trace_model, init.state, mode = models_to_try$mode[i],
+                      link_L = models_to_try$link_L[i], link_beta = models_to_try$link_beta[i],
+                      times = seq(0, 24, 1), nruns = 10, median = T, sampling_error = T,
+                      decay = model_result$decay[j])
     
     model_result$Pl[j] = traj$Pl[25]
     model_result$Pl_sd[j] = traj$Pl_sd[25]
@@ -101,23 +85,15 @@ for(i in 1:nrow(models_to_try)){
   
   for(j in 1:nrow(model_result)){
     
-    model = choose_model(model,
-                         frequentist = models_to_try$frequentist[i],
-                         fixed_delay = models_to_try$fixed_delay[i],
-                         decay = model_result$decay[j], 
-                         link_beta = models_to_try$link_beta[i],
-                         link_L = models_to_try$link_L[i], 
-                         link_delay = models_to_try$link_delay[i],
-                         transduction = models_to_try$transduction[i])
-    
     trace_model = all_params[[models_to_try$model_name[i]]]
-    
-    params = apply(trace_model, 2, median)
     
     init.state = c(Be = 1e4, Bt = 1e4, Bet = 0,
                    Pl = 1e4, Pe = 0, Pt = 0)
     
-    traj = multi_run2(model, params, init.state, times = seq(0, 24, 1), nruns = 10)
+    traj = multi_run2(trace_model, init.state, mode = models_to_try$mode[i],
+                      link_L = models_to_try$link_L[i], link_beta = models_to_try$link_beta[i],
+                      times = seq(0, 24, 1), nruns = 10, median = T, sampling_error = T,
+                      decay = model_result$decay[j])
     
     model_result$Pl[j] = traj$Pl[25]
     model_result$Pl_sd[j] = traj$Pl_sd[25]
@@ -141,23 +117,15 @@ for(i in 1:nrow(models_to_try)){
   
   for(j in 1:nrow(model_result)){
     
-    model = choose_model(model,
-                         frequentist = models_to_try$frequentist[i],
-                         fixed_delay = models_to_try$fixed_delay[i],
-                         decay = model_result$decay[j], 
-                         link_beta = models_to_try$link_beta[i],
-                         link_L = models_to_try$link_L[i], 
-                         link_delay = models_to_try$link_delay[i],
-                         transduction = models_to_try$transduction[i])
-    
     trace_model = all_params[[models_to_try$model_name[i]]]
-    
-    params = apply(trace_model, 2, median)
     
     init.state = c(Be = 1e4, Bt = 1e4, Bet = 0,
                    Pl = 1e5, Pe = 0, Pt = 0)
     
-    traj = multi_run2(model, params, init.state, times = seq(0, 24, 1), nruns = 10)
+    traj = multi_run2(trace_model, init.state, mode = models_to_try$mode[i],
+                      link_L = models_to_try$link_L[i], link_beta = models_to_try$link_beta[i],
+                      times = seq(0, 24, 1), nruns = 10, median = T, sampling_error = T,
+                      decay = model_result$decay[j])
     
     model_result$Pl[j] = traj$Pl[25]
     model_result$Pl_sd[j] = traj$Pl_sd[25]
@@ -189,14 +157,14 @@ ggplot(all_results) +
   facet_wrap(~initial, labeller = label_parsed) +
   labs(colour = "Model:", x="Log10 phage decay rate", y="pfu per mL after 24h") +
   theme_bw() +
-  scale_colour_manual(breaks= c("dens_beta", "dens_burst", "dens_both", "freq_beta", "freq_burst", "freq_both"),
+  scale_colour_manual(breaks= c("dens_beta", "dens_burst", "dens_both", "hill_beta", "hill_burst", "hill_both"),
                       values = c("#579dd9", "#5383ea", "#2c56a7", "firebrick1", "firebrick3", "firebrick4"),
-                      labels = c("Density - adsorption",
-                                 "Density - burst",
-                                 "Density - both",
-                                 "Frequency - adsorption",
-                                 "Frequency - burst",
-                                 "Frequency - both")) +
+                      labels = c("Linear - adsorption",
+                                 "Linear - burst",
+                                 "Linear - both",
+                                 "Saturated - adsorption",
+                                 "Saturated - burst",
+                                 "Saturated - both")) +
   theme(axis.text.x = element_text(size=12, angle = 0, hjust = 1),
         axis.title.x = element_text(size=12),
         axis.text.y = element_text(size=12),

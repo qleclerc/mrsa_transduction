@@ -68,7 +68,7 @@ lab_data_trans3 = read.csv(here::here("Data", "transduction_summary_10_3.csv")) 
 
 DIC = function(trace, mode, link_L, link_beta, lab_data, lab_data2){
   
-  theta.bar <- colMeans(trace[,-6])
+  theta.bar <- colMeans(trace[,-which(colnames(trace) == "LL")])
   log.like.theta.bar <- likelihood(lab_data, theta.bar, mode, link_L, link_beta) +
     likelihood(lab_data2, theta.bar, mode, link_L, link_beta)
   
@@ -118,20 +118,22 @@ for(i in 1:nrow(models_to_try)){
   
   trace_model = params[[models_to_try$model_name[i]]]
   
-  # for(j in 1:nrow(trace_model)){
-  #   
-  #   theta_j = trace_model[j,-6]
-  #   
-  #   trace_model$LL[j] = likelihood(lab_data_trans3, theta_j,
-  #                                  mode = models_to_try$mode[i],
-  #                                  link_L = models_to_try$link_L[i],
-  #                                  link_beta = models_to_try$link_beta[i]) +
-  #     likelihood(lab_data_trans5, theta_j,
-  #                mode = models_to_try$mode[i],
-  #                link_L = models_to_try$link_L[i],
-  #                link_beta = models_to_try$link_beta[i])
-  #   
-  # }
+  for(j in 1:nrow(trace_model)){
+    
+    if(j %% 100 == 0) cat("Row", j, "\n")
+      
+    theta_j = trace_model[j,-6]
+
+    trace_model$LL[j] = likelihood(lab_data_trans3, theta_j,
+                                   mode = models_to_try$mode[i],
+                                   link_L = models_to_try$link_L[i],
+                                   link_beta = models_to_try$link_beta[i]) +
+      likelihood(lab_data_trans5, theta_j,
+                 mode = models_to_try$mode[i],
+                 link_L = models_to_try$link_L[i],
+                 link_beta = models_to_try$link_beta[i])
+
+  }
   
   dic = DIC(trace_model, mode = models_to_try$mode[i],
             link_L = models_to_try$link_L[i], link_beta = models_to_try$link_beta[i],
@@ -142,6 +144,8 @@ for(i in 1:nrow(models_to_try)){
   for(j in 1:(ncol(quants)-1)){
     quants_s = c(quants_s, quants[2,j], quants[1,j], quants[3,j])
   }
+  
+  if(grepl("dens", models_to_try$model_name[i])) quants_s = c(quants_s, rep("0", 3))
   
   best_params = rbind(best_params,
                       c(quants_s, dic))
@@ -192,8 +196,15 @@ for(j in 1:(ncol(quants)-1)){
 
 colnames(best_params) = c(quants_names, "DIC")
 
+beta = parameters[[1]]/1e10
+alpha = parameters[[3]]/1e8
+P_lim = parameters[[5]]*1e8
+
 best_params[,-1] = apply(best_params[,-1], c(1,2), as.numeric)
-best_params[,c(2:4,8:10)] = apply(best_params[,c(2:4,8:10)], c(1,2), function(x) 1/x)
+best_params[c(1:3),c(2:4,8:10)] = apply(best_params[c(1:3),c(2:4,8:10)], c(1,2), function(x) 1/x)
+best_params[c(4:6),c(2:4)] = apply(best_params[c(4:6),c(2:4)], c(1,2), function(x) x/1e10)
+best_params[c(4:6),c(8:10)] = apply(best_params[c(4:6),c(8:10)], c(1,2), function(x) x/1e8)
+best_params[c(4:6),c(14:16)] = apply(best_params[c(4:6),c(14:16)], c(1,2), function(x) x*1e8)
 
 best_params$DIC = round(best_params$DIC-(min(best_params$DIC)))
 
@@ -268,9 +279,9 @@ pp = ggplot() +
   scale_linetype_manual(breaks = c("Data", "Model"),
                         labels = c("Data", "Model"),
                         values = c(1, 2)) +
-  scale_colour_manual(breaks = c("PL"),
-                      labels = c("Lytic phage"),
-                      values = c("purple", "green", "black", "#c88a33")) +
+  scale_colour_manual(breaks = c("PL", "other", "dens_burst", "hill_burst"),
+                      labels = c("Lytic phage", "", "", ""),
+                      values = c("#c88a33", "black", "green", "purple")) +
   scale_fill_manual(breaks = c("dens_burst", "hill_burst", "other"),
                     labels = c("Density, link burst size to bacterial growth",
                                "Saturated, link burst size to bacterial growth", "Other"),
@@ -331,7 +342,7 @@ p5_extra = ggplot() +
                         values = c(1, 2)) +
   scale_colour_manual(breaks = c("PL", "BET"),
                       labels = c("Lytic phage", "Double resistant bacteria (DRP)"),
-                      values = c("#c2484d", "purple", "green", "black", "#c88a33")) +
+                      values = c("#c88a33", "#c2484d", "green", "black", "purple")) +
   scale_fill_manual(breaks = c("dens_burst", "hill_burst", "other"),
                     labels = c("Density, link burst size to bacterial growth",
                                "Saturated, link burst size to bacterial growth", "Other"),
