@@ -118,22 +118,22 @@ for(i in 1:nrow(models_to_try)){
   
   trace_model = params[[models_to_try$model_name[i]]]
   
-  for(j in 1:nrow(trace_model)){
-    
-    if(j %% 100 == 0) cat("Row", j, "\n")
-      
-    theta_j = trace_model[j,-6]
-
-    trace_model$LL[j] = likelihood(lab_data_trans3, theta_j,
-                                   mode = models_to_try$mode[i],
-                                   link_L = models_to_try$link_L[i],
-                                   link_beta = models_to_try$link_beta[i]) +
-      likelihood(lab_data_trans5, theta_j,
-                 mode = models_to_try$mode[i],
-                 link_L = models_to_try$link_L[i],
-                 link_beta = models_to_try$link_beta[i])
-
-  }
+  # for(j in 1:nrow(trace_model)){
+  #   
+  #   if(j %% 100 == 0) cat("Row", j, "\n")
+  #     
+  #   theta_j = trace_model[j,-6]
+  # 
+  #   trace_model$LL[j] = likelihood(lab_data_trans3, theta_j,
+  #                                  mode = models_to_try$mode[i],
+  #                                  link_L = models_to_try$link_L[i],
+  #                                  link_beta = models_to_try$link_beta[i]) +
+  #     likelihood(lab_data_trans5, theta_j,
+  #                mode = models_to_try$mode[i],
+  #                link_L = models_to_try$link_L[i],
+  #                link_beta = models_to_try$link_beta[i])
+  # 
+  # }
   
   dic = DIC(trace_model, mode = models_to_try$mode[i],
             link_L = models_to_try$link_L[i], link_beta = models_to_try$link_beta[i],
@@ -195,10 +195,6 @@ for(j in 1:(ncol(quants)-1)){
 }
 
 colnames(best_params) = c(quants_names, "DIC")
-
-beta = parameters[[1]]/1e10
-alpha = parameters[[3]]/1e8
-P_lim = parameters[[5]]*1e8
 
 best_params[,-1] = apply(best_params[,-1], c(1,2), as.numeric)
 best_params[c(1:3),c(2:4,8:10)] = apply(best_params[c(1:3),c(2:4,8:10)], c(1,2), function(x) 1/x)
