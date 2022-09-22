@@ -100,4 +100,4 @@ for(j in 1:nrow(trace_model)){
   
 }
 
-write.csv(trace_model, "params_hill_burst.csv", row.names = F)
+write.csv(trace_model, here::here("Fitting", "params_hill_burst.csv"), row.names = F)
